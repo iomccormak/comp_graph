@@ -40,7 +40,7 @@ namespace lab3
                     _isDrawing = true;
                     _lastPoint = e.Location;
                 }
-            } 
+            }
             else if (radioButton2.Checked)
             {
                 if (e.Button == MouseButtons.Left)
@@ -52,11 +52,11 @@ namespace lab3
                         pictureBox1.Invalidate();
                     }
                 }
-            } 
+            }
             else if (radioButton3.Checked)
             {
                 if (e.Button == MouseButtons.Left)
-                {   
+                {
                     if (_imageBitmap != null)
                     {
                         _targetColor = _bitmap.GetPixel(e.X, e.Y);
@@ -67,13 +67,149 @@ namespace lab3
                             fillPictureLines(e.X, e.Y);
                             pictureBox1.Invalidate();
                         }
-                    }                    
+                    }
                 }
             }
             else if (radioButton4.Checked)
             {
+                if (e.Button == MouseButtons.Left)
+                {
+                    Point startPoint = e.Location;
+                    List<Point> boundaryPoints = TraceBoundary(startPoint);
 
+                    if (boundaryPoints.Count > 0)
+                    {
+                        DrawBoundary(boundaryPoints);
+                        pictureBox1.Invalidate();
+                    }
+                }
             }
+
+        }
+
+        private List<Point> TraceBoundary(Point start)
+        {
+            List<Point> boundary = new List<Point>();
+
+            Point? boundaryPoint = FindNearestBoundary(start);
+            if (boundaryPoint == null)
+                return boundary;
+
+            Point currentPoint = boundaryPoint.Value;
+            boundary.Add(currentPoint);
+            Color boundaryColor = _bitmap.GetPixel(currentPoint.X, currentPoint.Y);
+
+            int direction = 4;
+            while (true)
+            {
+                direction += 2;
+                if (direction > 7) direction -= 8;
+                Point neighbor;
+
+                for (int i = 0; i < 8; i++)
+                {
+                    neighbor = GetNeighbor(currentPoint, direction);
+                    if (neighbor.X >= 0 && neighbor.X < _bitmap.Width &&
+                        neighbor.Y >= 0 && neighbor.Y < _bitmap.Height &&
+                        ColorsEqual(_bitmap.GetPixel(neighbor.X, neighbor.Y), boundaryColor))
+                    {
+                        if (neighbor == boundaryPoint.Value)
+                            return boundary;
+
+                        boundary.Add(neighbor);
+                        currentPoint = neighbor;
+                        break;
+                    }
+                    direction--;
+                    if (direction < 0) direction += 8;
+                }
+            }
+        }
+
+
+        //private const int MaxPointsToCheck = 10000;
+        private Point? FindNearestBoundary(Point start)
+        {
+            Queue<Point> pointsToCheck = new Queue<Point>();
+            HashSet<Point> visitedPoints = new HashSet<Point>();
+            pointsToCheck.Enqueue(start);
+            int checkedPoints = 0;
+
+            while (pointsToCheck.Count > 0 /*&& checkedPoints < MaxPointsToCheck*/)
+            {
+                Point currentPoint = pointsToCheck.Dequeue();
+                if (visitedPoints.Contains(currentPoint))
+                    continue;
+
+                visitedPoints.Add(currentPoint);
+
+                if (IsBoundary(currentPoint))
+                    return currentPoint;
+
+                for (int direction = 0; direction < 8; direction++)
+                {
+                    Point neighborPoint = GetNeighbor(currentPoint, direction);
+                    if (IsWithinBounds(neighborPoint) && !visitedPoints.Contains(neighborPoint))
+                    {
+                        pointsToCheck.Enqueue(neighborPoint);
+                    }
+                }
+
+                checkedPoints++;
+            }
+
+            return null;
+        }
+
+
+
+        private bool IsBoundary(Point point)
+        {
+            return _bitmap.GetPixel(point.X, point.Y).ToArgb() == Color.Black.ToArgb();
+        }
+
+        private Point GetNeighbor(Point point, int direction)
+        {
+            switch (direction)
+            {
+                case 0:
+                    return new Point(point.X + 1, point.Y);
+                case 1:
+                    return new Point(point.X + 1, point.Y - 1);
+                case 2:
+                    return new Point(point.X, point.Y - 1);
+                case 3:
+                    return new Point(point.X - 1, point.Y - 1);
+                case 4:
+                    return new Point(point.X - 1, point.Y);
+                case 5:
+                    return new Point(point.X - 1, point.Y + 1);
+                case 6:
+                    return new Point(point.X, point.Y + 1);
+                case 7:
+                    return new Point(point.X + 1, point.Y + 1);
+                default:
+                    return point;
+            }
+        }
+
+
+        private void DrawBoundary(List<Point> boundaryPoints)
+        {
+            foreach (Point point in boundaryPoints)
+            {
+                _bitmap.SetPixel(point.X, point.Y, Color.Red);
+            }
+        }
+
+        private bool ColorsEqual(Color color1, Color color2)
+        {
+            return color1.ToArgb() == color2.ToArgb();
+        }
+
+        private bool IsWithinBounds(Point point)
+        {
+            return point.X >= 0 && point.X < _bitmap.Width && point.Y >= 0 && point.Y < _bitmap.Height;
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
@@ -232,5 +368,6 @@ namespace lab3
                 }
             }
         }
+
     }
 }

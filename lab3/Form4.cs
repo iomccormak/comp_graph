@@ -14,11 +14,11 @@ namespace lab3
     {
         Graphics _graphics;
         Bitmap bitmap;
+        Bitmap paletteBitmap;
         Point[] p = new Point[3];
         Color[] colors = new Color[3];
         int index = 0;
         Pen pen = new Pen(Color.Red, 1);
-        Bitmap paletteBitmap;
 
         public Form4()
         {
