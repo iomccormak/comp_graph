@@ -40,6 +40,7 @@ namespace lab3
                 }
                 else if (radioButtonWU.Checked)
                 {
+                    //DrawAALine(g, startPoint.X, startPoint.Y, endPoint.X, endPoint.Y);
                     DrawWuLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y, g);
                 }
             }
@@ -169,5 +170,63 @@ namespace lab3
                 y += yIncrement;
             }
         }
+        /*
+        private void DrawPixel(Graphics g, int x, int y, float brightness)
+        {
+            int c = (int)(255 * brightness);
+            Color color = Color.FromArgb(c, c, c);
+            bitmap.SetPixel(x, y, color);
+        }
+
+        private void DrawAALine(Graphics g, int x0, int y0, int x1, int y1)
+        {
+            bool steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
+
+            if (steep)
+            {
+                Swap(ref x0, ref y0);
+                Swap(ref x1, ref y1);
+            }
+            if (x0 > x1)
+            {
+                Swap(ref x0, ref x1);
+                Swap(ref y0, ref y1);
+            }
+
+            float dx = x1 - x0;
+            float dy = y1 - y0;
+            float gradient = dy / dx;
+            if (dx == 0.0f) gradient = 1;
+
+            float intersectY = y0;
+
+            for (int x = x0; x <= x1; x++)
+            {
+                if (steep)
+                {
+                    DrawPixel(g, (int)intersectY, x, 1 - FractionalPart(intersectY));
+                    DrawPixel(g, (int)intersectY + 1, x, FractionalPart(intersectY));
+                }
+                else
+                {
+                    DrawPixel(g, x, (int)intersectY, 1 - FractionalPart(intersectY));
+                    DrawPixel(g, x, (int)intersectY + 1, FractionalPart(intersectY));
+                }
+                intersectY += gradient;
+            }
+        }
+
+        private float FractionalPart(float x)
+        {
+            return x - (float)Math.Floor(x);
+        }
+
+        private void Swap(ref int a, ref int b)
+        {
+            int temp = a;
+            a = b;
+            b = temp;
+        }
+        */
     }
 }
