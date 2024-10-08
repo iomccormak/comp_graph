@@ -14,44 +14,80 @@ namespace lab4
     {
         private List<List<Point>> polygons = new List<List<Point>>();
         private List<Point> currentPolygon = new List<Point>();
+        private Bitmap _bitmap;
+        private Graphics _graphics;
+        private Pen _pen;
 
         public Form1()
         {
             InitializeComponent();
-            this.MouseClick += new MouseEventHandler(OnMouseClick);
-            this.Paint += new PaintEventHandler(OnPaint);
+            _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            _graphics = Graphics.FromImage(_bitmap);
+            _graphics.Clear(Color.White);
+            _pen = new Pen(Color.Black, 2);
+            pictureBox1.Image = _bitmap;
+
+            //pictureBox1.MouseDown += new MouseEventHandler(pictureBox1_MouseDown);
+            //pictureBox1.Paint += new PaintEventHandler(pictureBox1_Paint);
+        } 
+
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
+            polygons.Clear();
+            currentPolygon.Clear();
+            _graphics.Clear(Color.White);
+            pictureBox1.Invalidate();
         }
 
-        private void OnMouseClick(object sender, MouseEventArgs e)
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            // Добавляем точку в текущий полигон
-            currentPolygon.Add(new Point(e.X, e.Y));
-
-            // Перерисовываем форму после каждого клика
-            this.Invalidate();
+            if (radioButton1.Checked)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    DrawPolygon(e);
+                } 
+                else if (e.Button == MouseButtons.Right)
+                {
+                    StopDrawPolygon();
+                }
+            }
         }
 
-        private void OnPaint(object sender, PaintEventArgs e)
+        private void StopDrawPolygon()
         {
-            Graphics g = e.Graphics;
-            Pen pen = new Pen(Color.Black, 2);
+            if (currentPolygon.Count > 0)
+            {
+                polygons.Add(new List<Point>(currentPolygon)); 
+                currentPolygon.Clear();
+                pictureBox1.Invalidate();
+            }
+        }
 
+        private void DrawPolygon(MouseEventArgs e)
+        {
+            currentPolygon.Add(e.Location);
+            pictureBox1.Invalidate();
+        }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
             // Рисуем все полигоны
             foreach (var polygon in polygons)
             {
                 if (polygon.Count == 1)
                 {
-                    g.DrawEllipse(pen, polygon[0].X - 2, polygon[0].Y - 2, 4, 4); // Рисуем точку
+                    e.Graphics.DrawEllipse(_pen, polygon[0].X, polygon[0].Y, 2, 2); // Рисуем точку
                 }
                 else if (polygon.Count >= 2)
                 {
                     for (int i = 0; i < polygon.Count - 1; i++)
                     {
-                        g.DrawLine(pen, polygon[i], polygon[i + 1]); // Рисуем ребро
+                        e.Graphics.DrawLine(_pen, polygon[i], polygon[i + 1]); // Рисуем ребро
                     }
                     if (polygon.Count > 2)
                     {
-                        g.DrawPolygon(pen, polygon.ToArray()); // Рисуем полигон
+                        e.Graphics.DrawPolygon(_pen, polygon.ToArray()); // Рисуем полигон
                     }
                 }
             }
@@ -59,38 +95,18 @@ namespace lab4
             // Рисуем текущий полигон
             if (currentPolygon.Count == 1)
             {
-                g.DrawEllipse(pen, currentPolygon[0].X - 2, currentPolygon[0].Y - 2, 4, 4); // Рисуем точку
+                e.Graphics.DrawEllipse(_pen, currentPolygon[0].X, currentPolygon[0].Y, 2, 2); // Рисуем точку
             }
             else if (currentPolygon.Count >= 2)
             {
                 for (int i = 0; i < currentPolygon.Count - 1; i++)
                 {
-                    g.DrawLine(pen, currentPolygon[i], currentPolygon[i + 1]); // Рисуем ребро
+                    e.Graphics.DrawLine(_pen, currentPolygon[i], currentPolygon[i + 1]); // Рисуем ребро
                 }
                 if (currentPolygon.Count > 2)
                 {
-                    g.DrawPolygon(pen, currentPolygon.ToArray()); // Рисуем полигон
+                    e.Graphics.DrawPolygon(_pen, currentPolygon.ToArray()); // Рисуем полигон
                 }
-            }
-
-            pen.Dispose();
-        }
-
-        private void ClearButton_Click(object sender, EventArgs e)
-        {
-            polygons.Clear();
-            currentPolygon.Clear();
-            this.Invalidate();
-        }
-
-        private void NewPolygonButton_Click(object sender, EventArgs e)
-        {
-            // Если текущий полигон не пуст, добавляем его в список полигонов
-            if (currentPolygon.Count > 0)
-            {
-                polygons.Add(new List<Point>(currentPolygon)); // Сохраняем текущий полигон
-                currentPolygon.Clear(); // Очищаем для нового полигона
-                this.Invalidate(); // Перерисовываем форму
             }
         }
     }
