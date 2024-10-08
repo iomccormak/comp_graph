@@ -187,29 +187,30 @@ namespace lab4
                     break;
                 case 1:
                     _mode = Mode.Move_Polygon;
+                    outputTextBox.Text = "Введите координаты (x,y) через пробел";
                     break;
                 case 2:
                     _mode = Mode.Turn_Around_Point;
+                    outputTextBox.Text = "Введите координаты (x,y) и угол поворота через пробелы";
                     break;
                 case 3:
                     _mode = Mode.Turn_Around_Center;
+                    outputTextBox.Text = "Введите угол поворота";
                     break;
                 case 4:
                     _mode = Mode.Scaling_Relative_To_Point;
+                    outputTextBox.Text = "Введите координаты (x,y) и коэффициент масштабирования через пробелы";
                     break;
                 case 5:
                     _mode = Mode.Scaling_Relative_To_Center;
+                    outputTextBox.Text = "Введите коэффициент масштабирования";
                     break;
             }
         }
 
         private void buttonApply_Click(object sender, EventArgs e)
         {
-            if (_mode == Mode.None)
-            {
-                //Ваш код
-            }
-            else
+            if (_mode != Mode.None)
             {
                 switch (_mode)
                 {
@@ -218,7 +219,7 @@ namespace lab4
                         int dx = 0, dy = 0;
                         if (comboBoxPolygon.SelectedIndex == -1 || s.Length > 2 || !int.TryParse(s[0], out dx) || !int.TryParse(s[1], out dy))
                         {
-                            textBoxOutput.Text = "Ошибка входных данных";
+                            outputTextBox.Text = "Ошибка входных данных";
                             return;
                         }
 
@@ -229,20 +230,20 @@ namespace lab4
                         comboBoxPolygon.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         textBoxInput.Text = "";
-                        textBoxOutput.Text = "";
+                        outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
                     case Mode.Turn_Around_Point:
                         string[] input = textBoxInput.Text.Split(' ');
                         if (comboBoxPolygon.SelectedIndex == -1 || input.Length != 3)
                         {
-                            textBoxOutput.Text = "Ошибка входных данных. Введите x, y и угол поворота.";
+                            outputTextBox.Text = "Ошибка входных данных. Введите x, y и угол поворота.";
                             return;
                         }
                         int pointX, pointY, turn;
                         if (!int.TryParse(input[0], out pointX) || !int.TryParse(input[1], out pointY) || !int.TryParse(input[2], out turn))
                         {
-                            textBoxOutput.Text = "Ошибка ввода: некорректные данные.";
+                            outputTextBox.Text = "Ошибка ввода: некорректные данные.";
                             return;
                         }
                         Point rotationPoint = new Point(pointX, pointY);
@@ -255,13 +256,13 @@ namespace lab4
                         comboBoxPolygon.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         textBoxInput.Text = "";
-                        textBoxOutput.Text = "";
+                        outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
                     case Mode.Turn_Around_Center:
                         if (comboBoxPolygon.SelectedIndex == -1 || !int.TryParse(textBoxInput.Text, out turn))
                         {
-                            textBoxOutput.Text = "Ошибка входных данных";
+                            outputTextBox.Text = "Ошибка входных данных";
                             return;
                         }
                         Point tempP = PolygonCenter(polygons[comboBoxPolygon.SelectedIndex - 1]);
@@ -272,14 +273,14 @@ namespace lab4
                         comboBoxPolygon.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         textBoxInput.Text = "";
-                        textBoxOutput.Text = "";
+                        outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
                     case Mode.Scaling_Relative_To_Center:
                         float k = 0f;
                         if (comboBoxPolygon.SelectedIndex == 0 || !float.TryParse(textBoxInput.Text, out k))
                         {
-                            textBoxOutput.Text = "Ошибка входных данных";
+                            outputTextBox.Text = "Ошибка входных данных";
                             return;
                         }
 
@@ -292,14 +293,14 @@ namespace lab4
                         comboBoxPolygon.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         textBoxInput.Text = "";
-                        textBoxOutput.Text = "";
+                        outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
                     case Mode.Scaling_Relative_To_Point:
                         string[] scaleInput = textBoxInput.Text.Split(' ');
                         if (comboBoxPolygon.SelectedIndex == -1 || scaleInput.Length > 4)
                         {
-                            textBoxOutput.Text = "Ошибка входных данных. Введите x, y и коэффициент масштабирования.";
+                            outputTextBox.Text = "Ошибка входных данных. Введите x, y и коэффициент масштабирования.";
                             return;
                         }
 
@@ -307,7 +308,7 @@ namespace lab4
                         float scaleFactor;
                         if (!int.TryParse(scaleInput[0], out scaleX) || !int.TryParse(scaleInput[1], out scaleY) || !float.TryParse(scaleInput[2], out scaleFactor))
                         {
-                            textBoxOutput.Text = "Ошибка ввода: некорректные данные.";
+                            outputTextBox.Text = "Ошибка ввода: некорректные данные.";
                             return;
                         }
 
@@ -322,7 +323,7 @@ namespace lab4
                         comboBoxPolygon.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         textBoxInput.Text = "";
-                        textBoxOutput.Text = "";
+                        outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
 
@@ -353,6 +354,7 @@ namespace lab4
             }
             return resultVector;
         }
+
         private double[] Multiplydouble(double[][] Matrix, int[] array)
         {
             double[] resultVector = new double[3];
@@ -363,6 +365,7 @@ namespace lab4
             }
             return resultVector;
         }
+
         private Point RotatePoint(Point polygonpoint, Point PointofRotate, int rotateAngle)
         {
             double pointA, pointB;
@@ -381,6 +384,7 @@ namespace lab4
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
             return new Point((int)resultVector[0], (int)resultVector[1]);
         }
+
         private Point PolygonCenter(List<Point> polygon)
         {
             int a = 0;
@@ -398,6 +402,7 @@ namespace lab4
 
             return new Point(cx / (6 * a), cy / (6 * a));
         }
+
         private Point ScalePoint(Point polygonpoint, Point randompoint, float k)
         {
             int[] offsetVector = new int[3] { polygonpoint.X - randompoint.X, polygonpoint.Y - randompoint.Y, 1 };
@@ -409,6 +414,7 @@ namespace lab4
             };
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
             return new Point((int)resultVector[0] + randompoint.X, (int)resultVector[1] + randompoint.Y);
+        }
         private Point? FindIntersection(Point a, Point b, Point c, Point d, out string message)
         {
             Point n = new Point(-(d.Y - c.Y), d.X - c.X);
@@ -458,6 +464,5 @@ namespace lab4
             outputTextBox.Text = message + " Нажмите на экран, чтобы продолжить.";
             intFlag = 5; // Переход в следующий режим
         }
-    }
     }
 }
