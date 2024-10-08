@@ -178,8 +178,11 @@ namespace lab4
             if (currentPolygon.Count > 0)
             {
                 polygons.Add(new List<Point>(currentPolygon));
-                comboBoxPolygon.Items.Add($"Polygon {polygons.Count}");
-                comboBoxPolygon.Refresh();
+                if (radioButton1.Checked)
+                {
+                    comboBoxPolygon.Items.Add($"Polygon {polygons.Count}");
+                    comboBoxPolygon.Refresh();
+                }
                 currentPolygon.Clear();
                 pictureBox1.Invalidate();
             }
@@ -268,7 +271,8 @@ namespace lab4
                     case Mode.Move_Polygon:
                         string[] s = textBoxInput.Text.Split(' ');
                         int dx = 0, dy = 0;
-                        if (comboBoxPolygon.SelectedIndex == -1 || s.Length > 2 || !int.TryParse(s[0], out dx) || !int.TryParse(s[1], out dy))
+                       
+                        if (comboBoxPolygon.SelectedIndex == -1 || s.Length != 2 || !int.TryParse(s[0], out dx) || !int.TryParse(s[1], out dy))
                         {
                             outputTextBox.Text = "Ошибка входных данных";
                             return;
