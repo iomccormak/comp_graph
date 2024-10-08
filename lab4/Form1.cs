@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace lab4
 {
@@ -31,12 +32,17 @@ namespace lab4
             _pen = new Pen(Color.Black, 2);
             tempPoint = new Point(); // Потому что больше негде
             pictureBox1.Image = _bitmap;
-
-            // Инициализация радио-кнопки для пересечения
-            radioButton2.CheckedChanged += RadioButtonIntersection_CheckedChanged;
         }
 
-        private void RadioButtonIntersection_CheckedChanged(object sender, EventArgs e)
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!radioButton1.Checked)
+            {
+                StopDrawPolygon();
+            }
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton2.Checked)
             {
@@ -44,6 +50,31 @@ namespace lab4
                 tempEdge.Clear();
                 outputTextBox.Text = "Выберите 4 точки для проверки пересечения.";
             }
+            else if (!radioButton2.Checked)
+            {                
+                intFlag = 0;
+                tempEdge.Clear();
+                _graphics.Clear(Color.White);
+                pictureBox1.Invalidate();
+            }
+        }
+        private void radioButton4_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton4.Checked)
+            {
+                intFlag = 0;
+                outputTextBox.Text = "Нарисуйте отрезок и точку с любой стороны от него.";
+            }  
+            else if (!radioButton4.Checked)
+            {
+                if (polygons.Count > 0 && intFlag >= 2)
+                {
+                   polygons.RemoveAt(polygons.Count - 1);
+                }
+                intFlag = 0;
+                currentPolygon.Clear();
+                pictureBox1.Invalidate();
+            }          
         }
 
         private void ClearButton_Click(object sender, EventArgs e)
@@ -52,6 +83,7 @@ namespace lab4
             currentPolygon.Clear();
             _graphics.Clear(Color.White);
             pictureBox1.Invalidate();
+            intFlag = 0;
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -74,40 +106,58 @@ namespace lab4
             else if (radioButton3.Checked)
             {
                
+            } 
+            else if(radioButton4.Checked)
+            {
+               CheckSidePoint(e);
             }
         }
 
-        private void HandleIntersectionMode(MouseEventArgs e)
+        private void CheckSidePoint(MouseEventArgs e)
         {
-            if (intFlag < 4)
+            if (intFlag == 0)
             {
-                tempEdge.Add(e.Location);
-                _bitmap.SetPixel(e.Location.X, e.Location.Y, polygonColor);
                 intFlag++;
-
-                if (tempEdge.Count % 2 == 0)
-                {
-                    _graphics.DrawLine(new Pen(polygonColor), tempEdge[tempEdge.Count - 2], tempEdge[tempEdge.Count - 1]);
-                }
-                pictureBox1.Image = _bitmap;
-
-                if (intFlag == 4)
-                {
-                    CheckIntersection();
-                }
+                DrawPolygon(e);
             }
-            else if (intFlag == 5)
+            else if (intFlag == 1)
             {
-                _graphics.Clear(Color.White);
-                pictureBox1.Image = _bitmap;
-
-                tempEdge.Clear();
-                intFlag = 0;
-                outputTextBox.Text = "Выберите 4 точки для нового пересечения.";
+                intFlag++;
+                DrawPolygon(e);
+                StopDrawPolygon();
             }
+            else if (intFlag == 2)
+            {
+                intFlag++;
+                DrawPolygon(e);
+                Point point = currentPolygon[0];
+                List<Point> edge = polygons[polygons.Count - 1];
+                Point b = new Point(point.X - edge[1].X, point.Y - edge[1].Y);
+                Point a = new Point(edge[0].X - edge[1].X, edge[0].Y - edge[1].Y);
+                double result = b.Y * a.X - b.X * a.Y;
+                if (result > 0)
+                {
+                    outputTextBox.Text = $"Точка ({point.X},{point.Y}) находится слева от ребра.";
+                }
+                else if (result < 0)
+                {
+                    outputTextBox.Text = $"Точка ({point.X},{point.Y}) находится справа от ребра.";
+                }
+                else
+                {
+                    outputTextBox.Text = $"Точка ({point.X},{point.Y}) находится на ребре.";
+                }
+                outputTextBox.Text += " Нажмите на экран, чтобы продолжить.";
+            } 
+            else if (intFlag == 3 && polygons.Count > 0)
+            {
+                polygons.RemoveAt(polygons.Count - 1);
+                intFlag = 0;
+                currentPolygon.Clear();
+                outputTextBox.Text = "Нарисуйте отрезок и точку с любой стороны от него.";
+            }
+            pictureBox1.Invalidate();
         }
-
-
         private void StopDrawPolygon()
         {
             if (currentPolygon.Count > 0)
@@ -161,7 +211,33 @@ namespace lab4
                 }
             }
         }
+        private void HandleIntersectionMode(MouseEventArgs e)
+        {
+            if (intFlag < 4)
+            {
+                tempEdge.Add(e.Location);
+                _bitmap.SetPixel(e.Location.X, e.Location.Y, polygonColor);
+                intFlag++;
 
+                if (tempEdge.Count % 2 == 0)
+                {
+                    _graphics.DrawLine(_pen, tempEdge[tempEdge.Count - 2], tempEdge[tempEdge.Count - 1]);
+                }
+
+                if (intFlag == 4)
+                {
+                    CheckIntersection();
+                }
+            }
+            else if (intFlag == 5)
+            {
+                _graphics.Clear(Color.White);
+                tempEdge.Clear();
+                intFlag = 0;
+                outputTextBox.Text = "Выберите 4 точки для нового пересечения.";
+            }
+            pictureBox1.Invalidate();
+        }
         private Point? FindIntersection(Point a, Point b, Point c, Point d, out string message)
         {
             Point n = new Point(-(d.Y - c.Y), d.X - c.X);
@@ -204,13 +280,13 @@ namespace lab4
 
             if (intersection.HasValue)
             {
-                _graphics.DrawRectangle(new Pen(selectedPolygonColor), intersection.Value.X, intersection.Value.Y, 1, 1);
-                pictureBox1.Image = _bitmap;
+                _graphics.DrawRectangle(new Pen(selectedPolygonColor, 2), intersection.Value.X, intersection.Value.Y, 2, 2);
             }
 
             outputTextBox.Text = message + " Нажмите на экран, чтобы продолжить.";
             intFlag = 5; // Переход в следующий режим
+
+            pictureBox1.Invalidate();
         }
     }
-
 }
