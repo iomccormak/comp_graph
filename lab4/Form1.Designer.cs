@@ -191,15 +191,6 @@
             this.radioButton3.Text = "Принадлежность";
             this.radioButton3.UseVisualStyleBackColor = true;
             // 
-            // polygonSelectDropDown
-            // 
-            this.polygonSelectDropDown.FormattingEnabled = true;
-            this.polygonSelectDropDown.Location = new System.Drawing.Point(12, 289);
-            this.polygonSelectDropDown.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.polygonSelectDropDown.Name = "polygonSelectDropDown";
-            this.polygonSelectDropDown.Size = new System.Drawing.Size(131, 21);
-            this.polygonSelectDropDown.TabIndex = 7;
-            // 
             // applyButton
             // 
             this.applyButton.AccessibleRole = System.Windows.Forms.AccessibleRole.None;

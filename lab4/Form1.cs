@@ -45,10 +45,7 @@ namespace lab4
             pictureBox1.Image = _bitmap;
             comboBoxAthenian.SelectedIndex = 0;
             comboBoxPolygon.SelectedIndex = 0;
-            // Инициализация радио-кнопки для пересечения
-            radioButton2.CheckedChanged += RadioButtonIntersection_CheckedChanged;
-        }
-        
+        }        
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
@@ -456,7 +453,7 @@ namespace lab4
 
             return new Point(cx / (6 * a), cy / (6 * a));
         }
-        }
+        
         private void HandleIntersectionMode(MouseEventArgs e)
         {
             if (intFlag < 4)
