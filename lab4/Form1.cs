@@ -15,25 +15,25 @@ namespace lab4
     {
         None,
         Move_Polygon,
-        Turn_Around_Point,
+        Turn_Around_PointF,
         Turn_Around_Center,
-        Scaling_Relative_To_Point,
+        Scaling_Relative_To_PointF,
         Scaling_Relative_To_Center,
     }
 
     public partial class Form1 : Form
     {
-        private List<List<Point>> polygons = new List<List<Point>>();
-        private List<Point> currentPolygon = new List<Point>();
+        private List<List<PointF>> polygons = new List<List<PointF>>();
+        private List<PointF> currentPolygon = new List<PointF>();
         private Bitmap _bitmap;
         private Graphics _graphics;
         private Pen _pen;
         private Mode _mode;
         private int intFlag = 0;
-        private List<Point> tempEdge = new List<Point>();
+        private List<PointF> tempEdge = new List<PointF>();
         private Color polygonColor = Color.Black;
         private Color selectedPolygonColor = Color.Red;
-        Point tempPoint; 
+        PointF tempPointF; 
         public Form1()
         {
             InitializeComponent();
@@ -41,7 +41,7 @@ namespace lab4
             _graphics = Graphics.FromImage(_bitmap);
             _graphics.Clear(Color.White);
             _pen = new Pen(Color.Black, 2);
-            tempPoint = new Point(); // Потому что больше негде
+            tempPointF = new PointF();
             pictureBox1.Image = _bitmap;
             comboBoxAthenian.SelectedIndex = 0;
             comboBoxPolygon.SelectedIndex = 0;
@@ -84,12 +84,21 @@ namespace lab4
                     outputTextBox.Text = "Нет полигонов";
                 }
             }
+            else if (!radioButton4.Checked)
+            {
+                //if (polygons.Count > 0 && intFlag == 2)
+                //{
+                //    polygons.RemoveAt(polygons.Count - 1);
+                //}
+                intFlag = 0;
+                currentPolygon.Clear();
+                pictureBox1.Invalidate();
+            }               
         }
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton4.Checked)
             {
-                intFlag = 0;
                 outputTextBox.Text = "Нарисуйте отрезок и точку с любой стороны от него.";
             }  
             else if (!radioButton4.Checked)
@@ -97,11 +106,11 @@ namespace lab4
                 if (polygons.Count > 0 && intFlag >= 2)
                 {
                    polygons.RemoveAt(polygons.Count - 1);
-                }
-                intFlag = 0;
-                currentPolygon.Clear();
-                pictureBox1.Invalidate();
-            }          
+                }                
+            }
+            intFlag = 0;
+            currentPolygon.Clear();
+            pictureBox1.Invalidate();
         }
 
         private void ClearButton_Click(object sender, EventArgs e)
@@ -136,9 +145,7 @@ namespace lab4
             {
                 if (intFlag == 0)
                 {
-                    tempPoint = e.Location;
-                    _bitmap.SetPixel(e.Location.X, e.Location.Y, selectedPolygonColor);
-                    pictureBox1.Image = _bitmap;
+                    DrawPolygon(e);
                     intFlag = 1;
 
                     comboBoxPolygon.Enabled = true;
@@ -150,42 +157,18 @@ namespace lab4
                     intFlag = 0;
                     comboBoxPolygon.SelectedIndex = 0;
                     outputTextBox.Text = "";
-
-                    DrawPolygons();
+                    currentPolygon.Clear();
+                    StopDrawPolygon();
+                    pictureBox1.Invalidate();
                 }
             } 
             else if(radioButton4.Checked)
             {
-               CheckSidePoint(e);
+               CheckSidePointF(e);
             }
         }
 
-        void DrawPolygons()
-        {
-            _bitmap = new Bitmap(850, 600);
-            pictureBox1.Image = _bitmap;
-            _graphics = Graphics.FromImage(pictureBox1.Image);
-
-            for (int j = 0; j < polygons.Count; j++)
-            {
-                Color color = comboBoxPolygon.SelectedIndex == j + 1 ? selectedPolygonColor : polygonColor;
-                Pen pen = new Pen(color);
-
-                List<Point> polygon = polygons[j];
-                if (polygon.Count == 1) _graphics.DrawRectangle(pen, new Rectangle(polygon[0].X, polygon[0].Y, 1, 1));
-                else if (polygon.Count == 2) _graphics.DrawLine(pen, polygon[0].X, polygon[0].Y, polygon[1].X, polygon[1].Y);
-                else
-                {
-                    for (int i = 1; i < polygon.Count; i++)
-                        _graphics.DrawLine(pen, polygon[i - 1].X, polygon[i - 1].Y, polygon[i].X, polygon[i].Y);
-                    _graphics.DrawLine(pen, polygon[0].X, polygon[0].Y, polygon[polygon.Count - 1].X, polygon[polygon.Count - 1].Y);
-                }
-            }
-
-            pictureBox1.Image = _bitmap;
-        }
-
-        private void CheckSidePoint(MouseEventArgs e)
+        private void CheckSidePointF(MouseEventArgs e)
         {
             if (intFlag == 0)
             {
@@ -202,22 +185,22 @@ namespace lab4
             {
                 intFlag++;
                 DrawPolygon(e);
-                Point point = currentPolygon[0];
-                List<Point> edge = polygons[polygons.Count - 1];
-                Point b = new Point(point.X - edge[1].X, point.Y - edge[1].Y);
-                Point a = new Point(edge[0].X - edge[1].X, edge[0].Y - edge[1].Y);
+                PointF PointF = currentPolygon[0];
+                List<PointF> edge = polygons[polygons.Count - 1];
+                PointF b = new PointF(PointF.X - edge[1].X, PointF.Y - edge[1].Y);
+                PointF a = new PointF(edge[0].X - edge[1].X, edge[0].Y - edge[1].Y);
                 double result = b.Y * a.X - b.X * a.Y;
                 if (result > 0)
                 {
-                    outputTextBox.Text = $"Точка ({point.X},{point.Y}) находится слева от ребра.";
+                    outputTextBox.Text = $"Точка ({PointF.X},{PointF.Y}) находится слева от ребра.";
                 }
                 else if (result < 0)
                 {
-                    outputTextBox.Text = $"Точка ({point.X},{point.Y}) находится справа от ребра.";
+                    outputTextBox.Text = $"Точка ({PointF.X},{PointF.Y}) находится справа от ребра.";
                 }
                 else
                 {
-                    outputTextBox.Text = $"Точка ({point.X},{point.Y}) находится на ребре.";
+                    outputTextBox.Text = $"Точка ({PointF.X},{PointF.Y}) находится на ребре.";
                 }
                 outputTextBox.Text += " Нажмите на экран, чтобы продолжить.";
             } 
@@ -234,12 +217,9 @@ namespace lab4
         {
             if (currentPolygon.Count > 0)
             {
-                polygons.Add(new List<Point>(currentPolygon));
-                if (radioButton1.Checked)
-                {
-                    comboBoxPolygon.Items.Add($"Polygon {polygons.Count}");
-                    comboBoxPolygon.Refresh();
-                }
+                polygons.Add(new List<PointF>(currentPolygon));
+                comboBoxPolygon.Items.Add($"Polygon {polygons.Count}");
+                comboBoxPolygon.Refresh();
                 currentPolygon.Clear();
                 pictureBox1.Invalidate();
             }
@@ -295,25 +275,31 @@ namespace lab4
             {
                 case 0:
                     _mode = Mode.None;
+                    applyButton.Enabled = false;
                     break;
                 case 1:
                     _mode = Mode.Move_Polygon;
+                    applyButton.Enabled = true;
                     outputTextBox.Text = "Введите координаты (x,y) через пробел";
                     break;
                 case 2:
-                    _mode = Mode.Turn_Around_Point;
+                    _mode = Mode.Turn_Around_PointF;
+                    applyButton.Enabled = true;
                     outputTextBox.Text = "Введите координаты (x,y) и угол поворота через пробелы";
                     break;
                 case 3:
                     _mode = Mode.Turn_Around_Center;
+                    applyButton.Enabled = true;
                     outputTextBox.Text = "Введите угол поворота";
                     break;
                 case 4:
-                    _mode = Mode.Scaling_Relative_To_Point;
+                    _mode = Mode.Scaling_Relative_To_PointF;
+                    applyButton.Enabled = true;
                     outputTextBox.Text = "Введите координаты (x,y) и коэффициент масштабирования через пробелы";
                     break;
                 case 5:
                     _mode = Mode.Scaling_Relative_To_Center;
+                    applyButton.Enabled = true;
                     outputTextBox.Text = "Введите коэффициент масштабирования";
                     break;
             }
@@ -336,7 +322,7 @@ namespace lab4
                         }
 
                         for (int i = 0; i < polygons[comboBoxPolygon.SelectedIndex - 1].Count; i++)
-                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = Movepoint(polygons[comboBoxPolygon.SelectedIndex - 1][i], dx, dy);
+                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = MovePointF(polygons[comboBoxPolygon.SelectedIndex - 1][i], dx, dy);
                         comboBoxAthenian.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         comboBoxPolygon.SelectedIndex = 0;
@@ -345,23 +331,23 @@ namespace lab4
                         outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
-                    case Mode.Turn_Around_Point:
+                    case Mode.Turn_Around_PointF:
                         string[] input = textBoxInput.Text.Split(' ');
                         if (comboBoxPolygon.SelectedIndex == -1 || input.Length != 3)
                         {
                             outputTextBox.Text = "Ошибка входных данных. Введите x, y и угол поворота.";
                             return;
                         }
-                        int pointX, pointY, turn;
-                        if (!int.TryParse(input[0], out pointX) || !int.TryParse(input[1], out pointY) || !int.TryParse(input[2], out turn))
+                        int PointFX, PointFY, turn;
+                        if (!int.TryParse(input[0], out PointFX) || !int.TryParse(input[1], out PointFY) || !int.TryParse(input[2], out turn))
                         {
                             outputTextBox.Text = "Ошибка ввода: некорректные данные.";
                             return;
                         }
-                        Point rotationPoint = new Point(pointX, pointY);
+                        PointF rotationPointF = new PointF(PointFX, PointFY);
                         for (int i = 0; i < polygons[comboBoxPolygon.SelectedIndex - 1].Count; i++)
                         {
-                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = RotatePoint(polygons[comboBoxPolygon.SelectedIndex - 1][i], rotationPoint, turn);
+                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = RotatePointF(polygons[comboBoxPolygon.SelectedIndex - 1][i], rotationPointF, turn);
                         }
                         comboBoxAthenian.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
@@ -377,9 +363,9 @@ namespace lab4
                             outputTextBox.Text = "Ошибка входных данных";
                             return;
                         }
-                        Point tempP = PolygonCenter(polygons[comboBoxPolygon.SelectedIndex - 1]);
+                        PointF tempP = PolygonCenter(polygons[comboBoxPolygon.SelectedIndex - 1]);
                         for (int i = 0; i < polygons[comboBoxPolygon.SelectedIndex - 1].Count; i++)
-                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = RotatePoint(polygons[comboBoxPolygon.SelectedIndex - 1][i], tempP, turn);
+                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = RotatePointF(polygons[comboBoxPolygon.SelectedIndex - 1][i], tempP, turn);
                         comboBoxAthenian.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         comboBoxPolygon.SelectedIndex = 0;
@@ -396,10 +382,10 @@ namespace lab4
                             return;
                         }
 
-                        Point center = PolygonCenter(polygons[comboBoxPolygon.SelectedIndex - 1]);
+                        PointF center = PolygonCenter(polygons[comboBoxPolygon.SelectedIndex - 1]);
 
                         for (int i = 0; i < polygons[comboBoxPolygon.SelectedIndex - 1].Count; i++)
-                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = ScalePoint(polygons[comboBoxPolygon.SelectedIndex - 1][i], center, k);
+                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = ScalePointF(polygons[comboBoxPolygon.SelectedIndex - 1][i], center, k);
                         comboBoxAthenian.SelectedIndex = 0;
                         comboBoxAthenian.Refresh();
                         comboBoxPolygon.SelectedIndex = 0;
@@ -408,7 +394,7 @@ namespace lab4
                         outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
-                    case Mode.Scaling_Relative_To_Point:
+                    case Mode.Scaling_Relative_To_PointF:
                         string[] scaleInput = textBoxInput.Text.Split(' ');
                         if (comboBoxPolygon.SelectedIndex == -1 || scaleInput.Length > 4)
                         {
@@ -424,10 +410,10 @@ namespace lab4
                             return;
                         }
 
-                        Point scalePoint = new Point(scaleX, scaleY);
+                        PointF scalePointF = new PointF(scaleX, scaleY);
                         for (int i = 0; i < polygons[comboBoxPolygon.SelectedIndex - 1].Count; i++)
                         {
-                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = ScalePoint(polygons[comboBoxPolygon.SelectedIndex - 1][i], scalePoint, scaleFactor);
+                            polygons[comboBoxPolygon.SelectedIndex - 1][i] = ScalePointF(polygons[comboBoxPolygon.SelectedIndex - 1][i], scalePointF, scaleFactor);
                         }
 
                         comboBoxAthenian.SelectedIndex = 0;
@@ -441,7 +427,7 @@ namespace lab4
                 }
             }
 
-        } 
+        }
 
 
         private void checkButton_Click(object sender, EventArgs e)
@@ -453,63 +439,57 @@ namespace lab4
             }
 
             int cnt = 0;
-            List<Point> l = new List<Point>(polygons[comboBoxPolygon.SelectedIndex - 1]);
+            List<PointF> l = new List<PointF>(polygons[comboBoxPolygon.SelectedIndex - 1]);
+            float yPoint = currentPolygon[0].Y;
+
             if (l.Count > 2)
             {
-                for (int i = 1; i <= l.Count; i++)
+                for (int i = 0; i < l.Count; i++)
                 {
-                    Point a = tempPoint;
-                    Point b = new Point(tempPoint.X + 1, tempPoint.Y);
-                    Point c = l[i - 1];
-                    Point d = l[i % l.Count];
-                    Point n = new Point(-(d.Y - c.Y), d.X - c.X);
-                    float t = -(float)(n.X * (a.X - c.X) + n.Y * (a.Y - c.Y)) / (n.X * (b.X - a.X) + n.Y * (b.Y - a.Y));
-                    Point res = new Point(a.X + (int)(t * (b.X - a.X)), a.Y + (int)(t * (b.Y - a.Y)));
-                    if (res.X >= Math.Min(c.X, d.X) && res.X <= Math.Max(c.X, d.X) && res.X > a.X) cnt++;
+                    PointF c = l[i];
+                    PointF d = l[(i + 1) % l.Count];
 
+                    if (c.Y == d.Y)
+                        continue;
+
+                    PointF lower = c.Y < d.Y ? c : d;
+                    PointF upper = c.Y < d.Y ? d : c;
+
+                    if (yPoint < upper.Y && yPoint >= lower.Y)
+                    {
+                        float intersectionX = (yPoint - lower.Y) * (upper.X - lower.X) / (upper.Y - lower.Y) + lower.X;
+                        if (intersectionX > currentPolygon[0].X)
+                        {
+                            cnt++;
+                        }
+                    }
                 }
             }
 
             if (cnt % 2 == 0)
                 outputTextBox.Text = "Точка не лежит внутри полигона.";
-
             else
-            {
-                Point b = new Point(tempPoint.X - l[0].X, tempPoint.Y - l[0].Y);
-                Point a = new Point(l[1].X - l[0].X, l[1].Y - l[0].Y);
-                bool sign = b.X * a.Y - b.Y * a.X > 0;
+                outputTextBox.Text = "Точка лежит внутри полигона.";
 
-                bool res = true;
-
-                for (int i = 1; i <= l.Count; i++)
-                {
-                    b = new Point(tempPoint.X - l[i - 1].X, tempPoint.Y - l[i - 1].Y);
-                    a = new Point(l[i % l.Count].X - l[i - 1].X, l[i % l.Count].Y - l[i - 1].Y);
-                    float t1 = -(b.Y * a.X - b.X * a.Y);
-                    if (!(sign && t1 > 0 || !sign && t1 < 0)) { res = false; break; }
-                }
-
-                if (res) outputTextBox.Text = "Точка лежит внутри выпуклого полигона.";
-                else outputTextBox.Text = "Точка лежит внутри вогнутого полигона.";
-            }
             outputTextBox.Text += " Нажмите на экран, чтобы продолжить.";
             comboBoxPolygon.Enabled = false;
             checkButton.Enabled = false;
-
             intFlag = 2;
         }
 
-        private Point Movepoint(Point polygonpoint, int dx, int dy)
+
+
+        private PointF MovePointF(PointF polygonPointF, int dx, int dy)
         {
-            int[][] Matrix = new int[3][]
+            double[][] Matrix = new double[3][]
             {
-                    new int[3] { 1,   0, 0 },
-                    new int[3] { 0,   1, 0 },
-                    new int[3] { dx, dy, 1 }
+                    new double[3] { 1,   0, 0 },
+                    new double[3] { 0,   1, 0 },
+                    new double[3] { dx, dy, 1 }
             };
-            int[] offsetVector = new int[3] { polygonpoint.X, polygonpoint.Y, 1 };
-            int[] resultVector = Multiplyint(Matrix, offsetVector);
-            return new Point((int)resultVector[0], (int)resultVector[1]);
+            double[] offsetVector = new double[3] { polygonPointF.X, polygonPointF.Y, 1 };
+            double[] resultVector = Multiplydouble(Matrix, offsetVector);
+            return new PointF((float)resultVector[0], (float)resultVector[1]);
         }
 
          private int[] Multiplyint(int[][] Matrix, int[] array)
@@ -523,7 +503,7 @@ namespace lab4
             return resultVector;
         }
 
-        private double[] Multiplydouble(double[][] Matrix, int[] array)
+        private double[] Multiplydouble(double[][] Matrix, double[] array)
         {
             double[] resultVector = new double[3];
             for (int i = 0; i < 3; i++)
@@ -534,41 +514,41 @@ namespace lab4
             return resultVector;
         }
 
-        private Point RotatePoint(Point polygonpoint, Point PointofRotate, int rotateAngle)
+        private PointF RotatePointF(PointF polygonPointF, PointF PointFofRotate, int rotateAngle)
         {
-            double pointA, pointB;
+            double PointFA, PointFB;
             double angle = (rotateAngle / 180D) * Math.PI;
 
-            pointA = -PointofRotate.X * Math.Cos(angle) + PointofRotate.Y * Math.Sin(angle) + PointofRotate.X;
-            pointB = -PointofRotate.X * Math.Sin(angle) - PointofRotate.Y * Math.Cos(angle) + PointofRotate.Y;
+            PointFA = -PointFofRotate.X * Math.Cos(angle) + PointFofRotate.Y * Math.Sin(angle) + PointFofRotate.X;
+            PointFB = -PointFofRotate.X * Math.Sin(angle) - PointFofRotate.Y * Math.Cos(angle) + PointFofRotate.Y;
 
-            int[] offsetVector = new int[3] { polygonpoint.X, polygonpoint.Y, 1 };
+            double[] offsetVector = new double[3] { polygonPointF.X, polygonPointF.Y, 1 };
             double[][] Matrix = new double[3][]
             {
                 new double[3] {  Math.Cos(angle),   Math.Sin(angle), 0 },
                 new double[3] { -Math.Sin(angle),   Math.Cos(angle), 0 },
-                new double[3] { pointA, pointB, 1 }
+                new double[3] { PointFA, PointFB, 1 }
             };
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
-            return new Point((int)resultVector[0], (int)resultVector[1]);
+            return new PointF((float)resultVector[0], (float)resultVector[1]);
         }
 
-        private Point PolygonCenter(List<Point> polygon)
+        private PointF PolygonCenter(List<PointF> polygon)
         {
-            int a = 0;
-            int cx = 0;
-            int cy = 0;
+            float a = 0;
+            float cx = 0;
+            float cy = 0;
 
             for (int i = 0; i < polygon.Count; i++)
             {
-                int temp = polygon[i].X * polygon[(i + 1) % polygon.Count].Y - polygon[(i + 1) % polygon.Count].X * polygon[i].Y;
+                float temp = polygon[i].X * polygon[(i + 1) % polygon.Count].Y - polygon[(i + 1) % polygon.Count].X * polygon[i].Y;
                 a += temp;
                 cx += (polygon[i].X + polygon[(i + 1) % polygon.Count].X) * temp;
                 cy += (polygon[i].Y + polygon[(i + 1) % polygon.Count].Y) * temp;
             }
             a /= 2;
 
-            return new Point(cx / (6 * a), cy / (6 * a));
+            return new PointF(cx / (6 * a), cy / (6 * a));
         }
         
         private void HandleIntersectionMode(MouseEventArgs e)
@@ -598,9 +578,9 @@ namespace lab4
             }
             pictureBox1.Invalidate();
         }
-        private Point ScalePoint(Point polygonpoint, Point randompoint, float k)
+        private PointF ScalePointF(PointF polygonPointF, PointF randomPointF, float k)
         {
-            int[] offsetVector = new int[3] { polygonpoint.X - randompoint.X, polygonpoint.Y - randompoint.Y, 1 };
+            double[] offsetVector = new double[3] { polygonPointF.X - randomPointF.X, polygonPointF.Y - randomPointF.Y, 1 };
             double[][] Matrix = new double[3][]
             {
                 new double[3] {  k,   0, 0 },
@@ -608,11 +588,11 @@ namespace lab4
                 new double[3] { 0, 0, 1 }
             };
             double[] resultVector = Multiplydouble(Matrix, offsetVector);
-            return new Point((int)resultVector[0] + randompoint.X, (int)resultVector[1] + randompoint.Y);
+            return new PointF((float)resultVector[0] + randomPointF.X, (float)resultVector[1] + randomPointF.Y);
         }
-        private Point? FindIntersection(Point a, Point b, Point c, Point d, out string message)
+        private PointF? FindIntersection(PointF a, PointF b, PointF c, PointF d, out string message)
         {
-            Point n = new Point(-(d.Y - c.Y), d.X - c.X);
+            PointF n = new PointF(-(d.Y - c.Y), d.X - c.X);
 
             float denominator = n.X * (b.X - a.X) + n.Y * (b.Y - a.Y);
             if (denominator == 0)
@@ -623,7 +603,7 @@ namespace lab4
 
             float t = -(float)(n.X * (a.X - c.X) + n.Y * (a.Y - c.Y)) / denominator;
 
-            Point res = new Point(a.X + (int)(t * (b.X - a.X)), a.Y + (int)(t * (b.Y - a.Y)));
+            PointF res = new PointF(a.X + (int)(t * (b.X - a.X)), a.Y + (int)(t * (b.Y - a.Y)));
 
             if (res.X >= Math.Min(a.X, b.X) && res.X <= Math.Max(a.X, b.X) &&
                 res.Y >= Math.Min(a.Y, b.Y) && res.Y <= Math.Max(a.Y, b.Y) &&
@@ -642,13 +622,13 @@ namespace lab4
 
         private void CheckIntersection()
         {
-            Point a = tempEdge[0];
-            Point b = tempEdge[1];
-            Point c = tempEdge[2];
-            Point d = tempEdge[3];
+            PointF a = tempEdge[0];
+            PointF b = tempEdge[1];
+            PointF c = tempEdge[2];
+            PointF d = tempEdge[3];
 
             string message;
-            Point? intersection = FindIntersection(a, b, c, d, out message);
+            PointF? intersection = FindIntersection(a, b, c, d, out message);
 
             if (intersection.HasValue)
             {
@@ -656,7 +636,7 @@ namespace lab4
             }
 
             outputTextBox.Text = message + " Нажмите на экран, чтобы продолжить.";
-            intFlag = 5; // Переход в следующий режим
+            intFlag = 5;
 
             pictureBox1.Invalidate();
         }
