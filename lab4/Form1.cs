@@ -18,7 +18,7 @@ namespace lab4
         Turn_Around_Point,
         Turn_Around_Center,
         Scaling_Relative_To_Point,
-        Scaling_Relative_To_Center
+        Scaling_Relative_To_Center,
     }
 
     public partial class Form1 : Form
@@ -71,6 +71,20 @@ namespace lab4
                 pictureBox1.Invalidate();
             }
         }
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton3.Checked)
+            {
+                if (polygons.Count > 0)
+                {
+                    outputTextBox.Text = "Выберите точку.";
+                }
+                else
+                {
+                    outputTextBox.Text = "Нет полигонов";
+                }
+            }
+        }
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton4.Checked)
@@ -120,12 +134,55 @@ namespace lab4
             }
             else if (radioButton3.Checked)
             {
-               
+                if (intFlag == 0)
+                {
+                    tempPoint = e.Location;
+                    _bitmap.SetPixel(e.Location.X, e.Location.Y, selectedPolygonColor);
+                    pictureBox1.Image = _bitmap;
+                    intFlag = 1;
+
+                    comboBoxPolygon.Enabled = true;
+                    checkButton.Enabled = true;
+                    outputTextBox.Text = "Выберите полигон. После чего нажмите ПРОВЕРИТЬ.";
+                }
+                else if (intFlag == 2)
+                {
+                    intFlag = 0;
+                    comboBoxPolygon.SelectedIndex = 0;
+                    outputTextBox.Text = "";
+
+                    DrawPolygons();
+                }
             } 
             else if(radioButton4.Checked)
             {
                CheckSidePoint(e);
             }
+        }
+
+        void DrawPolygons()
+        {
+            _bitmap = new Bitmap(850, 600);
+            pictureBox1.Image = _bitmap;
+            _graphics = Graphics.FromImage(pictureBox1.Image);
+
+            for (int j = 0; j < polygons.Count; j++)
+            {
+                Color color = comboBoxPolygon.SelectedIndex == j + 1 ? selectedPolygonColor : polygonColor;
+                Pen pen = new Pen(color);
+
+                List<Point> polygon = polygons[j];
+                if (polygon.Count == 1) _graphics.DrawRectangle(pen, new Rectangle(polygon[0].X, polygon[0].Y, 1, 1));
+                else if (polygon.Count == 2) _graphics.DrawLine(pen, polygon[0].X, polygon[0].Y, polygon[1].X, polygon[1].Y);
+                else
+                {
+                    for (int i = 1; i < polygon.Count; i++)
+                        _graphics.DrawLine(pen, polygon[i - 1].X, polygon[i - 1].Y, polygon[i].X, polygon[i].Y);
+                    _graphics.DrawLine(pen, polygon[0].X, polygon[0].Y, polygon[polygon.Count - 1].X, polygon[polygon.Count - 1].Y);
+                }
+            }
+
+            pictureBox1.Image = _bitmap;
         }
 
         private void CheckSidePoint(MouseEventArgs e)
@@ -381,11 +438,67 @@ namespace lab4
                         outputTextBox.Text = "";
                         pictureBox1.Invalidate();
                         break;
+                }
+            }
 
+        } 
+
+
+        private void checkButton_Click(object sender, EventArgs e)
+        {
+            if (comboBoxPolygon.SelectedIndex == 0)
+            {
+                outputTextBox.Text = "Ошибка входных данных";
+                return;
+            }
+
+            int cnt = 0;
+            List<Point> l = new List<Point>(polygons[comboBoxPolygon.SelectedIndex - 1]);
+            if (l.Count > 2)
+            {
+                for (int i = 1; i <= l.Count; i++)
+                {
+                    Point a = tempPoint;
+                    Point b = new Point(tempPoint.X + 1, tempPoint.Y);
+                    Point c = l[i - 1];
+                    Point d = l[i % l.Count];
+                    Point n = new Point(-(d.Y - c.Y), d.X - c.X);
+                    float t = -(float)(n.X * (a.X - c.X) + n.Y * (a.Y - c.Y)) / (n.X * (b.X - a.X) + n.Y * (b.Y - a.Y));
+                    Point res = new Point(a.X + (int)(t * (b.X - a.X)), a.Y + (int)(t * (b.Y - a.Y)));
+                    if (res.X >= Math.Min(c.X, d.X) && res.X <= Math.Max(c.X, d.X) && res.X > a.X) cnt++;
 
                 }
             }
+
+            if (cnt % 2 == 0)
+                outputTextBox.Text = "Точка не лежит внутри полигона.";
+
+            else
+            {
+                Point b = new Point(tempPoint.X - l[0].X, tempPoint.Y - l[0].Y);
+                Point a = new Point(l[1].X - l[0].X, l[1].Y - l[0].Y);
+                bool sign = b.X * a.Y - b.Y * a.X > 0;
+
+                bool res = true;
+
+                for (int i = 1; i <= l.Count; i++)
+                {
+                    b = new Point(tempPoint.X - l[i - 1].X, tempPoint.Y - l[i - 1].Y);
+                    a = new Point(l[i % l.Count].X - l[i - 1].X, l[i % l.Count].Y - l[i - 1].Y);
+                    float t1 = -(b.Y * a.X - b.X * a.Y);
+                    if (!(sign && t1 > 0 || !sign && t1 < 0)) { res = false; break; }
+                }
+
+                if (res) outputTextBox.Text = "Точка лежит внутри выпуклого полигона.";
+                else outputTextBox.Text = "Точка лежит внутри вогнутого полигона.";
+            }
+            outputTextBox.Text += " Нажмите на экран, чтобы продолжить.";
+            comboBoxPolygon.Enabled = false;
+            checkButton.Enabled = false;
+
+            intFlag = 2;
         }
+
         private Point Movepoint(Point polygonpoint, int dx, int dy)
         {
             int[][] Matrix = new int[3][]
@@ -547,5 +660,7 @@ namespace lab4
 
             pictureBox1.Invalidate();
         }
+
+        
     }
 }
