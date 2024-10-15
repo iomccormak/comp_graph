@@ -77,7 +77,7 @@ namespace lab5
             if (points.Count < 4) return;
 
             List<Point> result = new List<Point>();
-            float step = 0.2f;
+            float step = 0.01f;
 
             for (int i = 0; i <= points.Count - 4; i += 3)
             {
