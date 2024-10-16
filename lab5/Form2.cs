@@ -19,6 +19,7 @@ namespace lab5
         Random _random;
 
         int _depth;
+        int _randomMax;
         float _angle;
         float _initialAngle;
         string _axiom;
@@ -52,6 +53,7 @@ namespace lab5
                 ReadLSystem(_files[comboBox1.Text]);
             }
             _depth = trackBar1.Value;
+            _randomMax = trackBar2.Value;
             if (_bitmap != null)
             {
                 _bitmap.Dispose();
@@ -75,32 +77,29 @@ namespace lab5
 
             if (comboBox1.Text.StartsWith("Tree"))
             {
-                TreeFractalPoint[] points = TreeFractalPoints(new TreeFractalPoint(new PointF(0, 0), 0), fractalString);
+                List<TreeFractalPoint> points = TreeFractalPoints(new TreeFractalPoint(new PointF(0, 0), 0), fractalString);
                 points = ScaleTreeFractalPoints(points);
-                float maxDepth = points.Max(p => p.depth);
+                int maxDepth = points.Max(p => p.depth);
 
-                for (int i = 0; i < points.Length - 1; i++)
+                for (int i = 0; i < points.Count - 1; i++)
                 {
-                    // Интерполяция толщины линии
-                    float w = Interpolation(points[i].depth, 0, maxDepth, 10, 1);
+                    float w = Interpolation(points[i].depth, 0, maxDepth, 15, 1);
 
-                    // Интерполяция цвета
-                    Byte R = (Byte)Interpolation(points[i].depth, 0, maxDepth, Color.SaddleBrown.R, Color.LimeGreen.R);
-                    Byte G = (Byte)Interpolation(points[i].depth, 0, maxDepth, Color.SaddleBrown.G, Color.LimeGreen.G);
-                    Byte B = (Byte)Interpolation(points[i].depth, 0, maxDepth, Color.SaddleBrown.B, Color.LimeGreen.B);
+                    Byte R = (Byte)Interpolation(points[i].depth, 0, maxDepth, Color.Brown.R, Color.GreenYellow.R);
+                    Byte G = (Byte)Interpolation(points[i].depth, 0, maxDepth, Color.Brown.G, Color.GreenYellow.G);
+                    Byte B = (Byte)Interpolation(points[i].depth, 0, maxDepth, Color.Brown.B, Color.GreenYellow.B);
 
                     Pen treePen = new Pen(Color.FromArgb(R, G, B), w);
 
-                    // Рисуем линии с измененной шириной
                     _graphics.DrawLine(treePen, points[i].point.X, points[i].point.Y, points[i + 1].point.X, points[i + 1].point.Y);
                 }
             }
             else
             {
-                PointF[] points = FractalPoints(new PointF(0, 0), fractalString);
+                List<PointF> points = FractalPoints(new PointF(0, 0), fractalString);
                 points = ScaleFractalPoints(points);
 
-                for (int i = 0; i < points.Length - 1; i++)
+                for (int i = 0; i < points.Count - 1; i++)
                 {
                     _graphics.DrawLine(_pen, points[i].X, points[i].Y, points[i + 1].X, points[i + 1].Y);
                 }
@@ -111,12 +110,9 @@ namespace lab5
 
         float Interpolation(float x, float min1, float max1, float min2, float max2)
         {
-            if (Math.Abs(max1 - min1) < 1e-5)
-                return min2;
-
-            return (x - min1) / (max1 - min1) * (max2 - min2) + min2;
+            return (x - min1) / (max1 - min1 + 1) * (max2 - min2 + 1) + min2;;
         }
-        TreeFractalPoint[] ScaleTreeFractalPoints(TreeFractalPoint[] points)
+        List<TreeFractalPoint> ScaleTreeFractalPoints(List<TreeFractalPoint> points)
         {
             float minX = points.Min(p => p.point.X) - 10;
             float minY = points.Min(p => p.point.Y) - 10;
@@ -127,16 +123,17 @@ namespace lab5
             float scaleY = pictureBox1.Height / (maxY - minY);
             float scale = Math.Min(scaleX, scaleY);
 
-            TreeFractalPoint[] scaledPoints = new TreeFractalPoint[points.Length];
-            for (int i = 0; i < points.Length; i++)
+            List<TreeFractalPoint> scaledPoints = new List<TreeFractalPoint>();
+            for (int i = 0; i < points.Count; i++)
             {
-                scaledPoints[i].point.X = (points[i].point.X - minX) * scale + (pictureBox1.Width - (maxX - minX) * scale) / 2;
-                scaledPoints[i].point.Y = (points[i].point.Y - minY) * scale + (pictureBox1.Height - (maxY - minY) * scale) / 2;
+                float X = (points[i].point.X - minX) * scale + (pictureBox1.Width - (maxX - minX) * scale) / 2;
+                float Y = (points[i].point.Y - minY) * scale + (pictureBox1.Height - (maxY - minY) * scale) / 2;
+                scaledPoints.Add(new TreeFractalPoint(new PointF(X, Y), points[i].depth));
             }
 
             return scaledPoints;
         }
-        PointF[] ScaleFractalPoints(PointF[] points)
+        List<PointF> ScaleFractalPoints(List<PointF> points)
         {
             float minX = points.Min(p => p.X) - 10;
             float minY = points.Min(p => p.Y) - 10;
@@ -147,22 +144,22 @@ namespace lab5
             float scaleY = pictureBox1.Height / (maxY - minY);
             float scale = Math.Min(scaleX, scaleY);
 
-            PointF[] scaledPoints = new PointF[points.Length];
-            for (int i = 0; i < points.Length; i++)
+            List<PointF> scaledPoints = new List<PointF>();
+            for (int i = 0; i < points.Count; i++)
             {
-                scaledPoints[i].X = (points[i].X - minX) * scale + (pictureBox1.Width - (maxX - minX) * scale) / 2;
-                scaledPoints[i].Y = (points[i].Y - minY) * scale + (pictureBox1.Height - (maxY - minY) * scale) / 2;
+                float X = (points[i].X - minX) * scale + (pictureBox1.Width - (maxX - minX) * scale) / 2;
+                float Y = (points[i].Y - minY) * scale + (pictureBox1.Height - (maxY - minY) * scale) / 2;
+                scaledPoints.Add(new PointF(X, Y));
             }
 
             return scaledPoints;
         }
-        TreeFractalPoint[] TreeFractalPoints(TreeFractalPoint startPoint, string fractalString)
+        List<TreeFractalPoint> TreeFractalPoints(TreeFractalPoint startPoint, string fractalString)
         {
             List<TreeFractalPoint> points = new List<TreeFractalPoint>();
             TreeFractalPoint currentPoint = startPoint;
             float currentAngle = _initialAngle;
             int length = 10;
-            int depth = 0;
             points.Add(currentPoint);
 
             Stack<TreeFractalPoint> pointStack = new Stack<TreeFractalPoint>();
@@ -170,13 +167,22 @@ namespace lab5
 
             foreach (char ch in fractalString)
             {
-                if (ch == '+')
+                if (char.IsLetter(ch))
                 {
-                    currentAngle += _angle + _random.Next(0, 20);
+                    currentPoint.point.X += length;
+                    currentPoint = new TreeFractalPoint(
+                        RotatePointF(currentPoint.point, points[points.Count - 1].point, currentAngle),
+                        currentPoint.depth
+                    );
+                    points.Add(currentPoint);
+                }
+                else if (ch == '+')
+                {
+                    currentAngle += _angle + _random.Next(0, _randomMax);
                 }
                 else if (ch == '-')
                 {
-                    currentAngle -= _angle - _random.Next(0, 20);
+                    currentAngle -= _angle - _random.Next(0, _randomMax);
                 }
                 else if (ch == '[')
                 {
@@ -188,7 +194,6 @@ namespace lab5
                     if (pointStack.Count > 0)
                     {
                         currentPoint = pointStack.Pop();
-                        depth = currentPoint.depth;
                     }
                     if (angleStack.Count > 0)
                     {
@@ -198,24 +203,14 @@ namespace lab5
                 }
                 else if (ch == '@')
                 {
-                    depth++;
-                }
-
-                if (char.IsLetter(ch))
-                {                    
-                    currentPoint.point.X += length;
-                    currentPoint = new TreeFractalPoint(
-                        RotatePointF(currentPoint.point, points[points.Count - 1].point, currentAngle),
-                        depth
-                    );
-                    points.Add(currentPoint);
+                    currentPoint.depth++;
                 }
             }
 
-            return points.ToArray();
+            return points;
         }
 
-        PointF[] FractalPoints(PointF startPoint, string fractalString)
+        List<PointF> FractalPoints(PointF startPoint, string fractalString)
         {
             List<PointF> points = new List<PointF>();
             PointF currentPoint = startPoint;
@@ -228,7 +223,13 @@ namespace lab5
 
             foreach (char ch in fractalString)
             {
-                if (ch == '+')
+                if (char.IsLetter(ch))
+                {
+                    currentPoint.X += length;
+                    currentPoint = RotatePointF(currentPoint, points[points.Count - 1], currentAngle);
+                    points.Add(currentPoint);
+                }
+                else if (ch == '+')
                 {
                     currentAngle += _angle;
                 }
@@ -253,17 +254,10 @@ namespace lab5
                     }
                     currentPoint = RotatePointF(currentPoint, points[points.Count - 1], currentAngle);
                     points.Add(currentPoint);
-                }
-
-                if (char.IsLetter(ch))
-                {
-                    currentPoint.X += length;
-                    currentPoint = RotatePointF(currentPoint, points[points.Count - 1], currentAngle);
-                    points.Add(currentPoint);                    
-                }
+                }                
             }
 
-            return points.ToArray();
+            return points;
         }
         private System.Drawing.PointF RotatePointF(System.Drawing.PointF polygonPoint, System.Drawing.PointF PointofRotate, float rotateAngle)
         {
@@ -380,6 +374,12 @@ namespace lab5
             Clear();
             DrawFractal();
         }
+        private void trackBar2_ValueChanged(object sender, EventArgs e)
+        {
+            _randomMax = trackBar2.Value;
+            Clear();
+            DrawFractal();
+        }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             Clear();
@@ -400,6 +400,6 @@ namespace lab5
             pictureBox1.Image = _bitmap;
             Clear();
             DrawFractal();
-        }
+        }        
     }
 }
