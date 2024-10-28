@@ -178,11 +178,11 @@ namespace lab5
                 }
                 else if (ch == '+')
                 {
-                    currentAngle += _angle + _random.Next(0, _randomMax);
+                    currentAngle += _angle * _random.Next(0, _randomMax) % _randomMax;
                 }
                 else if (ch == '-')
                 {
-                    currentAngle -= _angle - _random.Next(0, _randomMax);
+                    currentAngle -= _angle * _random.Next(0, _randomMax) % _randomMax;
                 }
                 else if (ch == '[')
                 {
