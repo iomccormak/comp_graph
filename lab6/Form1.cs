@@ -4,9 +4,11 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace lab6
 {    
@@ -16,6 +18,13 @@ namespace lab6
         Bitmap _bitmap;
         Graphics _graphics;
         Polyhedron _polyhedron;
+        Mode _mode;
+
+        enum Mode
+        {
+            None,
+            ScaleRelativeCenter,
+        }
 
         public Form1()
         {
@@ -26,6 +35,9 @@ namespace lab6
             _graphics = Graphics.FromImage(_bitmap);
             pictureBox1.Image = _bitmap;
             radioButton1.Checked = true;
+            applyButton.Enabled = false;
+            comboBoxPolyhedron.SelectedIndex = 0;
+            _mode = Mode.None;
             DrawPolyhedron();
         }
 
@@ -47,7 +59,7 @@ namespace lab6
 
         public void DrawPerspective()
         {
-            float c = -pictureBox1.Width * 0.8f;
+            float c = -pictureBox1.Width;
             float offsetX = pictureBox1.Width / 2;
             float offsetY = pictureBox1.Height / 2;
 
@@ -59,19 +71,39 @@ namespace lab6
                 new float[4] { 0, 0, 0,    1 },
             };
 
-            foreach (var edge in _polyhedron.edges)
+            List<Point3D> points = new List<Point3D>();
+
+            foreach (var point in _polyhedron.points)
             {
-                var p1 = _polyhedron.points[edge.Item1].Clone();
-                var p2 = _polyhedron.points[edge.Item2].Clone();
+                var p = point.Clone();
+                p.ApplyMatrix(MatrixPerspective);
+                points.Add(p);
+            }
 
-                p1.ApplyMatrix(MatrixPerspective);
-                p2.ApplyMatrix(MatrixPerspective);
+            foreach (var face in _polyhedron.faces)
+            {
+                var indexes = face.indexes;
 
-                _graphics.DrawLine(
-                    _pen,
-                    p1.X / p1.W + offsetX, p1.Y / p1.W + offsetY,
-                    p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
-                    );
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Point3D p1, p2;
+                    if (i == indexes.Count - 1)
+                    {
+                        p1 = points[indexes[0]];
+                        p2 = points[indexes[i]];
+                    }
+                    else
+                    {
+                        p1 = points[indexes[i]];
+                        p2 = points[indexes[i + 1]];
+                    }
+
+                    _graphics.DrawLine(
+                            _pen,
+                            p1.X / p1.W + offsetX, p1.Y / p1.W + offsetY,
+                            p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
+                            );
+                }
             }
         }
 
@@ -91,20 +123,58 @@ namespace lab6
                 new float[4] {                    0,                                            0, 0, 1 },
             };
 
-            foreach (var edge in _polyhedron.edges)
+            List<Point3D> points = new List<Point3D>();
+
+            foreach (var point in _polyhedron.points)
             {
-                var p1 = _polyhedron.points[edge.Item1].Clone();
-                var p2 = _polyhedron.points[edge.Item2].Clone();
-
-                p1.ApplyMatrix(MatrixAxonometry);
-                p2.ApplyMatrix(MatrixAxonometry);
-
-                _graphics.DrawLine(
-                    _pen,
-                    p1.X / p1.W + offsetX, p1.Y / p1.W + offsetY,
-                    p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
-                    );
+                var p = point.Clone();
+                p.ApplyMatrix(MatrixAxonometry);
+                points.Add(p);
             }
+
+            foreach (var face in _polyhedron.faces)
+            {
+                var indexes = face.indexes;
+
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Point3D p1, p2;
+                    if (i == indexes.Count - 1)
+                    {
+                        p1 = points[indexes[0]];
+                        p2 = points[indexes[i]];
+                    }
+                    else
+                    {
+                        p1 = points[indexes[i]];
+                        p2 = points[indexes[i + 1]];
+                    }
+
+                    _graphics.DrawLine(
+                            _pen,
+                            p1.X / p1.W + offsetX, p1.Y / p1.W + offsetY,
+                            p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
+                            );
+                }
+            }            
+        }
+
+        private new void Scale(float k)
+        {
+            float[][] MatrixScale = new float[4][]
+            {
+                new float[4] { k, 0, 0, 0 },
+                new float[4] { 0, k, 0, 0 },
+                new float[4] { 0, 0, k, 0 },
+                new float[4] { 0, 0, 0, 1 },
+            };
+
+            foreach (var point in _polyhedron.points)
+            {
+                point.ApplyMatrix(MatrixScale);
+            }
+
+            DrawPolyhedron();
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
@@ -115,6 +185,75 @@ namespace lab6
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
             DrawPolyhedron();
+        }
+
+        private void comboBoxPolyhedron_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBoxPolyhedron.SelectedIndex)
+            {
+                case 0:
+                    _polyhedron = new Tetrahedron();
+                    break;
+                case 1:
+                    _polyhedron = new Hexahedron();
+                    break;
+                case 2:
+                    _polyhedron = new Octahedron();
+                    break;
+                case 3:
+                    _polyhedron = new Icosahedron();
+                    break;
+                case 4:
+                    _polyhedron = new Icosahedron();
+                    break;
+            }
+            DrawPolyhedron();
+        }
+
+        private void textBoxScale_TextChanged(object sender, EventArgs e)
+        {
+            if (!float.TryParse(textBoxScale.Text, out float k) || k == 0)
+            {
+                applyButton.Enabled = false;
+                textBoxOutput.Text = "Неккоректный ввод коэффиента масштабирования.";
+            } 
+            else
+            {
+                if (comboBoxAthenian.SelectedIndex != -1)
+                {
+                    applyButton.Enabled = true;
+                }                
+                textBoxOutput.Text = string.Empty;
+            }
+        }
+
+        private void applyButton_Click(object sender, EventArgs e)
+        {
+            switch (_mode)
+            {
+                case Mode.None: 
+                    break;
+                case Mode.ScaleRelativeCenter:
+                    Scale(float.Parse(textBoxScale.Text));
+                    break;
+            }
+        }
+
+        private void comboBoxAthenian_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBoxAthenian.SelectedIndex)
+            {
+                case 0:
+                    applyButton.Enabled = false;
+                    break;
+                case 1:
+                    applyButton.Enabled = false;
+                    break;
+                case 2:
+                    _mode = Mode.ScaleRelativeCenter;
+                    applyButton.Enabled = true;
+                    break;
+            }
         }
     }
 
@@ -153,15 +292,26 @@ namespace lab6
         }
     }
 
+    public class Face
+    {
+        public List<int> indexes;
+        public Face(List<int> _indexes)
+        {
+            indexes = _indexes;
+        }
+    }
+
     public class Polyhedron
     {
-        public const int EDGE_LENGHT = 100;
+        public const int EDGE_LENGHT = 150;
         public List<Point3D> points;
+        public List<Face> faces;
         public List<Tuple<int, int>> edges;
 
         public Polyhedron() 
         { 
             points = new List<Point3D>();
+            faces = new List<Face>();
             edges = new List<Tuple<int, int>>();
         }
 
@@ -172,33 +322,133 @@ namespace lab6
             edges.Add(new Tuple<int, int>( points.Count - 2, points.Count - 1));
         }       
     }
+    public class Tetrahedron : Polyhedron
+    {
+        public Tetrahedron()
+        {
+            Hexahedron icosahedron = new Hexahedron();
 
+            points = new List<Point3D>() {
+                icosahedron.points[0].Clone(), icosahedron.points[6].Clone(),
+                icosahedron.points[3].Clone(), icosahedron.points[5].Clone(),
+            };
+
+            faces = new List<Face>() {
+                new Face(new List<int> { 0, 1, 2,}), new Face(new List<int> { 0, 1, 3,}),
+                new Face(new List<int> { 0, 2, 3,}), new Face(new List<int> { 1, 2, 3,}),
+            };
+        }
+    }
     public class Hexahedron : Polyhedron
     {
         public Hexahedron() 
         {
             float l = EDGE_LENGHT / 2;
 
-            List<Point3D> points = new List<Point3D>() {
+            points = new List<Point3D>() {
                 new Point3D(l, l, l), new Point3D(l, l, -l),
                 new Point3D(l, -l, l), new Point3D(l, -l, -l),
                 new Point3D(-l, l, l), new Point3D(-l, l, -l),
                 new Point3D(-l, -l, l), new Point3D(-l, -l, -l),
             };
 
-            List<Tuple<int, int>> edges = new List<Tuple<int, int>>() {
-                new Tuple<int, int>( 0, 1 ), new Tuple<int, int>( 0, 2 ),
-                new Tuple<int, int>( 0, 4 ), new Tuple<int, int>( 1, 3 ),
-                new Tuple<int, int>( 1, 5 ), new Tuple<int, int>( 2, 3 ),
-                new Tuple<int, int>( 2, 6 ), new Tuple<int, int>( 3, 7 ),
-                new Tuple<int, int>( 4, 5 ), new Tuple<int, int>( 4, 6 ),
-                new Tuple<int, int>( 5, 7 ), new Tuple<int, int>( 6, 7 ),
+            faces = new List<Face>() {
+                new Face(new List<int> { 0, 1, 3, 2 }), new Face(new List<int> { 0, 1, 5, 4 }),
+                new Face(new List<int> { 0, 2, 6, 4 }), new Face(new List<int> { 2, 3, 7, 6 }),
+                new Face(new List<int> { 1, 3, 7, 5 }), new Face(new List<int> { 4, 5, 7, 6 }),
+            };
+        }
+    }
+
+    public class Octahedron : Polyhedron
+    {
+        public Octahedron()
+        {
+            float l = (float)(EDGE_LENGHT / Math.Sqrt(2));
+
+            points = new List<Point3D>() {
+                new Point3D(l, 0, 0), new Point3D(-l, 0, 0),
+                new Point3D(0, l, 0), new Point3D(0, -l, 0),
+                new Point3D(0, 0, l), new Point3D(0, 0, -l),
             };
 
-            foreach (var edge in edges)
+            faces = new List<Face>() {
+                new Face(new List<int> { 0, 2, 4,}), new Face(new List<int> { 0, 3, 4,}),
+                new Face(new List<int> { 0, 2, 5,}), new Face(new List<int> { 0, 3, 5,}),
+                new Face(new List<int> { 1, 2, 4,}), new Face(new List<int> { 1, 3, 4,}),
+                new Face(new List<int> { 1, 2, 5,}), new Face(new List<int> { 1, 3, 5,}),
+            };
+        }
+    }
+
+    public class Icosahedron : Polyhedron
+    {
+        public Icosahedron()
+        {
+            float l = EDGE_LENGHT / 2;
+            float phi = (1 + (float)Math.Sqrt(5)) / 2; 
+
+            points = new List<Point3D>()
             {
-                AddEdge(points[edge.Item1], points[edge.Item2]);
+                new Point3D(-l,  phi * l,  0), new Point3D( l,  phi * l,  0),
+                new Point3D(-l, -phi * l,  0), new Point3D( l, -phi * l,  0),
+                new Point3D( 0, -l,  phi * l), new Point3D( 0,  l,  phi * l),
+                new Point3D( 0, -l, -phi * l), new Point3D( 0,  l, -phi * l),
+                new Point3D( phi * l,  0, -l), new Point3D( phi * l,  0,  l),
+                new Point3D(-phi * l,  0, -l), new Point3D(-phi * l,  0,  l)
+            };
+
+            faces = new List<Face>()
+            {
+                new Face(new List<int> { 0, 11, 5 }), new Face(new List<int> { 0, 5, 1 }),
+                new Face(new List<int> { 0, 1, 7 }), new Face(new List<int> { 0, 7, 10 }),
+                new Face(new List<int> { 0, 10, 11 }), new Face(new List<int> { 1, 5, 9 }),
+                new Face(new List<int> { 5, 11, 4 }), new Face(new List<int> { 11, 10, 2 }),
+                new Face(new List<int> { 10, 7, 6 }), new Face(new List<int> { 7, 1, 8 }),
+                new Face(new List<int> { 3, 9, 4 }), new Face(new List<int> { 3, 4, 2 }),
+                new Face(new List<int> { 3, 2, 6 }), new Face(new List<int> { 3, 6, 8 }),
+                new Face(new List<int> { 3, 8, 9 }), new Face(new List<int> { 4, 9, 5 }),
+                new Face(new List<int> { 2, 4, 11 }), new Face(new List<int> { 6, 2, 10 }),
+                new Face(new List<int> { 8, 6, 7 }), new Face(new List<int> { 9, 8, 1 })
+            };
+        }
+    }
+
+    public class Dodecahedron : Polyhedron
+    {
+        public Dodecahedron()
+        {
+            Icosahedron icosahedron = new Icosahedron();
+            List<Point3D> dodecahedronPoints = new List<Point3D>();
+
+            foreach (var face in icosahedron.faces)
+            {
+                Point3D p1 = icosahedron.points[face.indexes[0]];
+                Point3D p2 = icosahedron.points[face.indexes[1]];
+                Point3D p3 = icosahedron.points[face.indexes[2]];
+
+                float centerX = (p1.X + p2.X + p3.X) / 3;
+                float centerY = (p1.Y + p2.Y + p3.Y) / 3;
+                float centerZ = (p1.Z + p2.Z + p3.Z) / 3;
+
+                dodecahedronPoints.Add(new Point3D(centerX, centerY, centerZ));
             }
+
+            points = dodecahedronPoints;
+
+            faces = new List<Face>()
+            {
+                new Face(new List<int> { 0, 11, 5 }), new Face(new List<int> { 0, 5, 1 }),
+                new Face(new List<int> { 0, 1, 7 }), new Face(new List<int> { 0, 7, 10 }),
+                new Face(new List<int> { 0, 10, 11 }), new Face(new List<int> { 1, 5, 9 }),
+                new Face(new List<int> { 5, 11, 4 }), new Face(new List<int> { 11, 10, 2 }),
+                new Face(new List<int> { 10, 7, 6 }), new Face(new List<int> { 7, 1, 8 }),
+                new Face(new List<int> { 3, 9, 4 }), new Face(new List<int> { 3, 4, 2 }),
+                new Face(new List<int> { 3, 2, 6 }), new Face(new List<int> { 3, 6, 8 }),
+                new Face(new List<int> { 3, 8, 9 }), new Face(new List<int> { 4, 9, 5 }),
+                new Face(new List<int> { 2, 4, 11 }), new Face(new List<int> { 6, 2, 10 }),
+                new Face(new List<int> { 8, 6, 7 }), new Face(new List<int> { 9, 8, 1 })
+            };
         }
     }
 }

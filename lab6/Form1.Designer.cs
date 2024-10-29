@@ -30,40 +30,140 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.applyButton = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.comboBoxAthenian = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxOutput = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBoxScale = new System.Windows.Forms.TextBox();
+            this.comboBoxPolyhedron = new System.Windows.Forms.ComboBox();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(219, 13);
+            this.pictureBox1.Location = new System.Drawing.Point(186, 13);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(713, 576);
+            this.pictureBox1.Size = new System.Drawing.Size(746, 576);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.applyButton);
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.comboBoxAthenian);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.textBoxOutput);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.textBoxScale);
+            this.groupBox1.Controls.Add(this.comboBoxPolyhedron);
             this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Location = new System.Drawing.Point(13, 13);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 576);
+            this.groupBox1.Size = new System.Drawing.Size(167, 576);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
-            // radioButton1
+            // applyButton
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(7, 20);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(92, 17);
-            this.radioButton1.TabIndex = 0;
-            this.radioButton1.Text = "Перспектива";
-            this.radioButton1.UseVisualStyleBackColor = true;
-            this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            this.applyButton.Location = new System.Drawing.Point(6, 155);
+            this.applyButton.Name = "applyButton";
+            this.applyButton.Size = new System.Drawing.Size(150, 23);
+            this.applyButton.TabIndex = 10;
+            this.applyButton.Text = "Применить";
+            this.applyButton.UseVisualStyleBackColor = true;
+            this.applyButton.Click += new System.EventHandler(this.applyButton_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(12, 66);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(80, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Многогранник";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(9, 111);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(152, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "Аффинные  преобразования";
+            // 
+            // comboBoxAthenian
+            // 
+            this.comboBoxAthenian.FormattingEnabled = true;
+            this.comboBoxAthenian.Items.AddRange(new object[] {
+            "Смещение",
+            "Поворот",
+            "Масштаб"});
+            this.comboBoxAthenian.Location = new System.Drawing.Point(6, 127);
+            this.comboBoxAthenian.Name = "comboBoxAthenian";
+            this.comboBoxAthenian.Size = new System.Drawing.Size(150, 21);
+            this.comboBoxAthenian.TabIndex = 7;
+            this.comboBoxAthenian.SelectedIndexChanged += new System.EventHandler(this.comboBoxAthenian_SelectedIndexChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(10, 464);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(40, 13);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "Вывод";
+            // 
+            // textBoxOutput
+            // 
+            this.textBoxOutput.Location = new System.Drawing.Point(7, 483);
+            this.textBoxOutput.Multiline = true;
+            this.textBoxOutput.Name = "textBoxOutput";
+            this.textBoxOutput.Size = new System.Drawing.Size(149, 87);
+            this.textBoxOutput.TabIndex = 5;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 187);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(101, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Масштабирование";
+            // 
+            // textBoxScale
+            // 
+            this.textBoxScale.Location = new System.Drawing.Point(6, 203);
+            this.textBoxScale.Name = "textBoxScale";
+            this.textBoxScale.Size = new System.Drawing.Size(150, 20);
+            this.textBoxScale.TabIndex = 3;
+            this.textBoxScale.Text = "1";
+            this.textBoxScale.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBoxScale.TextChanged += new System.EventHandler(this.textBoxScale_TextChanged);
+            // 
+            // comboBoxPolyhedron
+            // 
+            this.comboBoxPolyhedron.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.comboBoxPolyhedron.FormattingEnabled = true;
+            this.comboBoxPolyhedron.Items.AddRange(new object[] {
+            "Тетраэдр",
+            "Гексаэдр",
+            "Октаэдр",
+            "Икосаэдр",
+            "Додекаэдр"});
+            this.comboBoxPolyhedron.Location = new System.Drawing.Point(6, 85);
+            this.comboBoxPolyhedron.Name = "comboBoxPolyhedron";
+            this.comboBoxPolyhedron.Size = new System.Drawing.Size(150, 23);
+            this.comboBoxPolyhedron.TabIndex = 2;
+            this.comboBoxPolyhedron.SelectedIndexChanged += new System.EventHandler(this.comboBoxPolyhedron_SelectedIndexChanged);
             // 
             // radioButton2
             // 
@@ -76,8 +176,20 @@
             this.radioButton2.UseVisualStyleBackColor = true;
             this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
+            // radioButton1
+            // 
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Location = new System.Drawing.Point(7, 20);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(92, 17);
+            this.radioButton1.TabIndex = 0;
+            this.radioButton1.Text = "Перспектива";
+            this.radioButton1.UseVisualStyleBackColor = true;
+            this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            // 
             // Form1
             // 
+            this.AcceptButton = this.applyButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(944, 601);
@@ -98,6 +210,15 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.ComboBox comboBoxPolyhedron;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBoxScale;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBoxOutput;
+        private System.Windows.Forms.Button applyButton;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox comboBoxAthenian;
     }
 }
 
