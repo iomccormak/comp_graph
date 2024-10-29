@@ -30,6 +30,8 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.reflectTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.translationTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.applyButton = new System.Windows.Forms.Button();
@@ -43,8 +45,6 @@
             this.comboBoxPolyhedron = new System.Windows.Forms.ComboBox();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.label6 = new System.Windows.Forms.Label();
-            this.reflectTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -79,6 +79,25 @@
             this.groupBox1.Size = new System.Drawing.Size(167, 576);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
+            // 
+            // reflectTextBox
+            // 
+            this.reflectTextBox.Location = new System.Drawing.Point(6, 281);
+            this.reflectTextBox.Name = "reflectTextBox";
+            this.reflectTextBox.Size = new System.Drawing.Size(149, 20);
+            this.reflectTextBox.TabIndex = 14;
+            this.reflectTextBox.Text = "XY";
+            this.reflectTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.reflectTextBox.TextChanged += new System.EventHandler(this.textBoxReflection_TextChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 265);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(125, 13);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "Отражение (XY/XZ/YZ)";
             // 
             // translationTextBox
             // 
@@ -186,7 +205,8 @@
             "Гексаэдр",
             "Октаэдр",
             "Икосаэдр",
-            "Додекаэдр"});
+            "Додекаэдр",
+            "Параллелепипед"});
             this.comboBoxPolyhedron.Location = new System.Drawing.Point(6, 85);
             this.comboBoxPolyhedron.Name = "comboBoxPolyhedron";
             this.comboBoxPolyhedron.Size = new System.Drawing.Size(150, 23);
@@ -214,25 +234,6 @@
             this.radioButton1.Text = "Перспектива";
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 265);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(125, 13);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "Отражение (XY/XZ/YZ)";
-            // 
-            // reflectTextBox
-            // 
-            this.reflectTextBox.Location = new System.Drawing.Point(7, 282);
-            this.reflectTextBox.Name = "reflectTextBox";
-            this.reflectTextBox.Size = new System.Drawing.Size(149, 20);
-            this.reflectTextBox.TabIndex = 14;
-            this.reflectTextBox.Text = "XY";
-            this.reflectTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.reflectTextBox.TextChanged += new System.EventHandler(this.textBoxReflection_TextChanged);
             // 
             // Form1
             // 
