@@ -43,6 +43,8 @@
             this.comboBoxPolyhedron = new System.Windows.Forms.ComboBox();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.label6 = new System.Windows.Forms.Label();
+            this.reflectTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -57,6 +59,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.reflectTextBox);
+            this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.translationTextBox);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.applyButton);
@@ -78,7 +82,7 @@
             // 
             // translationTextBox
             // 
-            this.translationTextBox.Location = new System.Drawing.Point(6, 247);
+            this.translationTextBox.Location = new System.Drawing.Point(6, 242);
             this.translationTextBox.Name = "translationTextBox";
             this.translationTextBox.Size = new System.Drawing.Size(150, 20);
             this.translationTextBox.TabIndex = 12;
@@ -89,7 +93,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 230);
+            this.label5.Location = new System.Drawing.Point(6, 226);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(97, 13);
             this.label5.TabIndex = 11;
@@ -129,7 +133,8 @@
             this.comboBoxAthenian.Items.AddRange(new object[] {
             "Смещение",
             "Поворот",
-            "Масштаб"});
+            "Масштаб",
+            "Отражение"});
             this.comboBoxAthenian.Location = new System.Drawing.Point(6, 127);
             this.comboBoxAthenian.Name = "comboBoxAthenian";
             this.comboBoxAthenian.Size = new System.Drawing.Size(150, 21);
@@ -210,6 +215,25 @@
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 265);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(125, 13);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "Отражение (XY/XZ/YZ)";
+            // 
+            // reflectTextBox
+            // 
+            this.reflectTextBox.Location = new System.Drawing.Point(7, 282);
+            this.reflectTextBox.Name = "reflectTextBox";
+            this.reflectTextBox.Size = new System.Drawing.Size(149, 20);
+            this.reflectTextBox.TabIndex = 14;
+            this.reflectTextBox.Text = "XY";
+            this.reflectTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.reflectTextBox.TextChanged += new System.EventHandler(this.textBoxReflection_TextChanged);
+            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
@@ -244,6 +268,8 @@
         private System.Windows.Forms.ComboBox comboBoxAthenian;
         private System.Windows.Forms.TextBox translationTextBox;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox reflectTextBox;
+        private System.Windows.Forms.Label label6;
     }
 }
 

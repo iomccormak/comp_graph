@@ -25,6 +25,7 @@ namespace lab6
         {
             None,
             Translation,
+            Reflection,
             ScaleRelativeCenter,
         }
 
@@ -197,6 +198,53 @@ namespace lab6
             DrawPolyhedron();
         }
 
+        private void Reflect(string plane)
+        {
+            float[][] reflectionMatrix;
+
+            switch (plane)
+            {
+                case "XY":
+                    reflectionMatrix = new float[4][]
+                    {
+                new float[4] { 1, 0,  0, 0 },
+                new float[4] { 0, 1,  0, 0 },
+                new float[4] { 0, 0, -1, 0 },
+                new float[4] { 0, 0,  0, 1 },
+                    };
+                    break;
+                case "XZ":
+                    reflectionMatrix = new float[4][]
+                    {
+                new float[4] { 1,  0, 0, 0 },
+                new float[4] { 0, -1, 0, 0 },
+                new float[4] { 0,  0, 1, 0 },
+                new float[4] { 0,  0, 0, 1 },
+                    };
+                    break;
+                case "YZ":
+                    reflectionMatrix = new float[4][]
+                    {
+                new float[4] { -1, 0, 0, 0 },
+                new float[4] { 0,  1, 0, 0 },
+                new float[4] { 0,  0, 1, 0 },
+                new float[4] { 0,  0, 0, 1 },
+                    };
+                    break;
+                default:
+                    textBoxOutput.Text = "Неправильная плоскость для отражения.";
+                    return;
+            }
+
+            foreach (var point in _polyhedron.points)
+            {
+                point.ApplyMatrix(reflectionMatrix);
+            }
+
+            DrawPolyhedron();
+        }
+
+
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             DrawPolyhedron();
@@ -260,6 +308,9 @@ namespace lab6
                     string[] parametrs = translationTextBox.Text.Split();
                     Translation(float.Parse(parametrs[0]), float.Parse(parametrs[1]), float.Parse(parametrs[2]));
                     break;
+                case Mode.Reflection:
+                    Reflect(reflectTextBox.Text.Trim().ToUpper());
+                    break;
             }
         }
 
@@ -276,6 +327,10 @@ namespace lab6
                     break;
                 case 2:
                     _mode = Mode.ScaleRelativeCenter;
+                    applyButton.Enabled = true;
+                    break;
+                case 3:
+                    _mode = Mode.Reflection;
                     applyButton.Enabled = true;
                     break;
             }
@@ -305,7 +360,24 @@ namespace lab6
             }
         }
 
+        private void textBoxReflection_TextChanged(object sender, EventArgs e)
+        {
+            var text = reflectTextBox.Text.Trim().ToUpper();
 
+            if (text == "XY" || text == "XZ" || text == "YZ")
+            {
+                if (comboBoxAthenian.SelectedIndex != -1)
+                {
+                    applyButton.Enabled = true;
+                }
+                textBoxOutput.Text = string.Empty;
+            }
+            else
+            {
+                applyButton.Enabled = false;
+                textBoxOutput.Text = "Введите значение координатной плоскости (XY/XZ/YZ/xy/xz/yz).";
+            }
+        }
     }
 
     public class Point3D
