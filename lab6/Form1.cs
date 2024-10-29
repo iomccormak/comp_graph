@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace lab6
 {    
@@ -23,6 +24,7 @@ namespace lab6
         enum Mode
         {
             None,
+            Translation,
             ScaleRelativeCenter,
         }
 
@@ -177,6 +179,24 @@ namespace lab6
             DrawPolyhedron();
         }
 
+        private void Translation(float tx, float ty, float tz)
+        {
+            float[][] MatrixTranslation = new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { 0, 0, 1, 0 },
+                new float[4] { tx, ty, tz, 1 },
+            };
+
+            foreach (var point in _polyhedron.points)
+            {
+                point.ApplyMatrix(MatrixTranslation);
+            }
+
+            DrawPolyhedron();
+        }
+
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             DrawPolyhedron();
@@ -236,6 +256,10 @@ namespace lab6
                 case Mode.ScaleRelativeCenter:
                     Scale(float.Parse(textBoxScale.Text));
                     break;
+                case Mode.Translation:
+                    string[] parametrs = translationTextBox.Text.Split();
+                    Translation(float.Parse(parametrs[0]), float.Parse(parametrs[1]), float.Parse(parametrs[2]));
+                    break;
             }
         }
 
@@ -244,7 +268,8 @@ namespace lab6
             switch (comboBoxAthenian.SelectedIndex)
             {
                 case 0:
-                    applyButton.Enabled = false;
+                    _mode = Mode.Translation;
+                    applyButton.Enabled = true;
                     break;
                 case 1:
                     applyButton.Enabled = false;
@@ -255,6 +280,32 @@ namespace lab6
                     break;
             }
         }
+
+        private void textBoxTranslation_TextChanged(object sender, EventArgs e)
+        {
+            var parts = translationTextBox.Text.Split()
+                                               .Select(part => part.Trim())
+                                               .ToArray();
+
+            if (parts.Length == 3 &&
+                float.TryParse(parts[0], out float tx) &&
+                float.TryParse(parts[1], out float ty) &&
+                float.TryParse(parts[2], out float tz))
+            {
+                if (comboBoxAthenian.SelectedIndex != -1)
+                {
+                    applyButton.Enabled = true;
+                }
+                textBoxOutput.Text = string.Empty;
+            }
+            else
+            {
+                applyButton.Enabled = false;
+                textBoxOutput.Text = "Введите три значения смещения, разделенные пробелом.";
+            }
+        }
+
+
     }
 
     public class Point3D

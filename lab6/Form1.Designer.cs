@@ -30,6 +30,8 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.translationTextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.applyButton = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -55,6 +57,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.translationTextBox);
+            this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.applyButton);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label3);
@@ -71,6 +75,25 @@
             this.groupBox1.Size = new System.Drawing.Size(167, 576);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
+            // 
+            // translationTextBox
+            // 
+            this.translationTextBox.Location = new System.Drawing.Point(6, 247);
+            this.translationTextBox.Name = "translationTextBox";
+            this.translationTextBox.Size = new System.Drawing.Size(150, 20);
+            this.translationTextBox.TabIndex = 12;
+            this.translationTextBox.Text = "0 0 0";
+            this.translationTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.translationTextBox.TextChanged += new System.EventHandler(this.textBoxTranslation_TextChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(7, 230);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(97, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Смещение (x, y, z)";
             // 
             // applyButton
             // 
@@ -219,6 +242,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox comboBoxAthenian;
+        private System.Windows.Forms.TextBox translationTextBox;
+        private System.Windows.Forms.Label label5;
     }
 }
 
