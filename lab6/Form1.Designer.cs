@@ -45,20 +45,29 @@
             this.comboBoxPolyhedron = new System.Windows.Forms.ComboBox();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.labelRotateAxis = new System.Windows.Forms.Label();
+            this.textBoxRotateAxis = new System.Windows.Forms.TextBox();
+            this.labelRotateLine = new System.Windows.Forms.Label();
+            this.textBoxRotateLine = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(186, 13);
+            this.pictureBox1.Location = new System.Drawing.Point(248, 16);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(746, 576);
+            this.pictureBox1.Size = new System.Drawing.Size(995, 709);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.textBoxRotateLine);
+            this.groupBox1.Controls.Add(this.labelRotateLine);
+            this.groupBox1.Controls.Add(this.textBoxRotateAxis);
+            this.groupBox1.Controls.Add(this.labelRotateAxis);
             this.groupBox1.Controls.Add(this.reflectTextBox);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.translationTextBox);
@@ -74,17 +83,20 @@
             this.groupBox1.Controls.Add(this.comboBoxPolyhedron);
             this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.radioButton1);
-            this.groupBox1.Location = new System.Drawing.Point(13, 13);
+            this.groupBox1.Location = new System.Drawing.Point(17, 16);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(167, 576);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(223, 709);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
             // reflectTextBox
             // 
-            this.reflectTextBox.Location = new System.Drawing.Point(6, 281);
+            this.reflectTextBox.Location = new System.Drawing.Point(8, 346);
+            this.reflectTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.reflectTextBox.Name = "reflectTextBox";
-            this.reflectTextBox.Size = new System.Drawing.Size(149, 20);
+            this.reflectTextBox.Size = new System.Drawing.Size(197, 22);
             this.reflectTextBox.TabIndex = 14;
             this.reflectTextBox.Text = "XY";
             this.reflectTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -93,17 +105,19 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 265);
+            this.label6.Location = new System.Drawing.Point(8, 326);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(125, 13);
+            this.label6.Size = new System.Drawing.Size(150, 16);
             this.label6.TabIndex = 13;
             this.label6.Text = "Отражение (XY/XZ/YZ)";
             // 
             // translationTextBox
             // 
-            this.translationTextBox.Location = new System.Drawing.Point(6, 242);
+            this.translationTextBox.Location = new System.Drawing.Point(8, 298);
+            this.translationTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.translationTextBox.Name = "translationTextBox";
-            this.translationTextBox.Size = new System.Drawing.Size(150, 20);
+            this.translationTextBox.Size = new System.Drawing.Size(199, 22);
             this.translationTextBox.TabIndex = 12;
             this.translationTextBox.Text = "0 0 0";
             this.translationTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -112,17 +126,19 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 226);
+            this.label5.Location = new System.Drawing.Point(8, 278);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(97, 13);
+            this.label5.Size = new System.Drawing.Size(116, 16);
             this.label5.TabIndex = 11;
             this.label5.Text = "Смещение (x, y, z)";
             // 
             // applyButton
             // 
-            this.applyButton.Location = new System.Drawing.Point(6, 155);
+            this.applyButton.Location = new System.Drawing.Point(8, 191);
+            this.applyButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.applyButton.Name = "applyButton";
-            this.applyButton.Size = new System.Drawing.Size(150, 23);
+            this.applyButton.Size = new System.Drawing.Size(200, 28);
             this.applyButton.TabIndex = 10;
             this.applyButton.Text = "Применить";
             this.applyButton.UseVisualStyleBackColor = true;
@@ -131,18 +147,20 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 66);
+            this.label4.Location = new System.Drawing.Point(16, 81);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(80, 13);
+            this.label4.Size = new System.Drawing.Size(101, 16);
             this.label4.TabIndex = 9;
             this.label4.Text = "Многогранник";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 111);
+            this.label3.Location = new System.Drawing.Point(12, 137);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(152, 13);
+            this.label3.Size = new System.Drawing.Size(196, 16);
             this.label3.TabIndex = 8;
             this.label3.Text = "Аффинные  преобразования";
             // 
@@ -153,44 +171,50 @@
             "Смещение",
             "Поворот",
             "Масштаб",
-            "Отражение"});
-            this.comboBoxAthenian.Location = new System.Drawing.Point(6, 127);
+            "Отражение",
+            "Вращение"});
+            this.comboBoxAthenian.Location = new System.Drawing.Point(8, 156);
+            this.comboBoxAthenian.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.comboBoxAthenian.Name = "comboBoxAthenian";
-            this.comboBoxAthenian.Size = new System.Drawing.Size(150, 21);
+            this.comboBoxAthenian.Size = new System.Drawing.Size(199, 24);
             this.comboBoxAthenian.TabIndex = 7;
             this.comboBoxAthenian.SelectedIndexChanged += new System.EventHandler(this.comboBoxAthenian_SelectedIndexChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(10, 464);
+            this.label2.Location = new System.Drawing.Point(13, 571);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(40, 13);
+            this.label2.Size = new System.Drawing.Size(49, 16);
             this.label2.TabIndex = 6;
             this.label2.Text = "Вывод";
             // 
             // textBoxOutput
             // 
-            this.textBoxOutput.Location = new System.Drawing.Point(7, 483);
+            this.textBoxOutput.Location = new System.Drawing.Point(9, 594);
+            this.textBoxOutput.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
-            this.textBoxOutput.Size = new System.Drawing.Size(149, 87);
+            this.textBoxOutput.Size = new System.Drawing.Size(197, 106);
             this.textBoxOutput.TabIndex = 5;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 187);
+            this.label1.Location = new System.Drawing.Point(8, 230);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(101, 13);
+            this.label1.Size = new System.Drawing.Size(129, 16);
             this.label1.TabIndex = 4;
             this.label1.Text = "Масштабирование";
             // 
             // textBoxScale
             // 
-            this.textBoxScale.Location = new System.Drawing.Point(6, 203);
+            this.textBoxScale.Location = new System.Drawing.Point(8, 250);
+            this.textBoxScale.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBoxScale.Name = "textBoxScale";
-            this.textBoxScale.Size = new System.Drawing.Size(150, 20);
+            this.textBoxScale.Size = new System.Drawing.Size(199, 22);
             this.textBoxScale.TabIndex = 3;
             this.textBoxScale.Text = "1";
             this.textBoxScale.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -207,18 +231,20 @@
             "Икосаэдр",
             "Додекаэдр",
             "Параллелепипед"});
-            this.comboBoxPolyhedron.Location = new System.Drawing.Point(6, 85);
+            this.comboBoxPolyhedron.Location = new System.Drawing.Point(8, 105);
+            this.comboBoxPolyhedron.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.comboBoxPolyhedron.Name = "comboBoxPolyhedron";
-            this.comboBoxPolyhedron.Size = new System.Drawing.Size(150, 23);
+            this.comboBoxPolyhedron.Size = new System.Drawing.Size(199, 26);
             this.comboBoxPolyhedron.TabIndex = 2;
             this.comboBoxPolyhedron.SelectedIndexChanged += new System.EventHandler(this.comboBoxPolyhedron_SelectedIndexChanged);
             // 
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(7, 44);
+            this.radioButton2.Location = new System.Drawing.Point(9, 54);
+            this.radioButton2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(99, 17);
+            this.radioButton2.Size = new System.Drawing.Size(122, 20);
             this.radioButton2.TabIndex = 1;
             this.radioButton2.Text = "Аксонометрия";
             this.radioButton2.UseVisualStyleBackColor = true;
@@ -227,22 +253,64 @@
             // radioButton1
             // 
             this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(7, 20);
+            this.radioButton1.Location = new System.Drawing.Point(9, 25);
+            this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(92, 17);
+            this.radioButton1.Size = new System.Drawing.Size(115, 20);
             this.radioButton1.TabIndex = 0;
             this.radioButton1.Text = "Перспектива";
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
             // 
+            // labelRotateAxis
+            // 
+            this.labelRotateAxis.AutoSize = true;
+            this.labelRotateAxis.Location = new System.Drawing.Point(8, 382);
+            this.labelRotateAxis.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelRotateAxis.Name = "labelRotateAxis";
+            this.labelRotateAxis.Size = new System.Drawing.Size(147, 16);
+            this.labelRotateAxis.TabIndex = 15;
+            this.labelRotateAxis.Text = "Вращение вокруг оси";
+            // 
+            // textBoxRotateAxis
+            // 
+            this.textBoxRotateAxis.Location = new System.Drawing.Point(8, 402);
+            this.textBoxRotateAxis.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxRotateAxis.Name = "textBoxRotateAxis";
+            this.textBoxRotateAxis.Size = new System.Drawing.Size(197, 22);
+            this.textBoxRotateAxis.TabIndex = 16;
+            this.textBoxRotateAxis.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBoxRotateAxis.TextChanged += new System.EventHandler(this.textBoxRotateAxis_TextChanged);
+            // 
+            // labelRotateLine
+            // 
+            this.labelRotateLine.AutoSize = true;
+            this.labelRotateLine.Location = new System.Drawing.Point(8, 437);
+            this.labelRotateLine.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelRotateLine.Name = "labelRotateLine";
+            this.labelRotateLine.Size = new System.Drawing.Size(163, 16);
+            this.labelRotateLine.TabIndex = 17;
+            this.labelRotateLine.Text = "Поворот вокруг прямой";
+            // 
+            // textBoxRotateLine
+            // 
+            this.textBoxRotateLine.Location = new System.Drawing.Point(8, 457);
+            this.textBoxRotateLine.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxRotateLine.Name = "textBoxRotateLine";
+            this.textBoxRotateLine.Size = new System.Drawing.Size(197, 22);
+            this.textBoxRotateLine.TabIndex = 18;
+            this.textBoxRotateLine.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBoxRotateLine.TextChanged += new System.EventHandler(this.textBoxRotateLine_TextChanged);
+            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(944, 601);
+            this.ClientSize = new System.Drawing.Size(1259, 740);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -271,6 +339,10 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox reflectTextBox;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBoxRotateLine;
+        private System.Windows.Forms.Label labelRotateLine;
+        private System.Windows.Forms.TextBox textBoxRotateAxis;
+        private System.Windows.Forms.Label labelRotateAxis;
     }
 }
 

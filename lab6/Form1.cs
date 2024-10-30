@@ -27,6 +27,8 @@ namespace lab6
             Translation,
             Reflection,
             ScaleRelativeCenter,
+            RotateAxis,
+            RotateLine,
         }
 
         public Form1()
@@ -180,6 +182,212 @@ namespace lab6
             DrawPolyhedron();
         }
 
+        public void RotateLine(string input)
+        {
+            input = input.Trim();
+            var parts = input.Split(' ');
+            float angle = float.Parse(parts[6]);
+            Point3D a = new Point3D(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
+            Point3D b = new Point3D(float.Parse(parts[3]), float.Parse(parts[4]), float.Parse(parts[5]));
+
+            /*b.X -= a.X;
+            b.Y -= a.Y;
+            b.Z -= a.Z;
+
+            b.X /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Y /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Z /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+
+            float l = b.X;
+            float m = b.Y;
+            float n = b.Z;
+
+            angle = (float)((angle / 180D) * Math.PI);
+
+            float sin = (float)Math.Sin(angle);
+            float cos = (float)Math.Cos(angle);
+
+            float[][] RotateMatrix = new float[4][]
+            {
+                    new float[4] { l*l + cos*(1 - l*l), l*(1 - cos)*m + n * sin, l*(1 - cos)*n - m * sin, 0},
+                    new float[4] { l*(1 - cos)*m - n * sin, m*m + cos*(1 - m*m), m*(1 - cos)*n + l*sin, 0 },
+                    new float[4] { l*(1 - cos)*n + m * sin, m*(1 - cos)*n - l*sin, n*n + cos*(1 - n*n), 0 },
+                    new float[4] { 0,                       0,                     0,                   1 }
+            };*/
+
+            b.X -= a.X;
+            b.Y -= a.Y;
+            b.Z -= a.Z;
+
+            b.X /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Y /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Z /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+
+            Point3D dir = new Point3D(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
+            float d = (float)Math.Sqrt(dir.Y * dir.Y + dir.Z * dir.Z);
+
+            float cosPsi = dir.Z / d;
+            float sinPsi = dir.Y / d;
+            float[][] Rx = new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, cosPsi, sinPsi, 0 },
+                new float[4] { 0, -sinPsi, cosPsi, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(Rx, p)).ToList();
+
+            float cosTheta = dir.X / (float)Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y + dir.Z * dir.Z);
+            float sinTheta = -d / (float)Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y + dir.Z * dir.Z);
+            float[][] Ry = new float[4][]
+            {
+                new float[4] { cosTheta, 0, -sinTheta, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { sinTheta, 0, cosTheta, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(Ry, p)).ToList();
+
+            float phi = (float)(angle * Math.PI / 180);
+            float cosPhi = (float)Math.Cos(phi);
+            float sinPhi = (float)Math.Sin(phi);
+            float[][] Rz = new float[4][]
+            {
+                new float[4] { cosPhi, sinPhi, 0, 0 },
+                new float[4] { -sinPhi, cosPhi, 0, 0 },
+                new float[4] { 0, 0, 1, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(Rz, p)).ToList();
+
+            float[][] RyInverse = new float[4][]
+            {
+                new float[4] { cosTheta, 0, sinTheta, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { -sinTheta, 0, cosTheta, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(RyInverse, p)).ToList();
+
+            float[][] RxInverse = new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, cosPsi, -sinPsi, 0 },
+                new float[4] { 0, sinPsi, cosPsi, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(RxInverse, p)).ToList();
+
+            DrawPolyhedron();
+        }
+
+        private new void RotateAxis(string input)
+        {
+            var parts = input.Split(' ');
+            string axis = parts[0];
+            float angle = float.Parse(parts[1]);
+
+            if (axis == "x")
+            {
+                XYZRotate(angle, CreateXRotationMatrix);
+            }
+            else if (axis == "y")
+            {
+                XYZRotate(angle, CreateYRotationMatrix);
+            }
+            else if (axis == "z")
+            {
+                XYZRotate(angle, CreateZRotationMatrix);
+            }
+
+            DrawPolyhedron();
+        }
+
+        private void XYZRotate(float angle, Func<float, float[][]> createRotationMatrix)
+        {
+            Point3D center = CalculateCenter(_polyhedron.points);
+            _polyhedron.points = _polyhedron.points
+                .Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z))
+                .Select(p => XYZRotatePoint(p, createRotationMatrix(angle)))
+                .Select(p => TranslatePoint(p, center.X, center.Y, center.Z))
+                .ToList();
+        }
+
+        private Point3D CalculateCenter(List<Point3D> points)
+        {
+            float x = points.Average(p => p.X);
+            float y = points.Average(p => p.Y);
+            float z = points.Average(p => p.Z);
+            return new Point3D(x, y, z);
+        }
+
+        private Point3D XYZRotatePoint(Point3D p, float[][] rotationMatrix)
+        {
+            return MultiplyMatrix(rotationMatrix, p);
+        }
+
+        private float[][] CreateXRotationMatrix(float angle)
+        {
+            float rad = (float)(angle * Math.PI / 180);
+            return new float[][]
+            {
+                new float[] { 1, 0, 0, 0 },
+                new float[] { 0, (float)Math.Cos(rad), (float)Math.Sin(rad), 0 },
+                new float[] { 0, -(float)Math.Sin(rad), (float)Math.Cos(rad), 0 },
+                new float[] { 0, 0, 0, 1 }
+            };
+        }
+
+        private float[][] CreateYRotationMatrix(float angle)
+        {
+            float rad = (float)(angle * Math.PI / 180);
+            return new float[][]
+            {
+                new float[] { (float)Math.Cos(rad), 0, -(float)Math.Sin(rad), 0 },
+                new float[] { 0, 1, 0, 0 },
+                new float[] { (float)Math.Sin(rad), 0, (float)Math.Cos(rad), 0 },
+                new float[] { 0, 0, 0, 1 }
+            };
+        }
+
+        private float[][] CreateZRotationMatrix(float angle)
+        {
+            float rad = (float)(angle * Math.PI / 180);
+            return new float[][]
+            {
+                new float[] { (float)Math.Cos(rad), (float)Math.Sin(rad), 0, 0 },
+                new float[] { -(float)Math.Sin(rad), (float)Math.Cos(rad), 0, 0 },
+                new float[] { 0, 0, 1, 0 },
+                new float[] { 0, 0, 0, 1 }
+            };
+        }
+
+
+        public Point3D TranslatePoint(Point3D p, float dx, float dy, float dz)
+        {
+            float[][] TranslationMatrix = new float[4][]
+            {
+                    new float[4] { 1,  0,  0,  0 },
+                    new float[4] { 0,  1,  0,  0 },
+                    new float[4] { 0,  0,  1,  0 },
+                    new float[4] { dx, dy, dz, 1 }
+            };
+
+            return MultiplyMatrix(TranslationMatrix, p);
+        }
+
+        public Point3D MultiplyMatrix(float[][] matrix, Point3D p)
+        {
+            float[] tempVector = new float[3] { p.X, p.Y, p.Z };
+            float[] resultVector = new float[3];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                    resultVector[i] += matrix[j][i] * tempVector[j];
+            }
+            return new Point3D(resultVector[0], resultVector[1], resultVector[2]);
+        }
+
         private void Translation(float tx, float ty, float tz)
         {
             float[][] MatrixTranslation = new float[4][]
@@ -297,6 +505,12 @@ namespace lab6
                 case Mode.Reflection:
                     Reflect(reflectTextBox.Text.Trim().ToUpper());
                     break;
+                case Mode.RotateAxis:
+                    RotateAxis(textBoxRotateAxis.Text);
+                    break;
+                case Mode.RotateLine:
+                    RotateLine(textBoxRotateLine.Text);
+                    break;
             }
         }
 
@@ -309,7 +523,8 @@ namespace lab6
                     applyButton.Enabled = true;
                     break;
                 case 1:
-                    applyButton.Enabled = false;
+                    _mode = Mode.RotateLine;
+                    applyButton.Enabled = true;
                     break;
                 case 2:
                     _mode = Mode.ScaleRelativeCenter;
@@ -317,6 +532,10 @@ namespace lab6
                     break;
                 case 3:
                     _mode = Mode.Reflection;
+                    applyButton.Enabled = true;
+                    break;
+                case 4:
+                    _mode = Mode.RotateAxis;
                     applyButton.Enabled = true;
                     break;
             }
@@ -378,6 +597,42 @@ namespace lab6
             {
                 applyButton.Enabled = false;
                 textBoxOutput.Text = "Введите значение координатной плоскости (XY/XZ/YZ/xy/xz/yz).";
+            }
+        }
+
+        private void textBoxRotateAxis_TextChanged(object sender, EventArgs e)
+        {
+            var parts = textBoxRotateAxis.Text.Split().Select(part => part.Trim())
+                                               .ToArray();
+
+            if (parts.Length == 2 &&
+                float.TryParse(parts[1], out float angle))
+            {
+                applyButton.Enabled = comboBoxAthenian.SelectedIndex != -1;
+                textBoxOutput.Text = string.Empty;
+            }
+            else
+            {
+                applyButton.Enabled = false;
+                textBoxOutput.Text = "Некорректный ввод оси и угла. Формат: 'ось угол' (например, 'y 4').";
+            }
+
+        }
+
+        private void textBoxRotateLine_TextChanged(object sender, EventArgs e)
+        {
+            var input = textBoxRotateLine.Text.Trim();
+            var parts = input.Split(' ');
+
+            if (parts.Length == 7 && parts.All(part => float.TryParse(part, out _)))
+            {
+                applyButton.Enabled = comboBoxAthenian.SelectedIndex != -1;
+                textBoxOutput.Text = string.Empty;
+            }
+            else
+            {
+                applyButton.Enabled = false;
+                textBoxOutput.Text = "Некорректный ввод. Формат: 'x1 y1 z1 x2 y2 z2 угол' (например, '10 10 10 40 40 40 45').";
             }
         }
     }
