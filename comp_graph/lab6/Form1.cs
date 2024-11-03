@@ -110,25 +110,6 @@ namespace lab6
                             );
                 }
             }
-
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(1080, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 1080, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, 1080) };
-            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
-            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
-            for (int i = 0; i < axeses.Count; i++)
-            {
-                var axes = axeses[i];
-                axes[0].ApplyMatrix(MatrixPerspective);
-                axes[1].ApplyMatrix(MatrixPerspective);
-
-                _graphics.DrawLine(
-                                new Pen(colors[i], 2),
-                                axes[0].X / axes[0].W + offsetX, axes[0].Y / axes[0].W + offsetY,
-                                axes[1].X / axes[1].W + offsetX, axes[1].Y / axes[1].W + offsetY
-                                );
-            }
-
         }
 
         private void DrawAxonometry()
@@ -180,25 +161,7 @@ namespace lab6
                             p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
                             );
                 }
-            }
-
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(1080, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 1080, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, 1080) };
-            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
-            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
-            for (int i = 0; i < axeses.Count; i++)
-            {
-                var axes = axeses[i];
-                axes[0].ApplyMatrix(MatrixAxonometry);
-                axes[1].ApplyMatrix(MatrixAxonometry);
-
-                _graphics.DrawLine(
-                                new Pen(colors[i], 2),
-                                axes[0].X / axes[0].W + offsetX, axes[0].Y / axes[0].W + offsetY,
-                                axes[1].X / axes[1].W + offsetX, axes[1].Y / axes[1].W + offsetY
-                                );
-            }
+            }            
         }
 
         private new void Scale(float k)
@@ -227,26 +190,13 @@ namespace lab6
             Point3D a = new Point3D(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
             Point3D b = new Point3D(float.Parse(parts[3]), float.Parse(parts[4]), float.Parse(parts[5]));
 
-            b.X -= a.X;
+            /*b.X -= a.X;
             b.Y -= a.Y;
             b.Z -= a.Z;
 
-            float length = (float)Math.Sqrt(b.X * b.X + b.Y * b.Y + b.Z * b.Z);
-            b.X /= length;
-            b.Y /= length;
-            b.Z /= length;
-
-            /* float angleRadians = angle * (float)(Math.PI / 180.0);
-             float cosPhi = (float)Math.Cos(angleRadians);
-             float sinPhi = (float)Math.Sin(angleRadians);
-
-             float[][] rotationMatrix = new float[4][]
-             {
-         new float[4] { cosPhi + b.X * b.X * (1 - cosPhi),       b.X * b.Y * (1 - cosPhi) - b.Z * sinPhi, b.X * b.Z * (1 - cosPhi) + b.Y * sinPhi, 0 },
-         new float[4] { b.Y * b.X * (1 - cosPhi) + b.Z * sinPhi, cosPhi + b.Y * b.Y * (1 - cosPhi),       b.Y * b.Z * (1 - cosPhi) - b.X * sinPhi, 0 },
-         new float[4] { b.Z * b.X * (1 - cosPhi) - b.Y * sinPhi, b.Z * b.Y * (1 - cosPhi) + b.X * sinPhi, cosPhi + b.Z * b.Z * (1 - cosPhi),       0 },
-         new float[4] { 0, 0, 0, 1 }
-             };*/
+            b.X /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Y /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Z /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
 
             float l = b.X;
             float m = b.Y;
@@ -257,15 +207,76 @@ namespace lab6
             float sin = (float)Math.Sin(angle);
             float cos = (float)Math.Cos(angle);
 
-            float[][] rotationMatrix = new float[4][]
+            float[][] RotateMatrix = new float[4][]
             {
                     new float[4] { l*l + cos*(1 - l*l), l*(1 - cos)*m + n * sin, l*(1 - cos)*n - m * sin, 0},
                     new float[4] { l*(1 - cos)*m - n * sin, m*m + cos*(1 - m*m), m*(1 - cos)*n + l*sin, 0 },
                     new float[4] { l*(1 - cos)*n + m * sin, m*(1 - cos)*n - l*sin, n*n + cos*(1 - n*n), 0 },
                     new float[4] { 0,                       0,                     0,                   1 }
-            };
+            };*/
 
-            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(rotationMatrix, p)).ToList();
+            b.X -= a.X;
+            b.Y -= a.Y;
+            b.Z -= a.Z;
+
+            b.X /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Y /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+            b.Z /= (float)Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2) + Math.Pow(b.Z, 2));
+
+            Point3D dir = new Point3D(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
+            float d = (float)Math.Sqrt(dir.Y * dir.Y + dir.Z * dir.Z);
+
+            float cosPsi = dir.Z / d;
+            float sinPsi = dir.Y / d;
+            float[][] Rx = new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, cosPsi, sinPsi, 0 },
+                new float[4] { 0, -sinPsi, cosPsi, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(Rx, p)).ToList();
+
+            float cosTheta = dir.X / (float)Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y + dir.Z * dir.Z);
+            float sinTheta = -d / (float)Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y + dir.Z * dir.Z);
+            float[][] Ry = new float[4][]
+            {
+                new float[4] { cosTheta, 0, -sinTheta, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { sinTheta, 0, cosTheta, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(Ry, p)).ToList();
+
+            float phi = (float)(angle * Math.PI / 180);
+            float cosPhi = (float)Math.Cos(phi);
+            float sinPhi = (float)Math.Sin(phi);
+            float[][] Rz = new float[4][]
+            {
+                new float[4] { cosPhi, sinPhi, 0, 0 },
+                new float[4] { -sinPhi, cosPhi, 0, 0 },
+                new float[4] { 0, 0, 1, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(Rz, p)).ToList();
+
+            float[][] RyInverse = new float[4][]
+            {
+                new float[4] { cosTheta, 0, sinTheta, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { -sinTheta, 0, cosTheta, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(RyInverse, p)).ToList();
+
+            float[][] RxInverse = new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, cosPsi, -sinPsi, 0 },
+                new float[4] { 0, sinPsi, cosPsi, 0 },
+                new float[4] { 0, 0, 0, 1 }
+            };
+            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(RxInverse, p)).ToList();
 
             DrawPolyhedron();
         }
@@ -435,7 +446,6 @@ namespace lab6
 
             foreach (var point in _polyhedron.points)
             {
-
                 point.ApplyMatrix(reflectionMatrix);
             }
 
@@ -621,7 +631,6 @@ namespace lab6
             }
             else
             {
-
                 applyButton.Enabled = false;
                 textBoxOutput.Text = "Некорректный ввод. Формат: 'x1 y1 z1 x2 y2 z2 угол' (например, '10 10 10 40 40 40 45').";
             }
@@ -677,12 +686,21 @@ namespace lab6
         public const int EDGE_LENGTH = 150;
         public List<Point3D> points;
         public List<Face> faces;
+        public List<Tuple<int, int>> edges;
 
         public Polyhedron() 
         { 
             points = new List<Point3D>();
             faces = new List<Face>();
+            edges = new List<Tuple<int, int>>();
         }
+
+        public void AddEdge(Point3D point1, Point3D point2)
+        {
+            points.Add(point1);
+            points.Add(point2);
+            edges.Add(new Tuple<int, int>( points.Count - 2, points.Count - 1));
+        }       
     }
     public class Tetrahedron : Polyhedron
     {
