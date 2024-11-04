@@ -19,6 +19,7 @@ namespace lab6
         Bitmap _bitmap;
         Graphics _graphics;
         Polyhedron _polyhedron;
+        float[][] _modelMatrix;
         Mode _mode;
 
         enum Mode
@@ -34,6 +35,7 @@ namespace lab6
         public Form1()
         {
             InitializeComponent();
+            InitModelMatrix();
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -44,6 +46,17 @@ namespace lab6
             comboBoxPolyhedron.SelectedIndex = 4;
             _mode = Mode.None;
             DrawPolyhedron();
+        }
+
+        private void InitModelMatrix()
+        {
+            _modelMatrix = new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { 0, 0, 1, 0 },
+                new float[4] { 0, 0, 0, 1 },
+            };
         }
 
         public void DrawPolyhedron()
@@ -81,6 +94,7 @@ namespace lab6
             foreach (var point in _polyhedron.points)
             {
                 var p = point.Clone();
+                p.ApplyMatrix(_modelMatrix);
                 p.ApplyMatrix(MatrixPerspective);
                 points.Add(p);
             }
@@ -152,6 +166,7 @@ namespace lab6
             foreach (var point in _polyhedron.points)
             {
                 var p = point.Clone();
+                p.ApplyMatrix(_modelMatrix);
                 p.ApplyMatrix(MatrixAxonometry);
                 points.Add(p);
             }
@@ -201,6 +216,30 @@ namespace lab6
             }
         }
 
+        public static float[][] MultiplyMatrix(float[][] matrixA, float[][] matrixB)
+        {
+            float[][] result = new float[4][]
+            {
+                new float[4] { 0, 0, 0, 0 },
+                new float[4] { 0, 0, 0, 0 },
+                new float[4] { 0, 0, 0, 0 },
+                new float[4] { 0, 0, 0, 0 },
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        result[i][j] += matrixA[i][k] * matrixB[k][j];
+                    }
+                }
+            }
+
+            return result;
+        }
+
         private new void Scale(float k)
         {
             float[][] MatrixScale = new float[4][]
@@ -211,10 +250,7 @@ namespace lab6
                 new float[4] { 0, 0, 0, 1 },
             };
 
-            foreach (var point in _polyhedron.points)
-            {
-                point.ApplyMatrix(MatrixScale);
-            }
+            _modelMatrix = MultiplyMatrix(_modelMatrix, MatrixScale);
 
             DrawPolyhedron();
         }
@@ -236,18 +272,6 @@ namespace lab6
             b.Y /= length;
             b.Z /= length;
 
-            /* float angleRadians = angle * (float)(Math.PI / 180.0);
-             float cosPhi = (float)Math.Cos(angleRadians);
-             float sinPhi = (float)Math.Sin(angleRadians);
-
-             float[][] rotationMatrix = new float[4][]
-             {
-         new float[4] { cosPhi + b.X * b.X * (1 - cosPhi),       b.X * b.Y * (1 - cosPhi) - b.Z * sinPhi, b.X * b.Z * (1 - cosPhi) + b.Y * sinPhi, 0 },
-         new float[4] { b.Y * b.X * (1 - cosPhi) + b.Z * sinPhi, cosPhi + b.Y * b.Y * (1 - cosPhi),       b.Y * b.Z * (1 - cosPhi) - b.X * sinPhi, 0 },
-         new float[4] { b.Z * b.X * (1 - cosPhi) - b.Y * sinPhi, b.Z * b.Y * (1 - cosPhi) + b.X * sinPhi, cosPhi + b.Z * b.Z * (1 - cosPhi),       0 },
-         new float[4] { 0, 0, 0, 1 }
-             };*/
-
             float l = b.X;
             float m = b.Y;
             float n = b.Z;
@@ -265,12 +289,12 @@ namespace lab6
                     new float[4] { 0,                       0,                     0,                   1 }
             };
 
-            _polyhedron.points = _polyhedron.points.Select(p => MultiplyMatrix(rotationMatrix, p)).ToList();
+            _modelMatrix = MultiplyMatrix(_modelMatrix, rotationMatrix);
 
             DrawPolyhedron();
         }
 
-        private new void RotateAxis(string input)
+        private void RotateAxis(string input)
         {
             var parts = input.Split(' ');
             string axis = parts[0];
@@ -295,11 +319,9 @@ namespace lab6
         private void XYZRotate(float angle, Func<float, float[][]> createRotationMatrix)
         {
             Point3D center = CalculateCenter(_polyhedron.points);
-            _polyhedron.points = _polyhedron.points
-                .Select(p => TranslatePoint(p, -center.X, -center.Y, -center.Z))
-                .Select(p => XYZRotatePoint(p, createRotationMatrix(angle)))
-                .Select(p => TranslatePoint(p, center.X, center.Y, center.Z))
-                .ToList();
+            Translation(-center.X, -center.Y, -center.Z, false);
+            XYZRotatePoint(createRotationMatrix(angle));
+            Translation(center.X, center.Y, center.Z, false);
         }
 
         private Point3D CalculateCenter(List<Point3D> points)
@@ -310,9 +332,9 @@ namespace lab6
             return new Point3D(x, y, z);
         }
 
-        private Point3D XYZRotatePoint(Point3D p, float[][] rotationMatrix)
+        private void XYZRotatePoint(float[][] rotationMatrix)
         {
-            return MultiplyMatrix(rotationMatrix, p);
+            _modelMatrix = MultiplyMatrix(_modelMatrix, rotationMatrix);
         }
 
         private float[][] CreateXRotationMatrix(float angle)
@@ -352,7 +374,7 @@ namespace lab6
         }
 
 
-        public Point3D TranslatePoint(Point3D p, float dx, float dy, float dz)
+        public void Translation(float dx, float dy, float dz, bool draw = true)
         {
             float[][] TranslationMatrix = new float[4][]
             {
@@ -362,37 +384,10 @@ namespace lab6
                     new float[4] { dx, dy, dz, 1 }
             };
 
-            return MultiplyMatrix(TranslationMatrix, p);
-        }
+            _modelMatrix = MultiplyMatrix(_modelMatrix, TranslationMatrix);
 
-        public Point3D MultiplyMatrix(float[][] matrix, Point3D p)
-        {
-            float[] tempVector = new float[3] { p.X, p.Y, p.Z };
-            float[] resultVector = new float[3];
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                    resultVector[i] += matrix[j][i] * tempVector[j];
-            }
-            return new Point3D(resultVector[0], resultVector[1], resultVector[2]);
-        }
-
-        private void Translation(float tx, float ty, float tz)
-        {
-            float[][] MatrixTranslation = new float[4][]
-            {
-                new float[4] { 1, 0, 0, 0 },
-                new float[4] { 0, 1, 0, 0 },
-                new float[4] { 0, 0, 1, 0 },
-                new float[4] { tx, ty, tz, 1 },
-            };
-
-            foreach (var point in _polyhedron.points)
-            {
-                point.ApplyMatrix(MatrixTranslation);
-            }
-
-            DrawPolyhedron();
+            if (draw)
+                DrawPolyhedron();
         }
 
         private void Reflect(string plane)
@@ -433,11 +428,7 @@ namespace lab6
                     return;
             }
 
-            foreach (var point in _polyhedron.points)
-            {
-
-                point.ApplyMatrix(reflectionMatrix);
-            }
+            _modelMatrix = MultiplyMatrix(_modelMatrix, reflectionMatrix);
 
             DrawPolyhedron();
         }
@@ -625,6 +616,13 @@ namespace lab6
                 applyButton.Enabled = false;
                 textBoxOutput.Text = "Некорректный ввод. Формат: 'x1 y1 z1 x2 y2 z2 угол' (например, '10 10 10 40 40 40 45').";
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            InitModelMatrix();
+            DrawPolyhedron();
+            applyButton.Focus();
         }
     }
 
