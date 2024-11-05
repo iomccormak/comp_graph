@@ -125,9 +125,10 @@ namespace lab6
                 }
             }
 
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(1080, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 1080, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, 1080) };
+            int l = Math.Max(pictureBox1.Height, pictureBox1.Width);
+            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
+            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
+            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
             List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
             var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
             for (int i = 0; i < axeses.Count; i++)
@@ -197,9 +198,10 @@ namespace lab6
                 }
             }
 
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(1080, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 1080, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, 1080) };
+            int l = Math.Max(pictureBox1.Height, pictureBox1.Width);
+            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
+            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
+            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
             List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
             var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
             for (int i = 0; i < axeses.Count; i++)
@@ -624,6 +626,16 @@ namespace lab6
             DrawPolyhedron();
             applyButton.Focus();
         }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            pictureBox1.Width = this.ClientSize.Width - groupBox1.Width - 30;
+            pictureBox1.Height = this.ClientSize.Height - 25;
+            _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            _graphics = Graphics.FromImage(_bitmap);
+            pictureBox1.Image = _bitmap;
+            DrawPolyhedron();
+        }
     }
 
     public class Point3D
@@ -672,7 +684,7 @@ namespace lab6
 
     public class Polyhedron
     {
-        public const int EDGE_LENGTH = 150;
+        public const int EDGE_LENGTH = 200;
         public List<Point3D> points;
         public List<Face> faces;
 
@@ -800,7 +812,7 @@ namespace lab6
         public Dodecahedron()
         {
             float phi = (1 + (float)Math.Sqrt(5)) / 2;
-            float a = 100; 
+            float a = EDGE_LENGTH / 2; 
             float b = a / phi;
 
             points = new List<Point3D>()
