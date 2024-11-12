@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.resetButton = new System.Windows.Forms.Button();
             this.textBoxRotateLine = new System.Windows.Forms.TextBox();
             this.labelRotateLine = new System.Windows.Forms.Label();
@@ -52,18 +53,18 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.clearRotationFigureButton = new System.Windows.Forms.Button();
+            this.createRotationFigureButton = new System.Windows.Forms.Button();
+            this.pictureBoxRotationFigure = new System.Windows.Forms.PictureBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.textBoxRotationFigure = new System.Windows.Forms.TextBox();
+            this.radioButtonZRotationFigure = new System.Windows.Forms.RadioButton();
+            this.radioButtonYRotationFigure = new System.Windows.Forms.RadioButton();
+            this.radioButtonXRotationFigure = new System.Windows.Forms.RadioButton();
+            this.label7 = new System.Windows.Forms.Label();
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
-            this.radioButtonXRotationFigure = new System.Windows.Forms.RadioButton();
-            this.radioButtonYRotationFigure = new System.Windows.Forms.RadioButton();
-            this.radioButtonZRotationFigure = new System.Windows.Forms.RadioButton();
-            this.textBoxRotationFigure = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.pictureBoxRotationFigure = new System.Windows.Forms.PictureBox();
-            this.createRotationFigureButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -107,6 +108,21 @@
             this.groupBox1.Size = new System.Drawing.Size(167, 581);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.checkBox1.Checked = true;
+            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox1.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.checkBox1.Location = new System.Drawing.Point(83, 329);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(78, 17);
+            this.checkBox1.TabIndex = 20;
+            this.checkBox1.Text = "Auto Mode";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // resetButton
             // 
@@ -322,6 +338,7 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.clearRotationFigureButton);
             this.groupBox2.Controls.Add(this.createRotationFigureButton);
             this.groupBox2.Controls.Add(this.pictureBoxRotationFigure);
             this.groupBox2.Controls.Add(this.label8);
@@ -337,6 +354,102 @@
             this.groupBox2.Size = new System.Drawing.Size(176, 581);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
+            // 
+            // clearRotationFigureButton
+            // 
+            this.clearRotationFigureButton.Location = new System.Drawing.Point(91, 378);
+            this.clearRotationFigureButton.Name = "clearRotationFigureButton";
+            this.clearRotationFigureButton.Size = new System.Drawing.Size(79, 23);
+            this.clearRotationFigureButton.TabIndex = 10;
+            this.clearRotationFigureButton.Text = "Очистить";
+            this.clearRotationFigureButton.UseVisualStyleBackColor = true;
+            this.clearRotationFigureButton.Click += new System.EventHandler(this.clearRotationFigureButton_Click);
+            // 
+            // createRotationFigureButton
+            // 
+            this.createRotationFigureButton.Location = new System.Drawing.Point(7, 378);
+            this.createRotationFigureButton.Name = "createRotationFigureButton";
+            this.createRotationFigureButton.Size = new System.Drawing.Size(79, 23);
+            this.createRotationFigureButton.TabIndex = 9;
+            this.createRotationFigureButton.Text = "Создать";
+            this.createRotationFigureButton.UseVisualStyleBackColor = true;
+            this.createRotationFigureButton.Click += new System.EventHandler(this.createRotationFigureButton_Click);
+            // 
+            // pictureBoxRotationFigure
+            // 
+            this.pictureBoxRotationFigure.Location = new System.Drawing.Point(7, 407);
+            this.pictureBoxRotationFigure.Name = "pictureBoxRotationFigure";
+            this.pictureBoxRotationFigure.Size = new System.Drawing.Size(163, 153);
+            this.pictureBoxRotationFigure.TabIndex = 8;
+            this.pictureBoxRotationFigure.TabStop = false;
+            this.pictureBoxRotationFigure.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxRotationFigure_Paint);
+            this.pictureBoxRotationFigure.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBoxRotationFigure_MouseDown);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(8, 333);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(123, 13);
+            this.label8.TabIndex = 7;
+            this.label8.Text = "Количество разбиений";
+            // 
+            // textBoxRotationFigure
+            // 
+            this.textBoxRotationFigure.Location = new System.Drawing.Point(7, 352);
+            this.textBoxRotationFigure.Name = "textBoxRotationFigure";
+            this.textBoxRotationFigure.Size = new System.Drawing.Size(163, 20);
+            this.textBoxRotationFigure.TabIndex = 6;
+            this.textBoxRotationFigure.Text = "12";
+            this.textBoxRotationFigure.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBoxRotationFigure.TextChanged += new System.EventHandler(this.rotationFigureTextBox_TextChanged);
+            // 
+            // radioButtonZRotationFigure
+            // 
+            this.radioButtonZRotationFigure.AutoSize = true;
+            this.radioButtonZRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.radioButtonZRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(143, 294);
+            this.radioButtonZRotationFigure.Name = "radioButtonZRotationFigure";
+            this.radioButtonZRotationFigure.Size = new System.Drawing.Size(18, 30);
+            this.radioButtonZRotationFigure.TabIndex = 5;
+            this.radioButtonZRotationFigure.Text = "Z";
+            this.radioButtonZRotationFigure.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonYRotationFigure
+            // 
+            this.radioButtonYRotationFigure.AutoSize = true;
+            this.radioButtonYRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.radioButtonYRotationFigure.Checked = true;
+            this.radioButtonYRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(119, 294);
+            this.radioButtonYRotationFigure.Name = "radioButtonYRotationFigure";
+            this.radioButtonYRotationFigure.Size = new System.Drawing.Size(18, 30);
+            this.radioButtonYRotationFigure.TabIndex = 4;
+            this.radioButtonYRotationFigure.TabStop = true;
+            this.radioButtonYRotationFigure.Text = "Y";
+            this.radioButtonYRotationFigure.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonXRotationFigure
+            // 
+            this.radioButtonXRotationFigure.AutoSize = true;
+            this.radioButtonXRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.radioButtonXRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(95, 294);
+            this.radioButtonXRotationFigure.Name = "radioButtonXRotationFigure";
+            this.radioButtonXRotationFigure.Size = new System.Drawing.Size(18, 30);
+            this.radioButtonXRotationFigure.TabIndex = 3;
+            this.radioButtonXRotationFigure.Text = "X";
+            this.radioButtonXRotationFigure.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(8, 311);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(81, 13);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "Ось вращения";
             // 
             // saveButton
             // 
@@ -357,111 +470,11 @@
             this.loadButton.UseVisualStyleBackColor = true;
             this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(8, 311);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(81, 13);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "Ось вращения";
-            // 
-            // radioButtonXRotationFigure
-            // 
-            this.radioButtonXRotationFigure.AutoSize = true;
-            this.radioButtonXRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.radioButtonXRotationFigure.Checked = true;
-            this.radioButtonXRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(95, 294);
-            this.radioButtonXRotationFigure.Name = "radioButtonXRotationFigure";
-            this.radioButtonXRotationFigure.Size = new System.Drawing.Size(18, 30);
-            this.radioButtonXRotationFigure.TabIndex = 3;
-            this.radioButtonXRotationFigure.TabStop = true;
-            this.radioButtonXRotationFigure.Text = "X";
-            this.radioButtonXRotationFigure.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonYRotationFigure
-            // 
-            this.radioButtonYRotationFigure.AutoSize = true;
-            this.radioButtonYRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.radioButtonYRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(119, 294);
-            this.radioButtonYRotationFigure.Name = "radioButtonYRotationFigure";
-            this.radioButtonYRotationFigure.Size = new System.Drawing.Size(18, 30);
-            this.radioButtonYRotationFigure.TabIndex = 4;
-            this.radioButtonYRotationFigure.Text = "Y";
-            this.radioButtonYRotationFigure.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonZRotationFigure
-            // 
-            this.radioButtonZRotationFigure.AutoSize = true;
-            this.radioButtonZRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.radioButtonZRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(143, 294);
-            this.radioButtonZRotationFigure.Name = "radioButtonZRotationFigure";
-            this.radioButtonZRotationFigure.Size = new System.Drawing.Size(18, 30);
-            this.radioButtonZRotationFigure.TabIndex = 5;
-            this.radioButtonZRotationFigure.Text = "Z";
-            this.radioButtonZRotationFigure.UseVisualStyleBackColor = true;
-            // 
-            // textBoxRotationFigure
-            // 
-            this.textBoxRotationFigure.Location = new System.Drawing.Point(7, 352);
-            this.textBoxRotationFigure.Name = "textBoxRotationFigure";
-            this.textBoxRotationFigure.Size = new System.Drawing.Size(163, 20);
-            this.textBoxRotationFigure.TabIndex = 6;
-            this.textBoxRotationFigure.Text = "12";
-            this.textBoxRotationFigure.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.textBoxRotationFigure.TextChanged += new System.EventHandler(this.rotationFigureTextBox_TextChanged);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 333);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(123, 13);
-            this.label8.TabIndex = 7;
-            this.label8.Text = "Количество разбиений";
-            // 
-            // pictureBoxRotationFigure
-            // 
-            this.pictureBoxRotationFigure.Location = new System.Drawing.Point(7, 407);
-            this.pictureBoxRotationFigure.Name = "pictureBoxRotationFigure";
-            this.pictureBoxRotationFigure.Size = new System.Drawing.Size(163, 153);
-            this.pictureBoxRotationFigure.TabIndex = 8;
-            this.pictureBoxRotationFigure.TabStop = false;
-            this.pictureBoxRotationFigure.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBoxRotationFigure_MouseClick);
-            // 
-            // createRotationFigureButton
-            // 
-            this.createRotationFigureButton.Location = new System.Drawing.Point(7, 378);
-            this.createRotationFigureButton.Name = "createRotationFigureButton";
-            this.createRotationFigureButton.Size = new System.Drawing.Size(163, 23);
-            this.createRotationFigureButton.TabIndex = 9;
-            this.createRotationFigureButton.Text = "Создать фигуру вращения";
-            this.createRotationFigureButton.UseVisualStyleBackColor = true;
-            this.createRotationFigureButton.Click += new System.EventHandler(this.createRotationFigureButton_Click);
-            // 
             // timer1
             // 
             this.timer1.Enabled = true;
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checkBox1.Location = new System.Drawing.Point(83, 329);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(78, 17);
-            this.checkBox1.TabIndex = 20;
-            this.checkBox1.Text = "Auto Mode";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // Form1
             // 
@@ -524,6 +537,7 @@
         private System.Windows.Forms.PictureBox pictureBoxRotationFigure;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Button clearRotationFigureButton;
     }
 }
 

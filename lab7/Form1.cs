@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 
 namespace lab7
 {    
@@ -25,6 +26,8 @@ namespace lab7
         Polyhedron _polyhedron;
         float[][] _modelMatrix;
         Mode _mode;
+        ModeRotationFigure _modeRotationFigure;
+        List<Point> _points;
 
         enum Mode
         {
@@ -34,6 +37,13 @@ namespace lab7
             ScaleRelativeCenter,
             RotateAxis,
             RotateLine,
+        }
+
+        enum ModeRotationFigure
+        {
+            None,
+            DrawPoints,
+            JarvisMarch,
         }
 
         public Form1()
@@ -50,8 +60,12 @@ namespace lab7
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
+            checkBox1.Checked = false;
             comboBoxPolyhedron.SelectedIndex = 4;
             _mode = Mode.None;
+            _modeRotationFigure = ModeRotationFigure.DrawPoints;
+            createRotationFigureButton.Enabled = false;
+            _points = new List<Point>();
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             DrawPolyhedron();
         }        
@@ -89,13 +103,7 @@ namespace lab7
             float offsetX = pictureBox1.Width / 2;
             float offsetY = pictureBox1.Height / 2;
 
-            float[][] MatrixPerspective = new float[4][]
-            {
-                new float[4] { 1, 0, 0,    0 },
-                new float[4] { 0, 1, 0,    0 },
-                new float[4] { 0, 0, 0, -1/c },
-                new float[4] { 0, 0, 0,    1 },
-            };
+            float[][] MatrixPerspective = Matrices.Perspective(c);
 
             List<Point3D> points = new List<Point3D>();
 
@@ -162,13 +170,7 @@ namespace lab7
             float offsetX = pictureBox1.Width / 2;
             float offsetY = pictureBox1.Height / 2;
 
-            float[][] MatrixAxonometry = new float[4][]
-            {
-                new float[4] { (float)Math.Cos(psi),  (float)Math.Sin(phi) * (float)Math.Sin(psi), 0, 0 },
-                new float[4] {                    0,                         (float)Math.Cos(phi), 0, 0 },
-                new float[4] { (float)Math.Sin(psi), -(float)Math.Sin(phi) * (float)Math.Cos(psi), 0, 0 },
-                new float[4] {                    0,                                            0, 0, 1 },
-            };
+            float[][] MatrixAxonometry = Matrices.Axonometry(phi, psi);
 
             List<Point3D> points = new List<Point3D>();
 
@@ -224,43 +226,13 @@ namespace lab7
                                 axes[1].X / axes[1].W + offsetX, axes[1].Y / axes[1].W + offsetY
                                 );
             }
-        }
-
-        public static float[][] MultiplyMatrix(float[][] matrixA, float[][] matrixB)
-        {
-            float[][] result = new float[4][]
-            {
-                new float[4] { 0, 0, 0, 0 },
-                new float[4] { 0, 0, 0, 0 },
-                new float[4] { 0, 0, 0, 0 },
-                new float[4] { 0, 0, 0, 0 },
-            };
-
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    for (int k = 0; k < 4; k++)
-                    {
-                        result[i][j] += matrixA[i][k] * matrixB[k][j];
-                    }
-                }
-            }
-
-            return result;
-        }
+        }       
 
         private new void Scale(float k)
         {
-            float[][] MatrixScale = new float[4][]
-            {
-                new float[4] { k, 0, 0, 0 },
-                new float[4] { 0, k, 0, 0 },
-                new float[4] { 0, 0, k, 0 },
-                new float[4] { 0, 0, 0, 1 },
-            };
+            float[][] MatrixScale = Matrices.Scale(k);
 
-            _modelMatrix = MultiplyMatrix(_modelMatrix, MatrixScale);
+            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, MatrixScale);
 
             DrawPolyhedron();
         }
@@ -291,15 +263,9 @@ namespace lab7
             float sin = (float)Math.Sin(angle);
             float cos = (float)Math.Cos(angle);
 
-            float[][] rotationMatrix = new float[4][]
-            {
-                    new float[4] { l*l + cos*(1 - l*l), l*(1 - cos)*m + n * sin, l*(1 - cos)*n - m * sin, 0},
-                    new float[4] { l*(1 - cos)*m - n * sin, m*m + cos*(1 - m*m), m*(1 - cos)*n + l*sin, 0 },
-                    new float[4] { l*(1 - cos)*n + m * sin, m*(1 - cos)*n - l*sin, n*n + cos*(1 - n*n), 0 },
-                    new float[4] { 0,                       0,                     0,                   1 }
-            };
+            float[][] rotationMatrix = Matrices.RotationLine(l, m, n, sin, cos);
 
-            _modelMatrix = MultiplyMatrix(_modelMatrix, rotationMatrix);
+            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, rotationMatrix);
 
             DrawPolyhedron();
         }
@@ -344,57 +310,32 @@ namespace lab7
 
         private void XYZRotatePoint(float[][] rotationMatrix)
         {
-            _modelMatrix = MultiplyMatrix(_modelMatrix, rotationMatrix);
+            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, rotationMatrix);
         }
 
-        private float[][] CreateXRotationMatrix(float angle)
+        public float[][] CreateXRotationMatrix(float angle)
         {
             float rad = (float)(angle * Math.PI / 180);
-            return new float[][]
-            {
-                new float[] { 1, 0, 0, 0 },
-                new float[] { 0, (float)Math.Cos(rad), (float)Math.Sin(rad), 0 },
-                new float[] { 0, -(float)Math.Sin(rad), (float)Math.Cos(rad), 0 },
-                new float[] { 0, 0, 0, 1 }
-            };
+            return Matrices.XRotationMatrix(rad);
         }
 
-        private float[][] CreateYRotationMatrix(float angle)
+        public float[][] CreateYRotationMatrix(float angle)
         {
             float rad = (float)(angle * Math.PI / 180);
-            return new float[][]
-            {
-                new float[] { (float)Math.Cos(rad), 0, -(float)Math.Sin(rad), 0 },
-                new float[] { 0, 1, 0, 0 },
-                new float[] { (float)Math.Sin(rad), 0, (float)Math.Cos(rad), 0 },
-                new float[] { 0, 0, 0, 1 }
-            };
+            return Matrices.YRotationMatrix(rad);
         }
 
-        private float[][] CreateZRotationMatrix(float angle)
+        public float[][] CreateZRotationMatrix(float angle)
         {
             float rad = (float)(angle * Math.PI / 180);
-            return new float[][]
-            {
-                new float[] { (float)Math.Cos(rad), (float)Math.Sin(rad), 0, 0 },
-                new float[] { -(float)Math.Sin(rad), (float)Math.Cos(rad), 0, 0 },
-                new float[] { 0, 0, 1, 0 },
-                new float[] { 0, 0, 0, 1 }
-            };
+            return Matrices.ZRotationMatrix(rad);
         }
-
 
         public void Translation(float dx, float dy, float dz, bool draw = true)
         {
-            float[][] TranslationMatrix = new float[4][]
-            {
-                    new float[4] { 1,  0,  0,  0 },
-                    new float[4] { 0,  1,  0,  0 },
-                    new float[4] { 0,  0,  1,  0 },
-                    new float[4] { dx, dy, dz, 1 }
-            };
+            float[][] TranslationMatrix = Matrices.Translation(dx, dy, dz);
 
-            _modelMatrix = MultiplyMatrix(_modelMatrix, TranslationMatrix);
+            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, TranslationMatrix);
 
             if (draw)
                 DrawPolyhedron();
@@ -407,38 +348,20 @@ namespace lab7
             switch (plane)
             {
                 case "XY":
-                    reflectionMatrix = new float[4][]
-                    {
-                new float[4] { 1, 0,  0, 0 },
-                new float[4] { 0, 1,  0, 0 },
-                new float[4] { 0, 0, -1, 0 },
-                new float[4] { 0, 0,  0, 1 },
-                    };
+                    reflectionMatrix = Matrices.XYreflectionMatrix();
                     break;
                 case "XZ":
-                    reflectionMatrix = new float[4][]
-                    {
-                new float[4] { 1,  0, 0, 0 },
-                new float[4] { 0, -1, 0, 0 },
-                new float[4] { 0,  0, 1, 0 },
-                new float[4] { 0,  0, 0, 1 },
-                    };
+                    reflectionMatrix = Matrices.XZreflectionMatrix();
                     break;
                 case "YZ":
-                    reflectionMatrix = new float[4][]
-                    {
-                new float[4] { -1, 0, 0, 0 },
-                new float[4] { 0,  1, 0, 0 },
-                new float[4] { 0,  0, 1, 0 },
-                new float[4] { 0,  0, 0, 1 },
-                    };
+                    reflectionMatrix = Matrices.YZreflectionMatrix();
                     break;
                 default:
                     textBoxOutput.Text = "Неправильная плоскость для отражения.";
                     return;
             }
 
-            _modelMatrix = MultiplyMatrix(_modelMatrix, reflectionMatrix);
+            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, reflectionMatrix);
 
             DrawPolyhedron();
         }
@@ -473,7 +396,7 @@ namespace lab7
                 case 4:
                     _polyhedron = new Dodecahedron();
                     break;
-                case 5:
+                case 5:                    
                     _polyhedron = new Parallelepiped();
                     break;
             }
@@ -659,32 +582,7 @@ namespace lab7
                 _polyhedron = new Polyhedron();
                 _polyhedron.ParseFromOBJ(openFileDialog.FileName);
                 DrawPolyhedron();
-            }
-           
-        }
-
-        private void rotationFigureTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (!int.TryParse(textBoxRotationFigure.Text, out int k) || k < 0)
-            {
-                createRotationFigureButton.Enabled = false;
-                textBoxOutput.Text = "Некорректный ввод количества разбиений.";
-            }
-            else
-            {
-                createRotationFigureButton.Enabled = true;
-                textBoxOutput.Text = string.Empty;
-            }
-        }
-
-        private void createRotationFigureButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBoxRotationFigure_MouseClick(object sender, MouseEventArgs e)
-        {
-
+            }           
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -704,6 +602,123 @@ namespace lab7
                 Scale(e.Delta > 0 ? 1.05f : 0.95f);
             }
         }
+
+        private void rotationFigureTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (!int.TryParse(textBoxRotationFigure.Text, out int k) || k < 0)
+            {
+                createRotationFigureButton.Enabled = false;
+                textBoxOutput.Text = "Некорректный ввод количества разбиений.";
+            }
+            else
+            {
+                createRotationFigureButton.Enabled = _points.Count > 2;
+                textBoxOutput.Text = string.Empty;
+            }
+        }
+
+        private void createRotationFigureButton_Click(object sender, EventArgs e)
+        {
+            _modeRotationFigure = ModeRotationFigure.JarvisMarch;
+            JarvisMarch();
+            textBoxOutput.Text = "Нажмите на экран или на кнопку \"Очистить\", чтобы снова нарисовать точки.";
+            pictureBoxRotationFigure.Invalidate();
+        }
+
+        private void pictureBoxRotationFigure_MouseDown(object sender, MouseEventArgs e)
+        {
+            switch (_modeRotationFigure)
+            {
+                case ModeRotationFigure.DrawPoints:
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        DrawPoint(e);
+                    }
+                    break;
+                case ModeRotationFigure.JarvisMarch:
+                    clearRotationFigureButton_Click(sender, e);
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void DrawPoint(MouseEventArgs e)
+        {
+            _points.Add(e.Location);
+            if (_points.Count > 2)
+            {
+                createRotationFigureButton.Enabled = true;
+            }
+            pictureBoxRotationFigure.Invalidate();
+        }
+
+        private void JarvisMarch()
+        {
+            Point currentPoint = _points.OrderBy(p => p.X).First();
+            List<Point> passed = new List<Point>
+            {
+                currentPoint
+            };
+
+            while (true)
+            {
+                Point nextPoint = _points[0];
+
+                foreach (Point point in _points)
+                {
+                    if (point == currentPoint)
+                        continue;
+
+                    Point a = new Point(nextPoint.X - currentPoint.X, nextPoint.Y - currentPoint.Y);
+                    Point b = new Point(point.X - currentPoint.X, point.Y - currentPoint.Y);
+                    float product = a.X * b.Y - a.Y * b.X;
+
+                    if (nextPoint == currentPoint || product > 0)
+                        nextPoint = point;
+                }
+
+                currentPoint = nextPoint;
+
+                if (passed[0] == currentPoint)
+                    break;
+
+                passed.Add(currentPoint);
+            } 
+
+            List<Point3D> points = new List<Point3D>();
+            foreach (Point point in passed)
+            {
+                Point3D newPoint = new Point3D(point);
+                points.Add(newPoint);
+            }
+
+            Pen pen = new Pen(Color.Black, 1);
+            _graphicsRotationFigure.DrawPolygon(pen, passed.ToArray());
+
+            int axis = radioButtonXRotationFigure.Checked ? 0 : radioButtonYRotationFigure.Checked ? 1 : 2;
+            _polyhedron = new RotationPolyhedron(points, int.Parse(textBoxRotationFigure.Text, NumberStyles.Integer, CultureInfo.InvariantCulture), axis);
+
+            DrawPolyhedron();
+        } 
+
+        private void pictureBoxRotationFigure_Paint(object sender, PaintEventArgs e)
+        {
+            Pen pen = new Pen(Color.Black, 2);
+            foreach (Point point in _points)
+            {
+                e.Graphics.DrawEllipse(pen, point.X, point.Y, 2, 2);
+            }
+        }
+
+        private void clearRotationFigureButton_Click(object sender, EventArgs e)
+        {
+            _modeRotationFigure = ModeRotationFigure.DrawPoints;
+            _graphicsRotationFigure.Clear(Color.White);
+            _points.Clear();
+            textBoxOutput.Text = "Нарисуйте больше 1 точки, чтобы найти выпуклую оболочку с помощью алгоритма Джарвиса.";
+            createRotationFigureButton.Enabled = false;
+            pictureBoxRotationFigure.Invalidate();
+        }        
     }
 
     public class Point3D
@@ -714,6 +729,14 @@ namespace lab7
             X = _X;
             Y = _Y;
             Z = _Z;
+            W = 1;
+        }
+
+        public Point3D(Point point)
+        {
+            X = point.X;
+            Y = point.Y;
+            Z = 0;
             W = 1;
         }
 
@@ -964,6 +987,256 @@ namespace lab7
                     new Face(new List<int> { 1, 12, 14, 5, 9 }),
                     new Face(new List<int> { 6, 18, 19, 7, 15 })    
                };
+        }
+    }
+
+    public class RotationPolyhedron : Polyhedron
+    {
+        public RotationPolyhedron(List<Point3D> facePoints, int segments, int axis)
+        {
+            float phi = 360f / segments;
+
+            float[][] translationMatrix = Matrices.Translation(-facePoints[0].X, -facePoints[0].Y, -facePoints[0].Z);
+
+            float dx = facePoints[facePoints.Count - 1].X - facePoints[0].X;
+            float dy = facePoints[facePoints.Count - 1].Y - facePoints[0].Y;
+            float dz = facePoints[facePoints.Count - 1].Z - facePoints[0].Z;
+
+            float[][] transformationMatrix;
+
+            if (axis == 0)
+            {
+                float alpha = (float)Math.Atan2(dy, dx);
+                float beta = (float)Math.Atan2(dz, Math.Sqrt(dx * dx + dy * dy));
+
+                float[][] zRotation = Matrices.ZRotationMatrix(-alpha);
+                float[][] yRotation = Matrices.YRotationMatrix(beta);
+
+                transformationMatrix = Matrices.MultiplyMatrix(Matrices.MultiplyMatrix(translationMatrix, zRotation), yRotation);
+            }
+            else if (axis == 1)
+            {
+                float alpha = (float)Math.Atan2(dx, dy);
+                float beta = (float)Math.Atan2(dz, Math.Sqrt(dx * dx + dy * dy));
+
+                float[][] zRotation = Matrices.ZRotationMatrix(alpha);
+                float[][] xRotation = Matrices.XRotationMatrix(-beta);
+
+                transformationMatrix = Matrices.MultiplyMatrix(Matrices.MultiplyMatrix(translationMatrix, zRotation), xRotation);
+            }
+            else
+            {
+                float alpha = (float)Math.Atan2(dy, dz);
+                float beta = (float)Math.Atan2(dx, Math.Sqrt(dy * dy + dz * dz));
+
+                float[][] xRotation = Matrices.XRotationMatrix(-alpha);
+                float[][] yRotation = Matrices.YRotationMatrix(beta);
+
+                transformationMatrix = Matrices.MultiplyMatrix(Matrices.MultiplyMatrix(translationMatrix, xRotation), yRotation);
+            }
+
+            foreach (Point3D point in facePoints)
+            {
+                point.ApplyMatrix(transformationMatrix);
+            }
+
+            points = new List<Point3D>(facePoints);
+            faces = new List<Face>();
+
+            for (int i = 1; i < segments; i++)
+            {
+                float rad = (float)(i * phi * Math.PI / 180);
+
+                float[][] rotationMatrix;
+                if (axis == 0)
+                    rotationMatrix = Matrices.XRotationMatrix(rad);
+                else if (axis == 1)
+                    rotationMatrix = Matrices.YRotationMatrix(rad);
+                else
+                    rotationMatrix = Matrices.ZRotationMatrix(rad);
+
+                foreach (Point3D point in facePoints)
+                {
+                    Point3D newPoint = point.Clone();                    
+                    newPoint.ApplyMatrix(rotationMatrix);
+                    points.Add(newPoint);
+                }
+
+                int ind = (i - 1) * facePoints.Count;
+                
+                for (int j = 0; j < facePoints.Count - 1; j++)
+                {
+                    List<int> indices = new List<int>
+                    {
+                        ind + j,
+                        ind + j + 1,
+                        ind + j + 1 + facePoints.Count,
+                        ind + j + facePoints.Count
+                    };
+                    faces.Add(new Face(indices));
+                }
+            }
+            int indLast = (segments - 1) * facePoints.Count;
+
+            for (int j = 0; j < facePoints.Count - 1; j++)
+            {
+                List<int> indices = new List<int>
+                    {
+                        j,
+                        j + 1,
+                        j + 1 + indLast,
+                        j + indLast
+                    };
+                faces.Add(new Face(indices));
+            }
+        }
+    }
+
+    public static class Matrices
+    {
+        public static float[][] Translation(float dx, float dy, float dz)
+        {
+            return new float[][]
+            {
+                new float[] { 1,  0,  0,  0 },
+                new float[] { 0,  1,  0,  0 },
+                new float[] { 0,  0,  1,  0 },
+                new float[] { dx, dy, dz, 1 }
+            };
+        }
+
+        public static float[][] XRotationMatrix(float rad)
+        {
+            return new float[][]
+            {
+                new float[] { 1, 0, 0, 0 },
+                new float[] { 0, (float)Math.Cos(rad), (float)Math.Sin(rad), 0 },
+                new float[] { 0, -(float)Math.Sin(rad), (float)Math.Cos(rad), 0 },
+                new float[] { 0, 0, 0, 1 }
+            };
+        }
+
+        public static float[][] YRotationMatrix(float rad)
+        {
+            return new float[][]
+            {
+                new float[] { (float)Math.Cos(rad), 0, -(float)Math.Sin(rad), 0 },
+                new float[] { 0, 1, 0, 0 },
+                new float[] { (float)Math.Sin(rad), 0, (float)Math.Cos(rad), 0 },
+                new float[] { 0, 0, 0, 1 }
+            };
+        }
+
+        public static float[][] ZRotationMatrix(float rad)
+        {
+            return new float[][]
+            {
+                new float[] { (float)Math.Cos(rad), (float)Math.Sin(rad), 0, 0 },
+                new float[] { -(float)Math.Sin(rad), (float)Math.Cos(rad), 0, 0 },
+                new float[] { 0, 0, 1, 0 },
+                new float[] { 0, 0, 0, 1 }
+            };
+        }
+
+        public static float[][] XYreflectionMatrix()
+        {
+            return new float[4][]
+            {
+                new float[4] { 1, 0,  0, 0 },
+                new float[4] { 0, 1,  0, 0 },
+                new float[4] { 0, 0, -1, 0 },
+                new float[4] { 0, 0,  0, 1 },
+            };
+        }
+
+        public static float[][] XZreflectionMatrix()
+        {
+            return new float[4][]
+            {
+                new float[4] { 1,  0, 0, 0 },
+                new float[4] { 0, -1, 0, 0 },
+                new float[4] { 0,  0, 1, 0 },
+                new float[4] { 0,  0, 0, 1 },
+            };
+        }
+
+        public static float[][] YZreflectionMatrix()
+        {
+            return new float[4][]
+            {
+                new float[4] { -1, 0, 0, 0 },
+                new float[4] { 0,  1, 0, 0 },
+                new float[4] { 0,  0, 1, 0 },
+                new float[4] { 0,  0, 0, 1 },
+            };
+        }
+
+        public static float[][] RotationLine(float l, float m, float n, float sin, float cos)
+        {
+            return new float[4][]
+            {
+                    new float[4] { l*l + cos*(1 - l*l), l*(1 - cos)*m + n * sin, l*(1 - cos)*n - m * sin, 0},
+                    new float[4] { l*(1 - cos)*m - n * sin, m*m + cos*(1 - m*m), m*(1 - cos)*n + l*sin, 0 },
+                    new float[4] { l*(1 - cos)*n + m * sin, m*(1 - cos)*n - l*sin, n*n + cos*(1 - n*n), 0 },
+                    new float[4] { 0,                       0,                     0,                   1 }
+            };
+        }
+
+        public static float[][] Scale(float k)
+        {
+            return new float[4][]
+            {
+                new float[4] { k, 0, 0, 0 },
+                new float[4] { 0, k, 0, 0 },
+                new float[4] { 0, 0, k, 0 },
+                new float[4] { 0, 0, 0, 1 },
+            };
+        }
+
+        public static float[][] Perspective(float c)
+        {
+            return new float[4][]
+            {
+                new float[4] { 1, 0, 0,    0 },
+                new float[4] { 0, 1, 0,    0 },
+                new float[4] { 0, 0, 0, -1/c },
+                new float[4] { 0, 0, 0,    1 },
+            };
+        }
+
+        public static float[][] Axonometry(double phi, double psi)
+        {
+            return new float[4][]
+            {
+                new float[4] { (float)Math.Cos(psi), (float)Math.Sin(phi) * (float)Math.Sin(psi), 0, 0 },
+                new float[4] { 0, (float)Math.Cos(phi), 0, 0 },
+                new float[4] { (float)Math.Sin(psi), -(float)Math.Sin(phi) * (float)Math.Cos(psi), 0, 0 },
+                new float[4] { 0, 0, 0, 1 },
+            };
+        }
+
+        public static float[][] MultiplyMatrix(float[][] matrixA, float[][] matrixB)
+        {
+            float[][] result = new float[4][]
+            {
+                new float[4] { 0, 0, 0, 0 },
+                new float[4] { 0, 0, 0, 0 },
+                new float[4] { 0, 0, 0, 0 },
+                new float[4] { 0, 0, 0, 0 },
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        result[i][j] += matrixA[i][k] * matrixB[k][j];
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
