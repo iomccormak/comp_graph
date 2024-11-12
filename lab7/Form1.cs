@@ -28,6 +28,7 @@ namespace lab7
         Mode _mode;
         ModeRotationFigure _modeRotationFigure;
         List<Point> _points;
+        Func<float, float, float> _function;
 
         enum Mode
         {
@@ -722,17 +723,51 @@ namespace lab7
 
         private void button1_Click(object sender, EventArgs e)
         {
-
+            string[] inputs = textBox1.Text.Split(' ');
+            float x0 = float.Parse(inputs[0]);
+            float x1 = float.Parse(inputs[1]);
+            float y0 = float.Parse(inputs[2]);
+            float y1 = float.Parse(inputs[3]);
+            float step = float.Parse(inputs[4]);
+            _polyhedron = new FunctionalPolyhedron(x0, x1, y0, y1, step, _function);
+            DrawPolyhedron();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+            var input = textBox1.Text.Trim();
+            var parts = input.Split(' ');
 
+            if (parts.Length == 5 &&
+                parts.All(part => float.TryParse(part, NumberStyles.Float, CultureInfo.InvariantCulture, out _)))
+            {
+                button1.Enabled = comboBoxAthenian.SelectedIndex != -1;
+                textBoxOutput.Text = string.Empty;
+            }
+            else
+            {
+                button1.Enabled = false;
+                textBoxOutput.Text = "Некорректный ввод. Формат: 'x0 x1 y0 y1 шаг' (например, -10 10 -10 10 0,25).";
+            }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            switch (comboBox1.SelectedIndex)
+            {
+                case 0:
+                    _function = (x, y) => (float)Math.Sin(x) * (float)Math.Cos(y);
+                    button1.Enabled = true;
+                    break;
+                case 1:
+                    _function = (x, y) => (float)Math.Cos(x + y);
+                    button1.Enabled = true;
+                    break;
+                case 2:
+                    _function = (x, y) => (float)(5 * (Math.Cos(x * x + y * y + 1) / (x * x + y * y + 1) + 0.1));
+                    button1.Enabled = true;
+                    break;
+            }
         }
     }
 
@@ -1103,6 +1138,43 @@ namespace lab7
                         j + indLast
                     };
                 faces.Add(new Face(indices));
+            }
+        }
+    }
+
+    public class FunctionalPolyhedron : Polyhedron
+    {
+        public FunctionalPolyhedron(float x0, float x1, float y0, float y1, float step, Func<float, float, float> G)
+        {
+            Create(x0, x1, y0, y1, step, G);
+        }
+
+        private void Create(float x0, float x1, float y0, float y1, float step, Func<float, float, float> G)
+        {
+            int cntX = (int)Math.Floor((x1 - x0) / step);
+            int cntY = (int)Math.Floor((y1 - y0) / step);
+
+            for (int x_i = 0; x_i < cntX; x_i++)
+            {
+                for (int y_i = 0; y_i < cntY; y_i++)
+                {
+                    float x = x0 + step * x_i;
+                    float y = y0 + step * y_i;
+                    float z = G(x, y);
+                    points.Add(new Point3D(x * 15, z * 15, y * 15));
+                }
+            }
+
+            for (int i = 0; i < cntY - 1; i++)
+            {
+                for (int j = 0; j < cntX - 1; j++)
+                {
+                    int topLeft = i * cntX + j;
+                    int topRight = i * cntX + (j + 1);
+                    int bottomLeft = (i + 1) * cntX + j;
+                    int bottomRight = (i + 1) * cntX + (j + 1);
+                    faces.Add(new Face(new List<int> { topLeft, topRight, bottomRight, bottomLeft }));
+                }
             }
         }
     }
