@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +19,9 @@ namespace lab7
     {
         Pen _pen;
         Bitmap _bitmap;
+        Bitmap _bitmapRotationFigure;
         Graphics _graphics;
+        Graphics _graphicsRotationFigure;
         Polyhedron _polyhedron;
         float[][] _modelMatrix;
         Mode _mode;
@@ -40,14 +43,18 @@ namespace lab7
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            _bitmapRotationFigure = new Bitmap(pictureBoxRotationFigure.Width, pictureBoxRotationFigure.Height);    
             _graphics = Graphics.FromImage(_bitmap);
+            _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
+            _graphicsRotationFigure.Clear(Color.White);
             pictureBox1.Image = _bitmap;
-            radioButton1.Checked = true;
+            pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
             comboBoxPolyhedron.SelectedIndex = 4;
             _mode = Mode.None;
+            this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             DrawPolyhedron();
-        }
+        }        
 
         private void InitModelMatrix()
         {
@@ -480,11 +487,13 @@ namespace lab7
                 case Mode.None: 
                     break;
                 case Mode.ScaleRelativeCenter:
-                    Scale(float.Parse(textBoxScale.Text));
+                    Scale(float.Parse(textBoxScale.Text, NumberStyles.Float, CultureInfo.InvariantCulture));
                     break;
                 case Mode.Translation:
                     string[] parametrs = translationTextBox.Text.Split();
-                    Translation(float.Parse(parametrs[0]), float.Parse(parametrs[1]), float.Parse(parametrs[2]));
+                    Translation(float.Parse(parametrs[0], NumberStyles.Float, CultureInfo.InvariantCulture),
+                                float.Parse(parametrs[1], NumberStyles.Float, CultureInfo.InvariantCulture),
+                                float.Parse(parametrs[2], NumberStyles.Float, CultureInfo.InvariantCulture));
                     break;
                 case Mode.Reflection:
                     Reflect(reflectTextBox.Text.Trim().ToUpper());
@@ -526,10 +535,10 @@ namespace lab7
         }
         private void textBoxScale_TextChanged(object sender, EventArgs e)
         {
-            if (!float.TryParse(textBoxScale.Text, out float k) || k == 0)
+            if (!float.TryParse(textBoxScale.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out float k) || k == 0)
             {
                 applyButton.Enabled = false;
-                textBoxOutput.Text = "Неккоректный ввод коэффиента масштабирования.";
+                textBoxOutput.Text = "Некорректный ввод коэффиента масштабирования.";
             }
             else
             {
@@ -548,9 +557,9 @@ namespace lab7
                                                .ToArray();
 
             if (parts.Length == 3 &&
-                float.TryParse(parts[0], out float tx) &&
-                float.TryParse(parts[1], out float ty) &&
-                float.TryParse(parts[2], out float tz))
+                float.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float tx) &&
+                float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float ty) &&
+                float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float tz))
             {
                 if (comboBoxAthenian.SelectedIndex != -1)
                 {
@@ -590,14 +599,16 @@ namespace lab7
                                                .ToArray();
 
             if (parts.Length == 2 &&
-                float.TryParse(parts[1], out float angle))
+                float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float angle))
             {
                 applyButton.Enabled = comboBoxAthenian.SelectedIndex != -1;
                 textBoxOutput.Text = string.Empty;
+                checkBox1.Checked = true;
             }
             else
             {
                 applyButton.Enabled = false;
+                checkBox1.Checked = false;
                 textBoxOutput.Text = "Некорректный ввод оси и угла. Формат: 'ось угол' (например, 'y 4').";
             }
 
@@ -608,20 +619,20 @@ namespace lab7
             var input = textBoxRotateLine.Text.Trim();
             var parts = input.Split(' ');
 
-            if (parts.Length == 7 && parts.All(part => float.TryParse(part, out _)))
+            if (parts.Length == 7 && 
+                parts.All(part => float.TryParse(part, NumberStyles.Float, CultureInfo.InvariantCulture, out _)))
             {
                 applyButton.Enabled = comboBoxAthenian.SelectedIndex != -1;
                 textBoxOutput.Text = string.Empty;
             }
             else
             {
-
                 applyButton.Enabled = false;
                 textBoxOutput.Text = "Некорректный ввод. Формат: 'x1 y1 z1 x2 y2 z2 угол' (например, '10 10 10 40 40 40 45').";
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void resetButton_Click(object sender, EventArgs e)
         {
             InitModelMatrix();
             DrawPolyhedron();
@@ -630,7 +641,7 @@ namespace lab7
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            pictureBox1.Width = this.ClientSize.Width - groupBox1.Width - 30;
+            pictureBox1.Width = this.ClientSize.Width - groupBox1.Width - groupBox2.Width - 30;
             pictureBox1.Height = this.ClientSize.Height - 25;
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             _graphics = Graphics.FromImage(_bitmap);
@@ -650,6 +661,48 @@ namespace lab7
                 DrawPolyhedron();
             }
            
+        }
+
+        private void rotationFigureTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (!int.TryParse(textBoxRotationFigure.Text, out int k) || k < 0)
+            {
+                createRotationFigureButton.Enabled = false;
+                textBoxOutput.Text = "Некорректный ввод количества разбиений.";
+            }
+            else
+            {
+                createRotationFigureButton.Enabled = true;
+                textBoxOutput.Text = string.Empty;
+            }
+        }
+
+        private void createRotationFigureButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBoxRotationFigure_MouseClick(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            RotateAxis(textBoxRotateAxis.Text);
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            timer1.Enabled = checkBox1.Checked;
+        }
+
+        private void pictureBox1_OnMouseWheel(object sender, MouseEventArgs e)
+        {
+            if (pictureBox1.ClientRectangle.Contains(pictureBox1.PointToClient(MousePosition)))
+            {
+                Scale(e.Delta > 0 ? 1.05f : 0.95f);
+            }
         }
     }
 
