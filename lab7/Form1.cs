@@ -718,7 +718,22 @@ namespace lab7
             textBoxOutput.Text = "Нарисуйте больше 1 точки, чтобы найти выпуклую оболочку с помощью алгоритма Джарвиса.";
             createRotationFigureButton.Enabled = false;
             pictureBoxRotationFigure.Invalidate();
-        }        
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class Point3D
