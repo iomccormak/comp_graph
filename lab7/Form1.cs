@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 
 namespace lab7
-{    
+{
     public partial class Form1 : Form
     {
         Pen _pen;
@@ -69,7 +67,13 @@ namespace lab7
             _points = new List<Point>();
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             DrawPolyhedron();
-        }        
+        }
+
+
+
+
+
+        private bool saveWithAffin = false;
 
         private void InitModelMatrix()
         {
@@ -303,6 +307,10 @@ namespace lab7
 
         private Point3D CalculateCenter(List<Point3D> points)
         {
+            if (points == null || points.Count == 0)
+            {
+                throw new InvalidOperationException("Список точек пуст. Невозможно рассчитать центр.");
+            }
             float x = points.Average(p => p.X);
             float y = points.Average(p => p.Y);
             float z = points.Average(p => p.Z);
@@ -769,6 +777,25 @@ namespace lab7
                     break;
             }
         }
+      
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _polyhedron.SaveToFileInProjectFolder ( saveWithAffin? _modelMatrix:null);
+                MessageBox.Show("Модель сохранена в папке проекта (Models/modifiedModel.obj)");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении модели: {ex.Message}");
+            }
+           
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            saveWithAffin = !saveWithAffin;
+        }
     }
 
     public class Point3D
@@ -835,10 +862,47 @@ namespace lab7
             faces = new List<Face>();
         }
 
+        public void SaveToFileInProjectFolder(float[][] matrix = null)
+        {
+            string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string modelsDirectory = Path.Combine(projectDirectory, "Models");
+            if (!Directory.Exists(modelsDirectory))
+            {
+                Directory.CreateDirectory(modelsDirectory);
+            }
+            string filePath = Path.Combine(modelsDirectory, "3D_Model.obj");
+
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                foreach (var vertex in points)
+                {
+                    Point3D  vertex1 = vertex.Clone();
+                    if (matrix != null)
+                    {
+                     
+                            vertex1.ApplyMatrix(matrix);
+                    }
+                   
+                    writer.WriteLine($"v {vertex1.X.ToString(CultureInfo.InvariantCulture)} " +
+                                     $"{vertex1.Y.ToString(CultureInfo.InvariantCulture)} " +
+                                     $"{vertex1.Z.ToString(CultureInfo.InvariantCulture)}");
+                }
+                foreach (var face in faces)
+                {
+                    writer.Write("f");
+                    foreach (var index in face.indexes)
+                    {
+                        writer.Write($" {index + 1}"); 
+                    }
+                    writer.WriteLine();
+                }
+            }
+        }
+
         public void ParseFromOBJ(string filePath)
         {
-            points.Clear();
-            faces.Clear();
+            points = new List<Point3D>();
+            faces = new List<Face>();
 
             using (StreamReader reader = new StreamReader(filePath))
             {
@@ -851,9 +915,9 @@ namespace lab7
                     {
                         var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length == 4 &&
-                            float.TryParse(parts[1], out float x) &&
-                            float.TryParse(parts[2], out float y) &&
-                            float.TryParse(parts[3], out float z))
+                            float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x) &&
+                            float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y) &&
+                            float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float z))
                         {
                             points.Add(new Point3D(x, y, z));
                         }
@@ -868,30 +932,24 @@ namespace lab7
                             string[] faceData = parts[i].Split('/');
                             if (int.TryParse(faceData[0], out int vertexIndex))
                             {
-                                // Преобразуем индекс к базированию с нуля и проверяем его
                                 int adjustedIndex = vertexIndex - 1;
                                 if (adjustedIndex >= 0 && adjustedIndex < points.Count)
                                 {
                                     indexes.Add(adjustedIndex);
                                 }
-                                else
-                                {
-                                    // Индекс вне диапазона, игнорируем его или выводим сообщение для отладки
-                                    Console.WriteLine($"Warning: Ignoring out-of-range vertex index {vertexIndex} in file {filePath}");
-                                }
                             }
                         }
-
                         if (indexes.Count >= 3)
                         {
                             faces.Add(new Face(indexes));
+
                         }
                     }
                 }
             }
+
+            Console.WriteLine($"Parsed {points.Count} points and {faces.Count} faces from {filePath}");
         }
-
-
     }
     public class Tetrahedron : Polyhedron
     {

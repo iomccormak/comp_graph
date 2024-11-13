@@ -57,6 +57,7 @@
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button1 = new System.Windows.Forms.Button();
             this.clearRotationFigureButton = new System.Windows.Forms.Button();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.createRotationFigureButton = new System.Windows.Forms.Button();
             this.pictureBoxRotationFigure = new System.Windows.Forms.PictureBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -345,6 +346,7 @@
             this.groupBox2.Controls.Add(this.comboBox1);
             this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Controls.Add(this.clearRotationFigureButton);
+            this.groupBox2.Controls.Add(this.checkBox2);
             this.groupBox2.Controls.Add(this.createRotationFigureButton);
             this.groupBox2.Controls.Add(this.pictureBoxRotationFigure);
             this.groupBox2.Controls.Add(this.label8);
@@ -355,17 +357,17 @@
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.saveButton);
             this.groupBox2.Controls.Add(this.loadButton);
-            this.groupBox2.Location = new System.Drawing.Point(937, 12);
+            this.groupBox2.Location = new System.Drawing.Point(939, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(177, 581);
+            this.groupBox2.Size = new System.Drawing.Size(192, 600);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(7, 79);
+            this.textBox1.Location = new System.Drawing.Point(11, 104);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(163, 20);
+            this.textBox1.Size = new System.Drawing.Size(172, 20);
             this.textBox1.TabIndex = 13;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -376,39 +378,50 @@
             "sin(x)+cos(y)",
             "cos(x+y)",
             "5*cos(x^2+y^2+1)/(x^2+y^2+1)+0.1)"});
-            this.comboBox1.Location = new System.Drawing.Point(7, 105);
+            this.comboBox1.Location = new System.Drawing.Point(10, 127);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(164, 21);
+            this.comboBox1.Size = new System.Drawing.Size(173, 21);
             this.comboBox1.TabIndex = 12;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(7, 132);
+            this.button1.Location = new System.Drawing.Point(11, 155);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(163, 23);
+            this.button1.Size = new System.Drawing.Size(172, 23);
             this.button1.TabIndex = 11;
-            this.button1.Text = "button1";
+            this.button1.Text = "Создать поверхность";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // clearRotationFigureButton
             // 
-            this.clearRotationFigureButton.Location = new System.Drawing.Point(91, 378);
+            this.clearRotationFigureButton.Location = new System.Drawing.Point(100, 378);
             this.clearRotationFigureButton.Name = "clearRotationFigureButton";
-            this.clearRotationFigureButton.Size = new System.Drawing.Size(79, 23);
+            this.clearRotationFigureButton.Size = new System.Drawing.Size(86, 23);
             this.clearRotationFigureButton.TabIndex = 10;
             this.clearRotationFigureButton.Text = "Очистить";
             this.clearRotationFigureButton.UseVisualStyleBackColor = true;
             this.clearRotationFigureButton.Click += new System.EventHandler(this.clearRotationFigureButton_Click);
             // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(18, 78);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(165, 17);
+            this.checkBox2.TabIndex = 11;
+            this.checkBox2.Text = "учитывать преобразования";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
+            // 
             // createRotationFigureButton
             // 
             this.createRotationFigureButton.Location = new System.Drawing.Point(7, 378);
             this.createRotationFigureButton.Name = "createRotationFigureButton";
-            this.createRotationFigureButton.Size = new System.Drawing.Size(79, 23);
+            this.createRotationFigureButton.Size = new System.Drawing.Size(87, 23);
             this.createRotationFigureButton.TabIndex = 9;
-            this.createRotationFigureButton.Text = "Создать";
+            this.createRotationFigureButton.Text = "Создать фигуру";
             this.createRotationFigureButton.UseVisualStyleBackColor = true;
             this.createRotationFigureButton.Click += new System.EventHandler(this.createRotationFigureButton_Click);
             // 
@@ -416,7 +429,7 @@
             // 
             this.pictureBoxRotationFigure.Location = new System.Drawing.Point(7, 407);
             this.pictureBoxRotationFigure.Name = "pictureBoxRotationFigure";
-            this.pictureBoxRotationFigure.Size = new System.Drawing.Size(163, 153);
+            this.pictureBoxRotationFigure.Size = new System.Drawing.Size(178, 174);
             this.pictureBoxRotationFigure.TabIndex = 8;
             this.pictureBoxRotationFigure.TabStop = false;
             this.pictureBoxRotationFigure.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxRotationFigure_Paint);
@@ -435,7 +448,7 @@
             // 
             this.textBoxRotationFigure.Location = new System.Drawing.Point(7, 352);
             this.textBoxRotationFigure.Name = "textBoxRotationFigure";
-            this.textBoxRotationFigure.Size = new System.Drawing.Size(163, 20);
+            this.textBoxRotationFigure.Size = new System.Drawing.Size(176, 20);
             this.textBoxRotationFigure.TabIndex = 6;
             this.textBoxRotationFigure.Text = "12";
             this.textBoxRotationFigure.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -446,7 +459,7 @@
             this.radioButtonZRotationFigure.AutoSize = true;
             this.radioButtonZRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonZRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(143, 294);
+            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(165, 294);
             this.radioButtonZRotationFigure.Name = "radioButtonZRotationFigure";
             this.radioButtonZRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonZRotationFigure.TabIndex = 5;
@@ -459,7 +472,7 @@
             this.radioButtonYRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonYRotationFigure.Checked = true;
             this.radioButtonYRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(119, 294);
+            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(141, 294);
             this.radioButtonYRotationFigure.Name = "radioButtonYRotationFigure";
             this.radioButtonYRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonYRotationFigure.TabIndex = 4;
@@ -471,11 +484,13 @@
             // 
             this.radioButtonXRotationFigure.AutoSize = true;
             this.radioButtonXRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.radioButtonXRotationFigure.Checked = true;
             this.radioButtonXRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(95, 294);
+            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(113, 294);
             this.radioButtonXRotationFigure.Name = "radioButtonXRotationFigure";
             this.radioButtonXRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonXRotationFigure.TabIndex = 3;
+            this.radioButtonXRotationFigure.TabStop = true;
             this.radioButtonXRotationFigure.Text = "X";
             this.radioButtonXRotationFigure.UseVisualStyleBackColor = true;
             // 
@@ -490,18 +505,19 @@
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(7, 50);
+            this.saveButton.Location = new System.Drawing.Point(11, 49);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(163, 23);
+            this.saveButton.Size = new System.Drawing.Size(174, 23);
             this.saveButton.TabIndex = 1;
             this.saveButton.Text = "Сохранить модель";
             this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
             // loadButton
             // 
-            this.loadButton.Location = new System.Drawing.Point(7, 20);
+            this.loadButton.Location = new System.Drawing.Point(11, 20);
             this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(163, 23);
+            this.loadButton.Size = new System.Drawing.Size(175, 23);
             this.loadButton.TabIndex = 0;
             this.loadButton.Text = "Загрузить модель";
             this.loadButton.UseVisualStyleBackColor = true;
@@ -518,7 +534,7 @@
             this.AcceptButton = this.applyButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1120, 605);
+            this.ClientSize = new System.Drawing.Size(1143, 605);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -578,6 +594,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox checkBox2;
     }
 }
 
