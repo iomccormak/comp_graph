@@ -42,7 +42,7 @@ namespace lab7
         {
             None,
             DrawPoints,
-            JarvisMarch,
+            DrawRotationFigure,
         }
 
         public Form1()
@@ -572,13 +572,16 @@ namespace lab7
         }
 
         private void Form1_Resize(object sender, EventArgs e)
-        {
-            pictureBox1.Width = this.ClientSize.Width - groupBox1.Width - groupBox2.Width - 30;
-            pictureBox1.Height = this.ClientSize.Height - 25;
-            _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            _graphics = Graphics.FromImage(_bitmap);
-            pictureBox1.Image = _bitmap;
-            DrawPolyhedron();
+        {            
+            if (this.WindowState != FormWindowState.Minimized)
+            {
+                pictureBox1.Width = this.ClientSize.Width - groupBox1.Width - groupBox2.Width - 30;
+                pictureBox1.Height = this.ClientSize.Height - 25;
+                _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+                _graphics = Graphics.FromImage(_bitmap);
+                pictureBox1.Image = _bitmap;
+                DrawPolyhedron();
+            }            
         }
 
         private void loadButton_Click(object sender, EventArgs e)
@@ -628,8 +631,8 @@ namespace lab7
 
         private void createRotationFigureButton_Click(object sender, EventArgs e)
         {
-            _modeRotationFigure = ModeRotationFigure.JarvisMarch;
-            JarvisMarch();
+            _modeRotationFigure = ModeRotationFigure.DrawRotationFigure;
+            DrawRotationFigure();
             textBoxOutput.Text = "Нажмите на экран или на кнопку \"Очистить\", чтобы снова нарисовать точки.";
             pictureBoxRotationFigure.Invalidate();
         }
@@ -644,7 +647,7 @@ namespace lab7
                         DrawPoint(e);
                     }
                     break;
-                case ModeRotationFigure.JarvisMarch:
+                case ModeRotationFigure.DrawRotationFigure:
                     clearRotationFigureButton_Click(sender, e);
                     break;
                 default:
@@ -661,48 +664,19 @@ namespace lab7
             pictureBoxRotationFigure.Invalidate();
         }
 
-        private void JarvisMarch()
+        private void DrawRotationFigure()
         {
-            Point currentPoint = _points.OrderBy(p => p.X).First();
-            List<Point> passed = new List<Point>
-            {
-                currentPoint
-            };
-
-            while (true)
-            {
-                Point nextPoint = _points[0];
-
-                foreach (Point point in _points)
-                {
-                    if (point == currentPoint)
-                        continue;
-
-                    Point a = new Point(nextPoint.X - currentPoint.X, nextPoint.Y - currentPoint.Y);
-                    Point b = new Point(point.X - currentPoint.X, point.Y - currentPoint.Y);
-                    float product = a.X * b.Y - a.Y * b.X;
-
-                    if (nextPoint == currentPoint || product > 0)
-                        nextPoint = point;
-                }
-
-                currentPoint = nextPoint;
-
-                if (passed[0] == currentPoint)
-                    break;
-
-                passed.Add(currentPoint);
-            } 
-
             List<Point3D> points = new List<Point3D>();
-            foreach (Point point in passed)
+
+            foreach (Point point in _points)
             {
                 Point3D newPoint = new Point3D(point);
                 points.Add(newPoint);
             }
+            points.Reverse();
 
             Pen pen = new Pen(Color.Black, 1);
-            _graphicsRotationFigure.DrawPolygon(pen, passed.ToArray());
+            _graphicsRotationFigure.DrawPolygon(pen, _points.ToArray());
 
             int axis = radioButtonXRotationFigure.Checked ? 0 : radioButtonYRotationFigure.Checked ? 1 : 2;
             _polyhedron = new RotationPolyhedron(points, int.Parse(textBoxRotationFigure.Text, NumberStyles.Integer, CultureInfo.InvariantCulture), axis);
