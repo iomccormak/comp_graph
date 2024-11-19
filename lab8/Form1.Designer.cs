@@ -71,6 +71,7 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.comboBoxPolyList = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -344,6 +345,7 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.comboBoxPolyList);
             this.groupBox2.Controls.Add(this.label10);
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.textBox1);
@@ -552,6 +554,15 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // comboBoxPolyList
+            // 
+            this.comboBoxPolyList.FormattingEnabled = true;
+            this.comboBoxPolyList.Location = new System.Drawing.Point(6, 219);
+            this.comboBoxPolyList.Name = "comboBoxPolyList";
+            this.comboBoxPolyList.Size = new System.Drawing.Size(165, 21);
+            this.comboBoxPolyList.TabIndex = 21;
+            this.comboBoxPolyList.SelectedIndexChanged += new System.EventHandler(this.comboBoxPolyList_SelectedIndexChanged);
+            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
@@ -620,6 +631,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ComboBox comboBoxPolyList;
     }
 }
 
