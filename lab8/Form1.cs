@@ -27,6 +27,7 @@ namespace lab8
         ModeRotationFigure _modeRotationFigure;
         List<Point> _points;
         Func<float, float, float> _function;
+        Point3D _ViewVector;
 
         enum Mode
         {
@@ -49,6 +50,7 @@ namespace lab8
         {
             InitializeComponent();
             InitModelMatrix();
+            _ViewVector = new Point3D(0, 0, pictureBox1.Width);
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -68,10 +70,6 @@ namespace lab8
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             DrawPolyhedron();
         }
-
-
-
-
 
         private bool saveWithAffin = false;
 
@@ -120,7 +118,9 @@ namespace lab8
                 points.Add(p);
             }
 
-            foreach (var face in _polyhedron.faces)
+            List<Face> visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+
+            foreach (var face in visibleFaces)
             {
                 var indexes = face.indexes;
 
@@ -187,7 +187,8 @@ namespace lab8
                 points.Add(p);
             }
 
-            foreach (var face in _polyhedron.faces)
+            List<Face> visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+            foreach (var face in visibleFaces)
             {
                 var indexes = face.indexes;
 
@@ -230,6 +231,28 @@ namespace lab8
                                 axes[0].X / axes[0].W + offsetX, axes[0].Y / axes[0].W + offsetY,
                                 axes[1].X / axes[1].W + offsetX, axes[1].Y / axes[1].W + offsetY
                                 );
+            }
+        }
+
+        public void SetPerspectiveViewVector(float cameraX, float cameraY, float cameraZ)
+        {
+            // Рассчитываем центр объекта
+            Point3D center = CalculateCenter(_polyhedron.points);
+
+            // Вектор от камеры к центру объекта
+            float viewX = center.X - cameraX;
+            float viewY = center.Y - cameraY;
+            float viewZ = center.Z - cameraZ;
+
+            // Нормализация вектора
+            float length = (float)Math.Sqrt(viewX * viewX + viewY * viewY + viewZ * viewZ);
+            if (length > 0)
+            {
+                _ViewVector = new Point3D(viewX / length, viewY / length, viewZ / length);
+            }
+            else
+            {
+                _ViewVector = new Point3D(0, 0, 1); // На случай, если камера совпадает с центром
             }
         }
 
@@ -813,15 +836,76 @@ namespace lab8
         {
             return new Point3D(this.X, this.Y, this.Z) { W = this.W };
         }
+        public static Point3D operator -(Point3D p1, Point3D p2)
+        {
+            return new Point3D(p1.X - p2.X, p1.Y - p2.Y, p1.Z - p2.Z);
+        }
+        public Point3D CrossProduct(Point3D other)
+        {
+            return new Point3D(
+                this.Y * other.Z - this.Z * other.Y,
+                this.Z * other.X - this.X * other.Z,
+                this.X * other.Y - this.Y * other.X
+            );
+        }
+        public float DotProduct(Point3D other)
+        {
+            return this.X * other.X + this.Y * other.Y + this.Z * other.Z;
+        }
+        public void Normalize()
+        {
+            float length = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            if (length > 0)
+            {
+                X /= length;
+                Y /= length;
+                Z /= length;
+            }
+        }
     }
 
     public class Face
     {
         public List<int> indexes;
+        public Point3D normal;
+
         public Face(List<int> _indexes)
         {
             indexes = _indexes;
+            normal = null;
         }
+
+        public Point3D CalculateNormal(List<Point3D> points)
+        {
+            Point3D A = points[indexes[0]];
+            Point3D B = points[indexes[1]];
+            Point3D C = points[indexes[2]];
+
+            Point3D center = new Point3D(
+                (A.X + B.X + C.X) / 3,
+                (A.Y + B.Y + C.Y) / 3,
+                (A.Z + B.Z + C.Z) / 3
+            );
+
+            Point3D AB = B - A;
+            Point3D AC = C - A;
+            normal = AB.CrossProduct(AC);
+            normal.Normalize();
+
+            Point3D centerToFace = new Point3D(
+                (A.X + B.X + C.X) / 3,
+                (A.Y + B.Y + C.Y) / 3,
+                (A.Z + B.Z + C.Z) / 3
+            );
+
+            if (normal.DotProduct(centerToFace) < 0)
+            {
+                normal = new Point3D(-normal.X, -normal.Y, -normal.Z);
+            }
+
+            return normal;
+        }
+
     }
 
     public class Polyhedron
@@ -850,33 +934,51 @@ namespace lab8
             {
                 foreach (var vertex in points)
                 {
-                    Point3D vertex1 = vertex.Clone();
+                    Point3D transformedVertex = vertex.Clone();
                     if (matrix != null)
                     {
-
-                        vertex1.ApplyMatrix(matrix);
+                        transformedVertex.ApplyMatrix(matrix);
                     }
 
-                    writer.WriteLine($"v {vertex1.X.ToString(CultureInfo.InvariantCulture)} " +
-                                     $"{vertex1.Y.ToString(CultureInfo.InvariantCulture)} " +
-                                     $"{vertex1.Z.ToString(CultureInfo.InvariantCulture)}");
+                    writer.WriteLine($"v {transformedVertex.X.ToString(CultureInfo.InvariantCulture)} " +
+                                     $"{transformedVertex.Y.ToString(CultureInfo.InvariantCulture)} " +
+                                     $"{transformedVertex.Z.ToString(CultureInfo.InvariantCulture)}");
                 }
+
+                foreach (var face in faces)
+                {
+                    Point3D transformedNormal = face.normal.Clone();
+                    if (matrix != null)
+                    {
+                        transformedNormal = TransformNormal(transformedNormal, matrix);
+                        transformedNormal.Normalize();
+                    }
+                    
+                    writer.WriteLine($"vn {transformedNormal.X.ToString(CultureInfo.InvariantCulture)} " +
+                                      $"{transformedNormal.Y.ToString(CultureInfo.InvariantCulture)} " +
+                                      $"{transformedNormal.Z.ToString(CultureInfo.InvariantCulture)}");
+                }
+
+                int normalIndex = 1;
                 foreach (var face in faces)
                 {
                     writer.Write("f");
                     foreach (var index in face.indexes)
                     {
-                        writer.Write($" {index + 1}");
+                        writer.Write($" {index + 1}//{normalIndex}");
                     }
                     writer.WriteLine();
+                    normalIndex++;
                 }
             }
         }
+
 
         public void ParseFromOBJ(string filePath)
         {
             points = new List<Point3D>();
             faces = new List<Face>();
+            List<Point3D> normals = new List<Point3D>();
 
             using (StreamReader reader = new StreamReader(filePath))
             {
@@ -884,7 +986,6 @@ namespace lab8
                 while ((line = reader.ReadLine()) != null)
                 {
                     line = line.Trim();
-
                     if (line.StartsWith("v "))
                     {
                         var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -896,35 +997,99 @@ namespace lab8
                             points.Add(new Point3D(x, y, z));
                         }
                     }
+                    else if (line.StartsWith("vn "))
+                    {
+                        var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 4 &&
+                            float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x) &&
+                            float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y) &&
+                            float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float z))
+                        {
+                            normals.Add(new Point3D(x, y, z));
+                        }
+                    }
                     else if (line.StartsWith("f "))
                     {
                         var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         var indexes = new List<int>();
+                        var normalIndexes = new List<int>();
 
                         for (int i = 1; i < parts.Length; i++)
                         {
                             string[] faceData = parts[i].Split('/');
                             if (int.TryParse(faceData[0], out int vertexIndex))
                             {
-                                int adjustedIndex = vertexIndex - 1;
+                                int adjustedIndex = vertexIndex - 1; 
                                 if (adjustedIndex >= 0 && adjustedIndex < points.Count)
                                 {
                                     indexes.Add(adjustedIndex);
                                 }
                             }
+
+                            if (faceData.Length > 2 && int.TryParse(faceData[2], out int normalIndex))
+                            {
+                                int adjustedNormalIndex = normalIndex - 1; 
+                                if (adjustedNormalIndex >= 0 && adjustedNormalIndex < normals.Count)
+                                {
+                                    normalIndexes.Add(adjustedNormalIndex);
+                                }
+                            }
                         }
+
                         if (indexes.Count >= 3)
                         {
-                            faces.Add(new Face(indexes));
+                            Face face = new Face(indexes);
+                            if (normalIndexes.Count > 0)
+                            {
+                                face.normal = normals[normalIndexes[0]];
+                            }
 
+                            faces.Add(face);
                         }
                     }
                 }
             }
 
-            Console.WriteLine($"Parsed {points.Count} points and {faces.Count} faces from {filePath}");
+            Console.WriteLine($"Parsed {points.Count} points, {normals.Count} normals, and {faces.Count} faces from {filePath}");
+        }
+
+
+        private Point3D TransformNormal(Point3D normal, float[][] worldMatrix)
+        {
+            float[] transformed = new float[3];
+            for (int i = 0; i < 3; i++)
+            {
+                transformed[i] =
+                    worldMatrix[0][i] * normal.X +
+                    worldMatrix[1][i] * normal.Y +
+                    worldMatrix[2][i] * normal.Z;
+            }
+            Point3D transformedNormal = new Point3D(transformed[0], transformed[1], transformed[2]);
+            transformedNormal.Normalize();
+            return transformedNormal;
+        }
+
+        public List<Face> GetVisibleFaces(Point3D viewVector, float[][] worldMatrix)
+        {
+            List<Face> visibleFaces = new List<Face>();
+
+            foreach (var face in faces)
+            {
+                if (face.normal == null) face.CalculateNormal(points);
+                var normal = face.normal;
+
+                Point3D transformedNormal = TransformNormal(normal, worldMatrix);
+                float dotProduct = transformedNormal.DotProduct(viewVector);
+
+                if (dotProduct < 0)
+                {
+                    visibleFaces.Add(face);
+                }
+            }
+            return visibleFaces;
         }
     }
+
     public class Tetrahedron : Polyhedron
     {
         public Tetrahedron()
@@ -1056,19 +1221,20 @@ namespace lab8
             };
             faces = new List<Face>()
             {
-                    new Face(new List<int> { 15, 7, 11,3, 13,  }),
+                    new Face(new List<int> { 15, 7, 11 ,3, 13,  }),
                     new Face(new List<int> { 0, 8, 4, 14, 12 }),
                     new Face(new List<int> { 0, 12, 1, 17, 16 }),
                     new Face(new List<int> { 0, 16, 2, 10, 8 }),
                     new Face(new List<int> { 1, 12, 14, 5, 9 }),
+                    new Face(new List<int> { 1, 9, 5, 14, 12, }),
+                    new Face(new List<int> { 2, 16, 17, 3, 13 }),
                     new Face(new List<int> { 4, 14, 5, 19, 18 }),
                     new Face(new List<int> { 4, 18, 6, 10, 8 }),
-                    new Face(new List<int> { 5, 14, 12, 1, 9 }),
                     new Face(new List<int> { 5, 9, 11, 7, 19 }),
-                    new Face(new List<int> { 2, 16, 17, 3, 13 }),
-                    new Face(new List<int> { 1, 12, 14, 5, 9 }),
-                    new Face(new List<int> { 6, 18, 19, 7, 15 })
-               };
+                    new Face(new List<int> { 6, 18, 19, 7, 15 }),
+                    new Face(new List<int> { 2, 10 ,6, 15, 13}),
+                    new Face(new List<int> { 3, 17, 1, 9, 11 })
+            };
         }
     }
 

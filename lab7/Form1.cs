@@ -1055,19 +1055,20 @@ namespace lab7
                 new Point3D( phi * a, 0,  b), new Point3D( phi * a, 0, -b), new Point3D(-phi * a, 0,  b), new Point3D(-phi * a, 0, -b)
             };
             faces = new List<Face>()
-            {
-                    new Face(new List<int> { 15, 7, 11,3, 13,  }),
+            { 
+                    new Face(new List<int> { 15, 7, 11 ,3, 13,  }),
                     new Face(new List<int> { 0, 8, 4, 14, 12 }), 
                     new Face(new List<int> { 0, 12, 1, 17, 16 }),
                     new Face(new List<int> { 0, 16, 2, 10, 8 }),  
-                    new Face(new List<int> { 1, 12, 14, 5, 9 }),  
+                    new Face(new List<int> { 1, 12, 14, 5, 9 }),
+                    new Face(new List<int> { 1, 9, 5, 14, 12, }),
+                    new Face(new List<int> { 2, 16, 17, 3, 13 }),
                     new Face(new List<int> { 4, 14, 5, 19, 18 }), 
                     new Face(new List<int> { 4, 18, 6, 10, 8 }),    
-                    new Face(new List<int> { 5, 14, 12, 1, 9 }),     
                     new Face(new List<int> { 5, 9, 11, 7, 19 }),
-                    new Face(new List<int> { 2, 16, 17, 3, 13 }),
-                    new Face(new List<int> { 1, 12, 14, 5, 9 }),
-                    new Face(new List<int> { 6, 18, 19, 7, 15 })    
+                    new Face(new List<int> { 6, 18, 19, 7, 15 }),
+                    new Face(new List<int> { 2, 10 ,6, 15, 13}),
+                    new Face(new List<int> { 3, 17, 1, 9, 11 })
                };
         }
     }
