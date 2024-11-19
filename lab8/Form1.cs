@@ -770,6 +770,10 @@ namespace lab8
         {
             saveWithAffin = !saveWithAffin;
         }
+        private void comboBoxPolyList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class Point3D
