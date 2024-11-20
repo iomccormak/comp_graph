@@ -18,6 +18,7 @@ namespace lab8
     {
         Perspective,
         Axonometry,
+        Parallel
     }
 
     public partial class Form1 : Form
@@ -102,220 +103,9 @@ namespace lab8
 
         public void DrawPolyhedron()
         {
-            _camera.DrawScene(_graphics, new List<Polyhedron>() { _polyhedron }, _modeView);
+            _camera.DrawScene(_graphics, new List<Polyhedron>() { _polyhedron }, _modeView, checkBoxNonFrontFaces.Checked);
             pictureBox1.Refresh();
         }
-
-        public void DrawPerspective()
-        {
-            float c = -pictureBox1.Width;
-            float offsetX = pictureBox1.Width / 2;
-            float offsetY = pictureBox1.Height / 2;
-
-            float[][] MatrixPerspective = Matrices.Perspective(c);
-
-            List<Point3D> points = new List<Point3D>();
-
-            foreach (var point in _polyhedron.points)
-            {
-                var p = point.Clone();
-                p.ApplyMatrix(_polyhedron.modelMatrix);
-                p.ApplyMatrix(MatrixPerspective);
-                points.Add(p);
-            }
-
-            List<Face> visibleFaces = _polyhedron.faces;
-            if (checkBoxNonFrontFaces.Checked)
-            {
-                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _polyhedron.modelMatrix);
-            }
-            foreach (var face in visibleFaces)
-            {
-                var indexes = face.indexes;
-
-                for (int i = 0; i < indexes.Count; i++)
-                {
-                    Point3D p1, p2;
-                    if (i == indexes.Count - 1)
-                    {
-                        p1 = points[indexes[0]];
-                        p2 = points[indexes[i]];
-                    }
-                    else
-                    {
-                        p1 = points[indexes[i]];
-                        p2 = points[indexes[i + 1]];
-                    }
-
-                    _graphics.DrawLine(
-                            _pen,
-                            p1.X / p1.W + offsetX, p1.Y / p1.W + offsetY,
-                            p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
-                            );
-                }
-            }
-
-            int l = Math.Max(pictureBox1.Height, pictureBox1.Width);
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
-            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
-            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
-            for (int i = 0; i < axeses.Count; i++)
-            {
-                var axes = axeses[i];
-                axes[0].ApplyMatrix(MatrixPerspective);
-                axes[1].ApplyMatrix(MatrixPerspective);
-
-                _graphics.DrawLine(
-                                new Pen(colors[i], 2),
-                                axes[0].X / axes[0].W, axes[0].Y / axes[0].W,
-                                axes[1].X / axes[1].W, axes[1].Y / axes[1].W
-                                );
-            }
-        }
-
-        private void DrawAxonometry()
-        {
-            double phi = 35.26d;
-            double psi = 45d;
-
-            float offsetX = pictureBox1.Width / 2;
-            float offsetY = pictureBox1.Height / 2;
-
-            float[][] MatrixAxonometry = Matrices.Axonometry(phi, psi);
-
-            List<Point3D> points = new List<Point3D>();
-
-            foreach (var point in _polyhedron.points)
-            {
-                var p = point.Clone();
-                p.ApplyMatrix(_polyhedron.modelMatrix);
-                p.ApplyMatrix(MatrixAxonometry);
-                points.Add(p);
-            }
-
-            List<Face> visibleFaces = _polyhedron.faces;
-            if (checkBoxNonFrontFaces.Checked)
-            {
-                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _polyhedron.modelMatrix);
-            }
-            foreach (var face in visibleFaces)
-            {
-                var indexes = face.indexes;
-
-                for (int i = 0; i < indexes.Count; i++)
-                {
-                    Point3D p1, p2;
-                    if (i == indexes.Count - 1)
-                    {
-                        p1 = points[indexes[0]];
-                        p2 = points[indexes[i]];
-                    }
-                    else
-                    {
-                        p1 = points[indexes[i]];
-                        p2 = points[indexes[i + 1]];
-                    }
-
-                    _graphics.DrawLine(
-                            _pen,
-                            p1.X / p1.W + offsetX, p1.Y / p1.W + offsetY,
-                            p2.X / p2.W + offsetX, p2.Y / p2.W + offsetY
-                            );
-                }
-            }
-
-            int l = Math.Max(pictureBox1.Height, pictureBox1.Width);
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
-            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
-            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
-            for (int i = 0; i < axeses.Count; i++)
-            {
-                var axes = axeses[i];
-                axes[0].ApplyMatrix(MatrixAxonometry);
-                axes[1].ApplyMatrix(MatrixAxonometry);
-
-                _graphics.DrawLine(
-                                new Pen(colors[i], 2),
-                                axes[0].X / axes[0].W + offsetX, axes[0].Y / axes[0].W + offsetY,
-                                axes[1].X / axes[1].W + offsetX, axes[1].Y / axes[1].W + offsetY
-                                );
-            }
-        }
-    
-
-        public void DrawParallel()
-        {
-            float offsetX = pictureBox1.Width / 2;
-            float offsetY = pictureBox1.Height / 2;
-
-            float[][] MatrixParallel = Matrices.ParallelProjection();
-
-            List<Point3D> points = new List<Point3D>();
-
-            foreach (var point in _polyhedron.points)
-            {
-                var p = point.Clone();
-                p.ApplyMatrix(_polyhedron.modelMatrix);
-                p.ApplyMatrix(MatrixParallel);
-                points.Add(p);
-            }
-
-            List<Face> visibleFaces = _polyhedron.faces;
-            if (checkBoxNonFrontFaces.Checked)
-            {
-                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _polyhedron.modelMatrix);
-            }
-
-            foreach (var face in visibleFaces)
-            {
-                var indexes = face.indexes;
-
-                for (int i = 0; i < indexes.Count; i++)
-                {
-                    Point3D p1, p2;
-                    if (i == indexes.Count - 1)
-                    {
-                        p1 = points[indexes[0]];
-                        p2 = points[indexes[i]];
-                    }
-                    else
-                    {
-                        p1 = points[indexes[i]];
-                        p2 = points[indexes[i + 1]];
-                    }
-
-                    _graphics.DrawLine(
-                            _pen,
-                            p1.X + offsetX, p1.Y + offsetY,
-                            p2.X + offsetX, p2.Y + offsetY
-                            );
-                }
-            }
-
-            int l = Math.Max(pictureBox1.Height, pictureBox1.Width);
-            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
-            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
-            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
-            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
-            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
-            for (int i = 0; i < axeses.Count; i++)
-            {
-                var axes = axeses[i];
-                axes[0].ApplyMatrix(MatrixParallel);
-                axes[1].ApplyMatrix(MatrixParallel);
-
-                _graphics.DrawLine(
-                                new Pen(colors[i], 2),
-                                axes[0].X + offsetX, axes[0].Y + offsetY,
-                                axes[1].X + offsetX, axes[1].Y + offsetY
-                                );
-            }
-        }
-
 
         private new void Scale(float k)
         {
@@ -462,17 +252,19 @@ namespace lab8
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            _modeView = _modeView == ModeView.Perspective ? ModeView.Axonometry : ModeView.Perspective;
+            _modeView = ModeView.Perspective;
             DrawPolyhedron();
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
+            _modeView = ModeView.Axonometry;
             DrawPolyhedron();
         }
 
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
+            _modeView = ModeView.Parallel;
             DrawPolyhedron();
         }
 
@@ -934,7 +726,7 @@ namespace lab8
             _graphics = graphics;
         }
 
-        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView)
+        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, bool checkBoxNonFrontFaces)
         {
             float c = -1000;
             double phi = 35.26d;
@@ -951,8 +743,11 @@ namespace lab8
                     case ModeView.Axonometry:
                         ProjectionMatrix = Matrices.Axonometry(phi, psi);
                         break;
+                    case ModeView.Parallel:
+                        ProjectionMatrix = Matrices.Parallel();
+                        break;
                 }
-                DrawPolyhedron(polyhedron);
+                DrawPolyhedron(polyhedron, checkBoxNonFrontFaces);
             }
             //DrawAxis();
         }
@@ -979,7 +774,7 @@ namespace lab8
             }
         }
 
-        private void DrawPolyhedron(Polyhedron polyhedron)
+        private void DrawPolyhedron(Polyhedron polyhedron, bool checkBoxNonFrontFaces)
         {
             List<Point3D> points = new List<Point3D>();
 
@@ -992,7 +787,14 @@ namespace lab8
                 points.Add(p);
             }
 
-            foreach (var face in polyhedron.faces)
+            List<Face> visibleFaces = polyhedron.faces;
+            if (checkBoxNonFrontFaces)
+            {
+                var viewVector = Target - Position;
+                viewVector.Normalize();
+                visibleFaces = polyhedron.GetVisibleFaces(viewVector, polyhedron.modelMatrix);
+            }
+            foreach (var face in visibleFaces)
             {
                 var indexes = face.indexes;
 
@@ -1791,7 +1593,7 @@ namespace lab8
             };
         }
 
-        public static float[][] ParallelProjection()
+        public static float[][] Parallel()
         {
             return new float[4][]
             {
