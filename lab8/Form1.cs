@@ -50,7 +50,7 @@ namespace lab8
         {
             InitializeComponent();
             InitModelMatrix();
-            _ViewVector = new Point3D(0, 0, pictureBox1.Width);
+            _ViewVector = new Point3D(0, 0, 200);
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -95,6 +95,10 @@ namespace lab8
             else if (radioButton2.Checked)
             {
                 DrawAxonometry();
+            }
+            else if (radioButton3.Checked)
+            {
+                DrawParallel();
             }
 
             pictureBox1.Refresh();
@@ -241,27 +245,75 @@ namespace lab8
             }
         }
 
-        public void SetPerspectiveViewVector(float cameraX, float cameraY, float cameraZ)
+        public void DrawParallel()
         {
-            // Рассчитываем центр объекта
-            Point3D center = CalculateCenter(_polyhedron.points);
+            float offsetX = pictureBox1.Width / 2;
+            float offsetY = pictureBox1.Height / 2;
 
-            // Вектор от камеры к центру объекта
-            float viewX = center.X - cameraX;
-            float viewY = center.Y - cameraY;
-            float viewZ = center.Z - cameraZ;
+            float[][] MatrixParallel = Matrices.ParallelProjection();
 
-            // Нормализация вектора
-            float length = (float)Math.Sqrt(viewX * viewX + viewY * viewY + viewZ * viewZ);
-            if (length > 0)
+            List<Point3D> points = new List<Point3D>();
+
+            foreach (var point in _polyhedron.points)
             {
-                _ViewVector = new Point3D(viewX / length, viewY / length, viewZ / length);
+                var p = point.Clone();
+                p.ApplyMatrix(_modelMatrix);
+                p.ApplyMatrix(MatrixParallel);
+                points.Add(p);
             }
-            else
+
+            List<Face> visibleFaces = _polyhedron.faces;
+            if (checkBoxNonFrontFaces.Checked)
             {
-                _ViewVector = new Point3D(0, 0, 1); // На случай, если камера совпадает с центром
+                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+            }
+
+            foreach (var face in visibleFaces)
+            {
+                var indexes = face.indexes;
+
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Point3D p1, p2;
+                    if (i == indexes.Count - 1)
+                    {
+                        p1 = points[indexes[0]];
+                        p2 = points[indexes[i]];
+                    }
+                    else
+                    {
+                        p1 = points[indexes[i]];
+                        p2 = points[indexes[i + 1]];
+                    }
+
+                    _graphics.DrawLine(
+                            _pen,
+                            p1.X + offsetX, p1.Y + offsetY,
+                            p2.X + offsetX, p2.Y + offsetY
+                            );
+                }
+            }
+
+            int l = Math.Max(pictureBox1.Height, pictureBox1.Width);
+            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
+            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
+            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
+            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
+            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
+            for (int i = 0; i < axeses.Count; i++)
+            {
+                var axes = axeses[i];
+                axes[0].ApplyMatrix(MatrixParallel);
+                axes[1].ApplyMatrix(MatrixParallel);
+
+                _graphics.DrawLine(
+                                new Pen(colors[i], 2),
+                                axes[0].X + offsetX, axes[0].Y + offsetY,
+                                axes[1].X + offsetX, axes[1].Y + offsetY
+                                );
             }
         }
+
 
         private new void Scale(float k)
         {
@@ -412,6 +464,11 @@ namespace lab8
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            DrawPolyhedron();
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
             DrawPolyhedron();
         }
@@ -803,6 +860,11 @@ namespace lab8
         private void comboBoxPolyList_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void checkBoxNonFrontFaces_CheckedChanged(object sender, EventArgs e)
+        {
+            DrawPolyhedron();
         }
     }
 
@@ -1510,6 +1572,18 @@ namespace lab8
                 new float[4] { 0, 0, 0, 1 },
             };
         }
+
+        public static float[][] ParallelProjection()
+        {
+            return new float[4][]
+            {
+                new float[4] { 1, 0, 0, 0 },
+                new float[4] { 0, 1, 0, 0 },
+                new float[4] { 0, 0, 0, 0 }, // Параллельная проекция игнорирует глубину
+                new float[4] { 0, 0, 0, 1 },
+            };
+        }
+
 
         public static float[][] MultiplyMatrix(float[][] matrixA, float[][] matrixB)
         {

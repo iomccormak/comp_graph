@@ -53,6 +53,7 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxNonFrontFaces = new System.Windows.Forms.CheckBox();
             this.comboBoxPolyList = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -72,7 +73,7 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.checkBoxNonFrontFaces = new System.Windows.Forms.CheckBox();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -90,6 +91,7 @@
             // groupBox1
             // 
             this.groupBox1.AutoSize = true;
+            this.groupBox1.Controls.Add(this.radioButton3);
             this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.resetButton);
             this.groupBox1.Controls.Add(this.textBoxRotateLine);
@@ -113,7 +115,7 @@
             this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(167, 581);
+            this.groupBox1.Size = new System.Drawing.Size(167, 588);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
@@ -124,7 +126,7 @@
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checkBox1.Location = new System.Drawing.Point(83, 329);
+            this.checkBox1.Location = new System.Drawing.Point(83, 349);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(78, 17);
             this.checkBox1.TabIndex = 20;
@@ -134,7 +136,7 @@
             // 
             // resetButton
             // 
-            this.resetButton.Location = new System.Drawing.Point(6, 397);
+            this.resetButton.Location = new System.Drawing.Point(6, 413);
             this.resetButton.Name = "resetButton";
             this.resetButton.Size = new System.Drawing.Size(150, 43);
             this.resetButton.TabIndex = 19;
@@ -144,7 +146,7 @@
             // 
             // textBoxRotateLine
             // 
-            this.textBoxRotateLine.Location = new System.Drawing.Point(6, 371);
+            this.textBoxRotateLine.Location = new System.Drawing.Point(6, 387);
             this.textBoxRotateLine.Name = "textBoxRotateLine";
             this.textBoxRotateLine.Size = new System.Drawing.Size(150, 20);
             this.textBoxRotateLine.TabIndex = 18;
@@ -155,7 +157,7 @@
             // labelRotateLine
             // 
             this.labelRotateLine.AutoSize = true;
-            this.labelRotateLine.Location = new System.Drawing.Point(6, 355);
+            this.labelRotateLine.Location = new System.Drawing.Point(6, 371);
             this.labelRotateLine.Name = "labelRotateLine";
             this.labelRotateLine.Size = new System.Drawing.Size(128, 13);
             this.labelRotateLine.TabIndex = 17;
@@ -163,7 +165,7 @@
             // 
             // textBoxRotateAxis
             // 
-            this.textBoxRotateAxis.Location = new System.Drawing.Point(6, 327);
+            this.textBoxRotateAxis.Location = new System.Drawing.Point(6, 346);
             this.textBoxRotateAxis.Name = "textBoxRotateAxis";
             this.textBoxRotateAxis.Size = new System.Drawing.Size(71, 20);
             this.textBoxRotateAxis.TabIndex = 16;
@@ -174,7 +176,7 @@
             // labelRotateAxis
             // 
             this.labelRotateAxis.AutoSize = true;
-            this.labelRotateAxis.Location = new System.Drawing.Point(6, 310);
+            this.labelRotateAxis.Location = new System.Drawing.Point(6, 330);
             this.labelRotateAxis.Name = "labelRotateAxis";
             this.labelRotateAxis.Size = new System.Drawing.Size(117, 13);
             this.labelRotateAxis.TabIndex = 15;
@@ -182,7 +184,7 @@
             // 
             // reflectTextBox
             // 
-            this.reflectTextBox.Location = new System.Drawing.Point(6, 281);
+            this.reflectTextBox.Location = new System.Drawing.Point(6, 307);
             this.reflectTextBox.Name = "reflectTextBox";
             this.reflectTextBox.Size = new System.Drawing.Size(150, 20);
             this.reflectTextBox.TabIndex = 14;
@@ -193,7 +195,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 265);
+            this.label6.Location = new System.Drawing.Point(9, 291);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(125, 13);
             this.label6.TabIndex = 13;
@@ -201,7 +203,7 @@
             // 
             // translationTextBox
             // 
-            this.translationTextBox.Location = new System.Drawing.Point(6, 242);
+            this.translationTextBox.Location = new System.Drawing.Point(6, 269);
             this.translationTextBox.Name = "translationTextBox";
             this.translationTextBox.Size = new System.Drawing.Size(150, 20);
             this.translationTextBox.TabIndex = 12;
@@ -212,7 +214,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 226);
+            this.label5.Location = new System.Drawing.Point(6, 253);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(97, 13);
             this.label5.TabIndex = 11;
@@ -220,7 +222,7 @@
             // 
             // applyButton
             // 
-            this.applyButton.Location = new System.Drawing.Point(6, 155);
+            this.applyButton.Location = new System.Drawing.Point(6, 176);
             this.applyButton.Name = "applyButton";
             this.applyButton.Size = new System.Drawing.Size(150, 23);
             this.applyButton.TabIndex = 10;
@@ -231,7 +233,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 66);
+            this.label4.Location = new System.Drawing.Point(3, 93);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(80, 13);
             this.label4.TabIndex = 9;
@@ -240,7 +242,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 111);
+            this.label3.Location = new System.Drawing.Point(6, 133);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(152, 13);
             this.label3.TabIndex = 8;
@@ -256,7 +258,7 @@
             "Масштаб",
             "Отражение",
             "Вращение"});
-            this.comboBoxAthenian.Location = new System.Drawing.Point(6, 127);
+            this.comboBoxAthenian.Location = new System.Drawing.Point(6, 149);
             this.comboBoxAthenian.Name = "comboBoxAthenian";
             this.comboBoxAthenian.Size = new System.Drawing.Size(150, 21);
             this.comboBoxAthenian.TabIndex = 7;
@@ -265,7 +267,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 447);
+            this.label2.Location = new System.Drawing.Point(6, 459);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(40, 13);
             this.label2.TabIndex = 6;
@@ -273,7 +275,7 @@
             // 
             // textBoxOutput
             // 
-            this.textBoxOutput.Location = new System.Drawing.Point(6, 466);
+            this.textBoxOutput.Location = new System.Drawing.Point(6, 475);
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
             this.textBoxOutput.Size = new System.Drawing.Size(150, 94);
@@ -282,7 +284,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 187);
+            this.label1.Location = new System.Drawing.Point(6, 214);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(101, 13);
             this.label1.TabIndex = 4;
@@ -290,7 +292,7 @@
             // 
             // textBoxScale
             // 
-            this.textBoxScale.Location = new System.Drawing.Point(6, 203);
+            this.textBoxScale.Location = new System.Drawing.Point(6, 230);
             this.textBoxScale.Name = "textBoxScale";
             this.textBoxScale.Size = new System.Drawing.Size(150, 20);
             this.textBoxScale.TabIndex = 3;
@@ -310,7 +312,7 @@
             "Икосаэдр",
             "Додекаэдр",
             "Параллелепипед"});
-            this.comboBoxPolyhedron.Location = new System.Drawing.Point(6, 85);
+            this.comboBoxPolyhedron.Location = new System.Drawing.Point(6, 109);
             this.comboBoxPolyhedron.Name = "comboBoxPolyhedron";
             this.comboBoxPolyhedron.Size = new System.Drawing.Size(150, 21);
             this.comboBoxPolyhedron.TabIndex = 2;
@@ -320,7 +322,7 @@
             // 
             this.radioButton2.AutoSize = true;
             this.radioButton2.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButton2.Location = new System.Drawing.Point(7, 44);
+            this.radioButton2.Location = new System.Drawing.Point(6, 63);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(99, 17);
             this.radioButton2.TabIndex = 1;
@@ -333,7 +335,7 @@
             this.radioButton1.AutoSize = true;
             this.radioButton1.Checked = true;
             this.radioButton1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButton1.Location = new System.Drawing.Point(7, 20);
+            this.radioButton1.Location = new System.Drawing.Point(6, 40);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(92, 17);
             this.radioButton1.TabIndex = 0;
@@ -370,6 +372,18 @@
             this.groupBox2.Size = new System.Drawing.Size(190, 581);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
+            // 
+            // checkBoxNonFrontFaces
+            // 
+            this.checkBoxNonFrontFaces.AutoSize = true;
+            this.checkBoxNonFrontFaces.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.checkBoxNonFrontFaces.Location = new System.Drawing.Point(6, 230);
+            this.checkBoxNonFrontFaces.Name = "checkBoxNonFrontFaces";
+            this.checkBoxNonFrontFaces.Size = new System.Drawing.Size(178, 17);
+            this.checkBoxNonFrontFaces.TabIndex = 22;
+            this.checkBoxNonFrontFaces.Text = "Отсечение невидимых граней";
+            this.checkBoxNonFrontFaces.UseVisualStyleBackColor = true;
+            this.checkBoxNonFrontFaces.CheckedChanged += new System.EventHandler(this.checkBoxNonFrontFaces_CheckedChanged);
             // 
             // comboBoxPolyList
             // 
@@ -565,16 +579,16 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // checkBoxNonFrontFaces
+            // radioButton3
             // 
-            this.checkBoxNonFrontFaces.AutoSize = true;
-            this.checkBoxNonFrontFaces.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checkBoxNonFrontFaces.Location = new System.Drawing.Point(6, 230);
-            this.checkBoxNonFrontFaces.Name = "checkBoxNonFrontFaces";
-            this.checkBoxNonFrontFaces.Size = new System.Drawing.Size(178, 17);
-            this.checkBoxNonFrontFaces.TabIndex = 22;
-            this.checkBoxNonFrontFaces.Text = "Отсечение невидимых граней";
-            this.checkBoxNonFrontFaces.UseVisualStyleBackColor = true;
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Location = new System.Drawing.Point(6, 17);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(99, 17);
+            this.radioButton3.TabIndex = 21;
+            this.radioButton3.Text = "Параллельная";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            this.radioButton3.Click += new System.EventHandler(this.radioButton3_CheckedChanged);
             // 
             // Form1
             // 
@@ -646,6 +660,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ComboBox comboBoxPolyList;
         private System.Windows.Forms.CheckBox checkBoxNonFrontFaces;
+        private System.Windows.Forms.RadioButton radioButton3;
     }
 }
 
