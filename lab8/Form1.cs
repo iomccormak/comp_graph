@@ -14,6 +14,12 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 
 namespace lab8
 {
+    public enum ModeView
+    {
+        Perspective,
+        Axonometry,
+    }
+
     public partial class Form1 : Form
     {
         Pen _pen;
@@ -22,11 +28,13 @@ namespace lab8
         Graphics _graphics;
         Graphics _graphicsRotationFigure;
         Polyhedron _polyhedron;
-        float[][] _modelMatrix;
         Mode _mode;
+        ModeView _modeView;
         ModeRotationFigure _modeRotationFigure;
         List<Point> _points;
         Func<float, float, float> _function;
+        private bool saveWithAffin = false;
+        Camera _camera;
 
         enum Mode
         {
@@ -48,20 +56,23 @@ namespace lab8
         public Form1()
         {
             InitializeComponent();
-            InitModelMatrix();
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             _bitmapRotationFigure = new Bitmap(pictureBoxRotationFigure.Width, pictureBoxRotationFigure.Height);
             _graphics = Graphics.FromImage(_bitmap);
+            _graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            //_graphics.ScaleTransform(1, -1);
             _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
             _graphicsRotationFigure.Clear(Color.White);
+            _camera = new Camera(_graphics, _pen);
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
             checkBox1.Checked = false;
             comboBoxPolyhedron.SelectedIndex = 4;
             _mode = Mode.None;
+            _modeView = ModeView.Perspective;
             _modeRotationFigure = ModeRotationFigure.DrawPoints;
             createRotationFigureButton.Enabled = false;
             _points = new List<Point>();
@@ -69,36 +80,9 @@ namespace lab8
             DrawPolyhedron();
         }
 
-
-
-
-
-        private bool saveWithAffin = false;
-
-        private void InitModelMatrix()
-        {
-            _modelMatrix = new float[4][]
-            {
-                new float[4] { 1, 0, 0, 0 },
-                new float[4] { 0, 1, 0, 0 },
-                new float[4] { 0, 0, 1, 0 },
-                new float[4] { 0, 0, 0, 1 },
-            };
-        }
-
         public void DrawPolyhedron()
         {
-            _graphics.Clear(Color.White);
-
-            if (radioButton1.Checked)
-            {
-                DrawPerspective();
-            }
-            else if (radioButton2.Checked)
-            {
-                DrawAxonometry();
-            }
-
+            _camera.DrawScene(_graphics, new List<Polyhedron>() { _polyhedron }, _modeView);
             pictureBox1.Refresh();
         }
 
@@ -115,7 +99,7 @@ namespace lab8
             foreach (var point in _polyhedron.points)
             {
                 var p = point.Clone();
-                p.ApplyMatrix(_modelMatrix);
+                p.ApplyMatrix(_polyhedron.modelMatrix);
                 p.ApplyMatrix(MatrixPerspective);
                 points.Add(p);
             }
@@ -160,11 +144,10 @@ namespace lab8
 
                 _graphics.DrawLine(
                                 new Pen(colors[i], 2),
-                                axes[0].X / axes[0].W + offsetX, axes[0].Y / axes[0].W + offsetY,
-                                axes[1].X / axes[1].W + offsetX, axes[1].Y / axes[1].W + offsetY
+                                axes[0].X / axes[0].W, axes[0].Y / axes[0].W,
+                                axes[1].X / axes[1].W, axes[1].Y / axes[1].W
                                 );
             }
-
         }
 
         private void DrawAxonometry()
@@ -182,7 +165,7 @@ namespace lab8
             foreach (var point in _polyhedron.points)
             {
                 var p = point.Clone();
-                p.ApplyMatrix(_modelMatrix);
+                p.ApplyMatrix(_polyhedron.modelMatrix);
                 p.ApplyMatrix(MatrixAxonometry);
                 points.Add(p);
             }
@@ -232,12 +215,13 @@ namespace lab8
                                 );
             }
         }
+    
 
         private new void Scale(float k)
         {
             float[][] MatrixScale = Matrices.Scale(k);
 
-            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, MatrixScale);
+            _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, MatrixScale);
 
             DrawPolyhedron();
         }
@@ -270,7 +254,7 @@ namespace lab8
 
             float[][] rotationMatrix = Matrices.RotationLine(l, m, n, sin, cos);
 
-            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, rotationMatrix);
+            _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, rotationMatrix);
 
             DrawPolyhedron();
         }
@@ -319,7 +303,7 @@ namespace lab8
 
         private void XYZRotatePoint(float[][] rotationMatrix)
         {
-            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, rotationMatrix);
+            _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, rotationMatrix);
         }
 
         public float[][] CreateXRotationMatrix(float angle)
@@ -344,7 +328,7 @@ namespace lab8
         {
             float[][] TranslationMatrix = Matrices.Translation(dx, dy, dz);
 
-            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, TranslationMatrix);
+            _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, TranslationMatrix);
 
             if (draw)
                 DrawPolyhedron();
@@ -370,7 +354,7 @@ namespace lab8
                     return;
             }
 
-            _modelMatrix = Matrices.MultiplyMatrix(_modelMatrix, reflectionMatrix);
+            _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, reflectionMatrix);
 
             DrawPolyhedron();
         }
@@ -378,6 +362,7 @@ namespace lab8
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
+            _modeView = _modeView == ModeView.Perspective ? ModeView.Axonometry : ModeView.Perspective;
             DrawPolyhedron();
         }
 
@@ -566,7 +551,7 @@ namespace lab8
 
         private void resetButton_Click(object sender, EventArgs e)
         {
-            InitModelMatrix();
+            _polyhedron.modelMatrix = Matrices.Identity();
             DrawPolyhedron();
             applyButton.Focus();
         }
@@ -579,6 +564,7 @@ namespace lab8
                 pictureBox1.Height = this.ClientSize.Height - 25;
                 _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
                 _graphics = Graphics.FromImage(_bitmap);
+                _graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
                 pictureBox1.Image = _bitmap;
                 DrawPolyhedron();
             }
@@ -756,7 +742,7 @@ namespace lab8
         {
             try
             {
-                _polyhedron.SaveToFileInProjectFolder(saveWithAffin ? _modelMatrix : null);
+                _polyhedron.SaveToFileInProjectFolder(saveWithAffin ? _polyhedron.modelMatrix : null);
                 MessageBox.Show("Модель сохранена в папке проекта (Models/modifiedModel.obj)");
             }
             catch (Exception ex)
@@ -770,13 +756,225 @@ namespace lab8
         {
             saveWithAffin = !saveWithAffin;
         }
+
         private void comboBoxPolyList_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W || e.KeyCode == Keys.A || e.KeyCode == Keys.S || e.KeyCode == Keys.S)
+            {
+                if (ActiveControl is System.Windows.Forms.TextBox)
+                {
+                    return;
+                }
+            }
+
+            switch (e.KeyCode)
+            {
+                case Keys.W:
+                    _camera.MoveUp();
+                    break;
+                case Keys.A:
+                    _camera.MoveLeft();
+                    break;
+                case Keys.S:
+                    _camera.MoveDown();
+                    break;
+                case Keys.D:
+                    _camera.MoveRight();
+                    break;
+                case Keys.NumPad8:
+                    _camera.RotateUp();
+                    break;
+                case Keys.NumPad2:
+                    _camera.RotateDown();
+                    break;
+                case Keys.NumPad4:
+                    _camera.RotateRight();
+                    break;
+                case Keys.NumPad6:
+                    _camera.RotateLeft();
+                    break;
+                default:
+                    break;
+            }
+            DrawPolyhedron();
+        }
     }
 
-    public class Point3D
+    public class Camera
+    {
+        public Point3D Position {  get; set; }
+        public Point3D Target { get; set; }
+        public float[][] ViewMatrix { get; set; }
+        public float[][] ProjectionMatrix { get; set; }
+
+        private Graphics _graphics;
+        private Pen _pen;
+
+        public Camera(Graphics graphics, Pen pen)
+        {
+            Position = new Point3D(0, 0, 200);
+            Target = new Point3D(0, 1, 0);
+            ViewMatrix = Matrices.Identity();
+            _pen = pen;
+            _graphics = graphics;
+        }
+
+        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView)
+        {
+            float c = -1000;
+            double phi = 35.26d;
+            double psi = 45d;
+            _graphics = graphics;
+            _graphics.Clear(Color.White);
+            foreach (Polyhedron polyhedron in polyhedrons)
+            {
+                switch (modeView)
+                {
+                    case ModeView.Perspective:
+                        ProjectionMatrix = Matrices.Perspective(c);                        
+                        break;
+                    case ModeView.Axonometry:
+                        ProjectionMatrix = Matrices.Axonometry(phi, psi);
+                        break;
+                }
+                DrawPolyhedron(polyhedron);
+            }
+            //DrawAxis();
+        }
+
+        private void DrawAxis()
+        {
+            int l = Math.Max(int.MaxValue / 2, int.MaxValue / 2);
+            List<Point3D> Ox = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(l, 0, 0) };
+            List<Point3D> Oy = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, l, 0) };
+            List<Point3D> Oz = new List<Point3D>() { new Point3D(0, 0, 0), new Point3D(0, 0, l) };
+            List<Color> colors = new List<Color>() { Color.Red, Color.Green, Color.Blue };
+            var axeses = new List<List<Point3D>>() { Ox, Oy, Oz };
+            for (int i = 0; i < axeses.Count; i++)
+            {
+                var axes = axeses[i];
+                axes[0].ApplyMatrix(ProjectionMatrix);                
+                axes[1].ApplyMatrix(ProjectionMatrix);
+
+                _graphics.DrawLine(
+                                new Pen(colors[i], 2),
+                                axes[0].X / axes[0].W, axes[0].Y / axes[0].W,
+                                axes[1].X / axes[1].W, axes[1].Y / axes[1].W
+                                );
+            }
+        }
+
+        private void DrawPolyhedron(Polyhedron polyhedron)
+        {
+            List<Point3D> points = new List<Point3D>();
+
+            foreach (Point3D point in polyhedron.points)
+            {
+                Point3D p = point.Clone();
+                p.ApplyMatrix(polyhedron.modelMatrix);
+                p.ApplyMatrix(ViewMatrix);
+                p.ApplyMatrix(ProjectionMatrix);
+                points.Add(p);
+            }
+
+            foreach (var face in polyhedron.faces)
+            {
+                var indexes = face.indexes;
+
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Point3D p1, p2;
+                    if (i == indexes.Count - 1)
+                    {
+                        p1 = points[indexes[0]];
+                        p2 = points[indexes[i]];
+                    }
+                    else
+                    {
+                        p1 = points[indexes[i]];
+                        p2 = points[indexes[i + 1]];
+                    }
+
+                    _graphics.DrawLine(
+                            _pen,
+                            p1.X / p1.W, p1.Y / p1.W,
+                            p2.X / p2.W, p2.Y / p2.W
+                            );
+                }
+            }
+        }
+
+        public void Move(float[][] transformMatrix)
+        {
+            ViewMatrix = Matrices.MultiplyMatrix(ViewMatrix, transformMatrix);
+            Position.ApplyMatrix(transformMatrix);
+        }
+
+        public void Rotate(float[][] transformMatrix)
+        {
+            ViewMatrix = Matrices.MultiplyMatrix(ViewMatrix, transformMatrix);
+            Position.ApplyMatrix(transformMatrix);
+        }
+
+        public void MoveUp()
+        {
+            float[][] translation = Matrices.Translation(0, 10, 0);
+            Move(translation);
+        }
+
+        public void MoveDown()
+        {
+            float[][] translation = Matrices.Translation(0, -10, 0);
+            Move(translation);
+        }
+
+        public void MoveRight()
+        {
+            float[][] translation = Matrices.Translation(10, 0, 0);
+            Move(translation);
+        }
+
+        public void MoveLeft()
+        {
+            float[][] translation = Matrices.Translation(-10, 0, 0);
+            Move(translation);
+        }
+
+        public void RotateUp()
+        {
+            float rad = (float)(10 * Math.PI / 180);
+            float[][] rotation = Matrices.XRotationMatrix(rad);
+            Rotate(rotation);
+        }
+
+        public void RotateDown()
+        {
+            float rad = (float)(10 * Math.PI / 180);
+            float[][] rotation = Matrices.XRotationMatrix(-rad);
+            Rotate(rotation);
+        }
+
+        public void RotateRight()
+        {
+            float rad = (float)(10 * Math.PI / 180);
+            float[][] rotation = Matrices.YRotationMatrix(rad);
+            Rotate(rotation);
+        }
+
+        public void RotateLeft()
+        {
+            float rad = (float)(10 * Math.PI / 180);
+            float[][] rotation = Matrices.YRotationMatrix(-rad);
+            Rotate(rotation);
+        }
+    }
+
+    public class Point3D    
     {
         public float X, Y, Z, W;
         public Point3D(float _X, float _Y, float _Z)
@@ -833,11 +1031,13 @@ namespace lab8
         public const int EDGE_LENGTH = 200;
         public List<Point3D> points;
         public List<Face> faces;
+        public float[][] modelMatrix;
 
         public Polyhedron()
         {
             points = new List<Point3D>();
             faces = new List<Face>();
+            modelMatrix = Matrices.Identity();
         }
 
         public void SaveToFileInProjectFolder(float[][] matrix = null)
@@ -1335,6 +1535,17 @@ namespace lab8
                 new float[4] { 0, (float)Math.Cos(phi), 0, 0 },
                 new float[4] { (float)Math.Sin(psi), -(float)Math.Sin(phi) * (float)Math.Cos(psi), 0, 0 },
                 new float[4] { 0, 0, 0, 1 },
+            };
+        }
+
+        public static float[][] Identity()
+        {
+            return new float[][]
+            {
+                new float[] {1, 0, 0, 0},
+                new float[] {0, 1, 0, 0},
+                new float[] {0, 0, 1, 0},
+                new float[] {0, 0, 0, 1},
             };
         }
 
