@@ -57,7 +57,6 @@ namespace lab8
         public Form1()
         {
             InitializeComponent();
-            InitModelMatrix();
             _ViewVector = new Point3D(0, 0, 200);
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
@@ -128,7 +127,7 @@ namespace lab8
             List<Face> visibleFaces = _polyhedron.faces;
             if (checkBoxNonFrontFaces.Checked)
             {
-                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _polyhedron.modelMatrix);
             }
             foreach (var face in visibleFaces)
             {
@@ -199,7 +198,7 @@ namespace lab8
             List<Face> visibleFaces = _polyhedron.faces;
             if (checkBoxNonFrontFaces.Checked)
             {
-                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _polyhedron.modelMatrix);
             }
             foreach (var face in visibleFaces)
             {
@@ -260,7 +259,7 @@ namespace lab8
             foreach (var point in _polyhedron.points)
             {
                 var p = point.Clone();
-                p.ApplyMatrix(_modelMatrix);
+                p.ApplyMatrix(_polyhedron.modelMatrix);
                 p.ApplyMatrix(MatrixParallel);
                 points.Add(p);
             }
@@ -268,7 +267,7 @@ namespace lab8
             List<Face> visibleFaces = _polyhedron.faces;
             if (checkBoxNonFrontFaces.Checked)
             {
-                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _polyhedron.modelMatrix);
             }
 
             foreach (var face in visibleFaces)
