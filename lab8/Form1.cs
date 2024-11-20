@@ -118,8 +118,11 @@ namespace lab8
                 points.Add(p);
             }
 
-            List<Face> visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
-
+            List<Face> visibleFaces = _polyhedron.faces;
+            if (checkBoxNonFrontFaces.Checked)
+            {
+                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+            }
             foreach (var face in visibleFaces)
             {
                 var indexes = face.indexes;
@@ -187,7 +190,11 @@ namespace lab8
                 points.Add(p);
             }
 
-            List<Face> visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+            List<Face> visibleFaces = _polyhedron.faces;
+            if (checkBoxNonFrontFaces.Checked)
+            {
+                visibleFaces = _polyhedron.GetVisibleFaces(_ViewVector, _modelMatrix);
+            }
             foreach (var face in visibleFaces)
             {
                 var indexes = face.indexes;

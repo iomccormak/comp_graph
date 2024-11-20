@@ -53,6 +53,7 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.comboBoxPolyList = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -71,7 +72,7 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.comboBoxPolyList = new System.Windows.Forms.ComboBox();
+            this.checkBoxNonFrontFaces = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -82,7 +83,7 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(185, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(761, 581);
+            this.pictureBox1.Size = new System.Drawing.Size(750, 581);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -345,6 +346,7 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.checkBoxNonFrontFaces);
             this.groupBox2.Controls.Add(this.comboBoxPolyList);
             this.groupBox2.Controls.Add(this.label10);
             this.groupBox2.Controls.Add(this.label9);
@@ -363,16 +365,25 @@
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.saveButton);
             this.groupBox2.Controls.Add(this.loadButton);
-            this.groupBox2.Location = new System.Drawing.Point(952, 12);
+            this.groupBox2.Location = new System.Drawing.Point(941, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(179, 581);
+            this.groupBox2.Size = new System.Drawing.Size(190, 581);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
+            // 
+            // comboBoxPolyList
+            // 
+            this.comboBoxPolyList.FormattingEnabled = true;
+            this.comboBoxPolyList.Location = new System.Drawing.Point(12, 203);
+            this.comboBoxPolyList.Name = "comboBoxPolyList";
+            this.comboBoxPolyList.Size = new System.Drawing.Size(165, 21);
+            this.comboBoxPolyList.TabIndex = 21;
+            this.comboBoxPolyList.SelectedIndexChanged += new System.EventHandler(this.comboBoxPolyList_SelectedIndexChanged);
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(8, 144);
+            this.label10.Location = new System.Drawing.Point(13, 132);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(97, 13);
             this.label10.TabIndex = 20;
@@ -381,7 +392,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(8, 93);
+            this.label9.Location = new System.Drawing.Point(13, 93);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(130, 13);
             this.label9.TabIndex = 19;
@@ -389,7 +400,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(6, 117);
+            this.textBox1.Location = new System.Drawing.Point(12, 109);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(165, 20);
             this.textBox1.TabIndex = 18;
@@ -403,7 +414,7 @@
             "sin(x)+cos(y)",
             "cos(x+y)",
             "5*cos(x^2+y^2+1)/(x^2+y^2+1)+0.1)"});
-            this.comboBox1.Location = new System.Drawing.Point(6, 163);
+            this.comboBox1.Location = new System.Drawing.Point(12, 148);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(165, 21);
             this.comboBox1.TabIndex = 17;
@@ -411,7 +422,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(6, 190);
+            this.button1.Location = new System.Drawing.Point(12, 175);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(165, 23);
             this.button1.TabIndex = 16;
@@ -433,7 +444,7 @@
             // 
             this.checkBox2.AutoSize = true;
             this.checkBox2.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checkBox2.Location = new System.Drawing.Point(8, 72);
+            this.checkBox2.Location = new System.Drawing.Point(12, 72);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(165, 17);
             this.checkBox2.TabIndex = 11;
@@ -530,7 +541,7 @@
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(6, 43);
+            this.saveButton.Location = new System.Drawing.Point(12, 43);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(165, 23);
             this.saveButton.TabIndex = 1;
@@ -540,7 +551,7 @@
             // 
             // loadButton
             // 
-            this.loadButton.Location = new System.Drawing.Point(6, 14);
+            this.loadButton.Location = new System.Drawing.Point(12, 17);
             this.loadButton.Name = "loadButton";
             this.loadButton.Size = new System.Drawing.Size(165, 23);
             this.loadButton.TabIndex = 0;
@@ -554,14 +565,16 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // comboBoxPolyList
+            // checkBoxNonFrontFaces
             // 
-            this.comboBoxPolyList.FormattingEnabled = true;
-            this.comboBoxPolyList.Location = new System.Drawing.Point(6, 219);
-            this.comboBoxPolyList.Name = "comboBoxPolyList";
-            this.comboBoxPolyList.Size = new System.Drawing.Size(165, 21);
-            this.comboBoxPolyList.TabIndex = 21;
-            this.comboBoxPolyList.SelectedIndexChanged += new System.EventHandler(this.comboBoxPolyList_SelectedIndexChanged);
+            this.checkBoxNonFrontFaces.AutoSize = true;
+            this.checkBoxNonFrontFaces.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.checkBoxNonFrontFaces.Location = new System.Drawing.Point(6, 230);
+            this.checkBoxNonFrontFaces.Name = "checkBoxNonFrontFaces";
+            this.checkBoxNonFrontFaces.Size = new System.Drawing.Size(178, 17);
+            this.checkBoxNonFrontFaces.TabIndex = 22;
+            this.checkBoxNonFrontFaces.Text = "Отсечение невидимых граней";
+            this.checkBoxNonFrontFaces.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -632,6 +645,7 @@
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ComboBox comboBoxPolyList;
+        private System.Windows.Forms.CheckBox checkBoxNonFrontFaces;
     }
 }
 
