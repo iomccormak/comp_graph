@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -34,7 +35,6 @@ namespace lab8
         ModeRotationFigure _modeRotationFigure;
         List<Point> _points;
         Func<float, float, float> _function;
-        Point3D _ViewVector;
         private bool saveWithAffin = false;
         Camera _camera;
 
@@ -58,7 +58,6 @@ namespace lab8
         public Form1()
         {
             InitializeComponent();
-            _ViewVector = new Point3D(0, 0, 200);
             _polyhedron = new Hexahedron();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -75,11 +74,12 @@ namespace lab8
             checkBox1.Checked = false;
             comboBoxPolyhedron.SelectedIndex = 4;
             _mode = Mode.None;
-            _modeView = ModeView.Perspective;
+            _modeView = ModeView.Parallel;
             _modeRotationFigure = ModeRotationFigure.DrawPoints;
             createRotationFigureButton.Enabled = false;
             _points = new List<Point>();
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
+            checkBoxNonFrontFaces.Checked = true;
             DrawPolyhedron();
         }
 
@@ -701,14 +701,20 @@ namespace lab8
                     _camera.RotateDown();
                     break;
                 case Keys.NumPad4:
-                    _camera.RotateRight();
+                    _camera.RotateLeft();
                     break;
                 case Keys.NumPad6:
-                    _camera.RotateLeft();
+                    _camera.RotateRight();
                     break;
                 default:
                     break;
             }
+            DrawPolyhedron();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            _camera = new Camera(_graphics, _pen);
             DrawPolyhedron();
         }
     }
@@ -729,8 +735,10 @@ namespace lab8
 
         public Camera(Graphics graphics, Pen pen)
         {
-            Position = new Point3D(0, 0, -1000);
-            Target = new Point3D(0, 1, 0);
+            Position = new Point3D(0, 0, 1000);
+            Target = new Point3D(0, 0, 0);
+            //forward = Position - Target;
+            //forward.Normalize();
             ViewMatrix = Matrices.Identity();
             _pen = pen;
             _graphics = graphics;
@@ -738,9 +746,9 @@ namespace lab8
 
         public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, bool checkBoxNonFrontFaces)
         {
-            float c = Position.Z;
-            double phi = 35.26d;
-            double psi = 45d;
+            float c = -Position.Z;
+            //double phi = 35.26d;
+            //double psi = 45d;
             _graphics = graphics;
             _graphics.Clear(Color.White);
 
@@ -750,7 +758,8 @@ namespace lab8
                     ProjectionMatrix = Matrices.Perspective(c);
                     break;
                 case ModeView.Axonometry:
-                    ProjectionMatrix = Matrices.Axonometry(phi, psi);
+                    //ProjectionMatrix = Matrices.Axonometry(phi, psi);
+                    ProjectionMatrix = Matrices.Perspective(c);
                     break;
                 case ModeView.Parallel:
                     ProjectionMatrix = Matrices.Parallel();
@@ -796,7 +805,7 @@ namespace lab8
             List<Face> visibleFaces = polyhedron.faces;
             if (checkBoxNonFrontFaces)
             {
-                var viewVector = Position - Target;
+                var viewVector = Target - Position;
                 viewVector.Normalize();
                 visibleFaces = polyhedron.GetVisibleFaces(viewVector);
             }
@@ -843,49 +852,43 @@ namespace lab8
         {
             forward = Target - Position;
             forward.Normalize();
-            right = forward.CrossProduct(new Point3D(0, 1, 0));
+            right = forward.CrossProduct(up);
             right.Normalize();
-            up = forward.CrossProduct(right);
+            up = right.CrossProduct(forward);
             up.Normalize();
 
             ViewMatrix = new float[][] {
-                new float[] { right.X,   up.X,   forward.X,   0 },
-                new float[] { right.Y,   up.Y,   forward.Y,   0 },
-                new float[] { right.Z,   up.Z,   forward.Z,   0 },
-                new float[] { -right.DotProduct(Position), -up.DotProduct(Position), -forward.DotProduct(Position),      1 }
+                new float[] { right.X, up.X, forward.X, 0 },
+                new float[] { right.Y, up.Y, forward.Y, 0 },
+                new float[] { right.Z, up.Z, forward.Z, 0 },
+                new float[] { -right.DotProduct(Position), -up.DotProduct(Position), -forward.DotProduct(Position), 1 }
             };
         }
 
         public void Move(float dx, float dy, float dz)
         {
             Position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
-            UpdateViewMatrix();
+            //UpdateViewMatrix();
         }
 
-        public void Rotate(float angleX, float angleY, float angleZ)
+        public void Rotate(float angleX, float angleY)
         {
             float radX = (float)(angleX * Math.PI / 180);
             float radY = (float)(angleY * Math.PI / 180);
-            float radZ = (float)(angleZ * Math.PI / 180);
 
-            //float distance = (float)Math.Sqrt(Position.X * Position.X + Position.Y * Position.Y + Position.Z * Position.Z);
+            if (radY == 0)
+            {
+                var rotationX = Matrices.XRotationMatrix(radX);
+                Position.ApplyMatrix(rotationX);
+            } 
+            else if (radX == 0)
+            {
+                var rotationY = Matrices.YRotationMatrix(radY);
+                Position.ApplyMatrix(rotationY);
+            }
 
-            if (radX != 0)
-                Position.ApplyMatrix(Matrices.XRotationMatrix(radX));
-            if (radY != 0)
-                Position.ApplyMatrix(Matrices.YRotationMatrix(radY));
-            if (radZ != 0)
-                Position.ApplyMatrix(Matrices.ZRotationMatrix(radZ));
-
-            //Position.Normalize();
-
-            //Position.X *= distance;
-            //Position.Y *= distance;
-            //Position.Z *= distance;
-
-            UpdateViewMatrix();
+            //UpdateViewMatrix();
         }
-
 
         public void MoveUp() => Move(0, 30, 0);
         public void MoveDown() => Move(0, -30, 0);
@@ -893,10 +896,10 @@ namespace lab8
         public void MoveLeft() => Move(-30, 0, 0);
         public void MoveForward() => Move(0, 0, 30);
         public void MoveBackward() => Move(0, 0, -30);
-        public void RotateUp() => Rotate(10, 0, 0);
-        public void RotateDown() => Rotate(-10, 0, 0);
-        public void RotateRight() => Rotate(0, 10, 0);
-        public void RotateLeft() => Rotate(0, -10, 0);
+        public void RotateUp() => Rotate(10, 0);
+        public void RotateDown() => Rotate(-10, 0);
+        public void RotateRight() => Rotate(0, 10);
+        public void RotateLeft() => Rotate(0, -10);
     }
 
     public class Point3D    

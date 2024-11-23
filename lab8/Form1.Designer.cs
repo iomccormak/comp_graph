@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.resetButton = new System.Windows.Forms.Button();
             this.textBoxRotateLine = new System.Windows.Forms.TextBox();
@@ -73,7 +74,7 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -118,6 +119,19 @@
             this.groupBox1.Size = new System.Drawing.Size(167, 588);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
+            // 
+            // radioButton3
+            // 
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Checked = true;
+            this.radioButton3.Location = new System.Drawing.Point(6, 17);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(99, 17);
+            this.radioButton3.TabIndex = 21;
+            this.radioButton3.TabStop = true;
+            this.radioButton3.Text = "Параллельная";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            this.radioButton3.Click += new System.EventHandler(this.radioButton3_CheckedChanged);
             // 
             // checkBox1
             // 
@@ -333,13 +347,11 @@
             // radioButton1
             // 
             this.radioButton1.AutoSize = true;
-            this.radioButton1.Checked = true;
             this.radioButton1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.radioButton1.Location = new System.Drawing.Point(6, 40);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(92, 17);
             this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
             this.radioButton1.Text = "Перспектива";
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
@@ -348,6 +360,7 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.checkBoxNonFrontFaces);
             this.groupBox2.Controls.Add(this.comboBoxPolyList);
             this.groupBox2.Controls.Add(this.label10);
@@ -446,7 +459,7 @@
             // 
             // clearRotationFigureButton
             // 
-            this.clearRotationFigureButton.Location = new System.Drawing.Point(91, 366);
+            this.clearRotationFigureButton.Location = new System.Drawing.Point(91, 381);
             this.clearRotationFigureButton.Name = "clearRotationFigureButton";
             this.clearRotationFigureButton.Size = new System.Drawing.Size(80, 23);
             this.clearRotationFigureButton.TabIndex = 10;
@@ -468,7 +481,7 @@
             // 
             // createRotationFigureButton
             // 
-            this.createRotationFigureButton.Location = new System.Drawing.Point(6, 366);
+            this.createRotationFigureButton.Location = new System.Drawing.Point(6, 381);
             this.createRotationFigureButton.Name = "createRotationFigureButton";
             this.createRotationFigureButton.Size = new System.Drawing.Size(79, 23);
             this.createRotationFigureButton.TabIndex = 9;
@@ -479,9 +492,9 @@
             // pictureBoxRotationFigure
             // 
             this.pictureBoxRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBoxRotationFigure.Location = new System.Drawing.Point(6, 395);
+            this.pictureBoxRotationFigure.Location = new System.Drawing.Point(6, 413);
             this.pictureBoxRotationFigure.Name = "pictureBoxRotationFigure";
-            this.pictureBoxRotationFigure.Size = new System.Drawing.Size(165, 165);
+            this.pictureBoxRotationFigure.Size = new System.Drawing.Size(165, 147);
             this.pictureBoxRotationFigure.TabIndex = 8;
             this.pictureBoxRotationFigure.TabStop = false;
             this.pictureBoxRotationFigure.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxRotationFigure_Paint);
@@ -490,7 +503,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 321);
+            this.label8.Location = new System.Drawing.Point(8, 336);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 13);
             this.label8.TabIndex = 7;
@@ -498,7 +511,7 @@
             // 
             // textBoxRotationFigure
             // 
-            this.textBoxRotationFigure.Location = new System.Drawing.Point(6, 340);
+            this.textBoxRotationFigure.Location = new System.Drawing.Point(6, 355);
             this.textBoxRotationFigure.Name = "textBoxRotationFigure";
             this.textBoxRotationFigure.Size = new System.Drawing.Size(165, 20);
             this.textBoxRotationFigure.TabIndex = 6;
@@ -511,7 +524,7 @@
             this.radioButtonZRotationFigure.AutoSize = true;
             this.radioButtonZRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonZRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(149, 282);
+            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(149, 297);
             this.radioButtonZRotationFigure.Name = "radioButtonZRotationFigure";
             this.radioButtonZRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonZRotationFigure.TabIndex = 5;
@@ -524,7 +537,7 @@
             this.radioButtonYRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonYRotationFigure.Checked = true;
             this.radioButtonYRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(125, 282);
+            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(125, 297);
             this.radioButtonYRotationFigure.Name = "radioButtonYRotationFigure";
             this.radioButtonYRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonYRotationFigure.TabIndex = 4;
@@ -537,7 +550,7 @@
             this.radioButtonXRotationFigure.AutoSize = true;
             this.radioButtonXRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonXRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(101, 282);
+            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(101, 297);
             this.radioButtonXRotationFigure.Name = "radioButtonXRotationFigure";
             this.radioButtonXRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonXRotationFigure.TabIndex = 3;
@@ -547,7 +560,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 299);
+            this.label7.Location = new System.Drawing.Point(9, 314);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(81, 13);
             this.label7.TabIndex = 2;
@@ -579,16 +592,15 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // radioButton3
+            // button2
             // 
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Location = new System.Drawing.Point(6, 17);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(99, 17);
-            this.radioButton3.TabIndex = 21;
-            this.radioButton3.Text = "Параллельная";
-            this.radioButton3.UseVisualStyleBackColor = true;
-            this.radioButton3.Click += new System.EventHandler(this.radioButton3_CheckedChanged);
+            this.button2.Location = new System.Drawing.Point(12, 268);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(165, 23);
+            this.button2.TabIndex = 23;
+            this.button2.Text = "Сбросить положение камеры";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
             // 
@@ -663,6 +675,7 @@
         private System.Windows.Forms.ComboBox comboBoxPolyList;
         private System.Windows.Forms.CheckBox checkBoxNonFrontFaces;
         private System.Windows.Forms.RadioButton radioButton3;
+        private System.Windows.Forms.Button button2;
     }
 }
 
