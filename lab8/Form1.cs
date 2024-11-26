@@ -846,6 +846,7 @@ namespace lab8
         private void DrawPolyhedron(Polyhedron polyhedron, bool checkBoxNonFrontFaces, bool zBuffer, float[,] zBufferArray, int width, int height, bool faceColor)
         {
             List<Point3D> points = new List<Point3D>();
+            List<Point3D> projectedPoints = new List<Point3D>();
 
             List<Face> visibleFaces = polyhedron.faces;
             if (checkBoxNonFrontFaces)
@@ -864,11 +865,29 @@ namespace lab8
                 p.ApplyMatrix(ViewMatrix);
                 p.ApplyMatrix(ProjectionMatrix);
                 points.Add(p);
+                projectedPoints.Add(p);
             }
 
             if (zBuffer)
             {
-                
+                foreach (var face in polyhedron.faces)
+                {
+                    var facePoints = face.indexes.Select(i => projectedPoints[i]).ToList();
+                    var screenPoints = facePoints.Select(p =>
+                        new Point3D(
+                            p.X / p.W + width / 2,
+                            p.Y / p.W + height / 2,
+                            0
+                        )
+                    ).ToList();
+
+                    var triangles = Triangulate(screenPoints);
+
+                    foreach (var triangle in triangles)
+                    {
+                        RasterizeTriangle(triangle, facePoints, zBufferArray, face.faceColor, width, height);
+                    }
+                }
             }
             else
             {
@@ -911,6 +930,93 @@ namespace lab8
             }
             
         }
+
+        private static List<List<Point3D>> Triangulate(List<Point3D> polygonPoints)
+        {
+            List<List<Point3D>> triangles = new List<List<Point3D>>();
+            for (int i = 2; i < polygonPoints.Count; i++)
+            {
+                triangles.Add(new List<Point3D>
+        {
+            polygonPoints[0],
+            polygonPoints[i - 1],
+            polygonPoints[i]
+        });
+            }
+
+            return triangles;
+        }
+
+
+        private void RasterizeTriangle(List<Point3D> triangle, List<Point3D> facePoints, float[,] zBufferArray, Color color, int width, int height)
+        {
+            // Упорядочиваем вершины треугольника по Y для упрощения
+            var sortedPoints = triangle.OrderBy(p => p.Y).ToList();
+            var top = sortedPoints[0];
+            var mid = sortedPoints[1];
+            var bottom = sortedPoints[2];
+
+            // Растеризация верхней части треугольника
+            for (float y = top.Y; y <= mid.Y; y += 0.5f)
+            {
+                float x1 = FindXbyY(y, top, mid);
+                float z1 = FindZbyY(y, top, mid);
+
+                float x2 = FindXbyY(y, top, bottom);
+                float z2 = FindZbyY(y, top, bottom);
+
+                FillScanline((int)y, x1, z1, x2, z2, zBufferArray, color, width, height);
+            }
+
+            // Растеризация нижней части треугольника
+            for (float y = mid.Y; y <= bottom.Y; y += 0.5f)
+            {
+                float x1 = FindXbyY(y, mid, bottom);
+                float z1 = FindZbyY(y, mid, bottom);
+
+                float x2 = FindXbyY(y, top, bottom);
+                float z2 = FindZbyY(y, top, bottom);
+
+                FillScanline((int)y, x1, z1, x2, z2, zBufferArray, color, width, height);
+            }
+        }
+
+        private float FindXbyY(float y, Point3D p1, Point3D p2)
+        {
+            if (p1.Y == p2.Y) return p1.X; // Горизонтальная линия
+            return p1.X + (p2.X - p1.X) * (y - p1.Y) / (p2.Y - p1.Y);
+        }
+
+
+        private float FindZbyY(float y, Point3D p1, Point3D p2)
+        {
+            if (p1.Y == p2.Y) return p1.Z; // Горизонтальная линия
+            return p1.Z + (p2.Z - p1.Z) * (y - p1.Y) / (p2.Y - p1.Y);
+        }
+
+
+        private void FillScanline(int y, float x1, float z1, float x2, float z2, float[,] zBufferArray, Color color, int width, int height)
+        {
+            if (x1 > x2)
+            {
+                (x1, x2) = (x2, x1);
+                (z1, z2) = (z2, z1);
+            }
+
+            for (float x = x1; x <= x2; x += 0.5f)
+            {
+                float z = z1 + (z2 - z1) * (x - x1) / (x2 - x1);
+                int ix = (int)x, iy = y;
+
+                if (ix >= 0 && ix < width && iy >= 0 && iy < height && z < zBufferArray[ix, iy])
+                {
+                    zBufferArray[ix, iy] = z;
+                    _graphics.FillRectangle(new SolidBrush(color), ix, iy, 1, 1);
+                }
+            }
+        }
+
+
 
         private void UpdateViewMatrix()
         {
