@@ -56,7 +56,6 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.button2 = new System.Windows.Forms.Button();
             this.checkBoxNonFrontFaces = new System.Windows.Forms.CheckBox();
-            this.comboBoxPolyList = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -75,6 +74,9 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.listBoxPolyhedronList = new System.Windows.Forms.ListBox();
+            this.checkBoxZBuffer = new System.Windows.Forms.CheckBox();
+            this.checkBoxColor = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -85,13 +87,14 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(185, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(750, 581);
+            this.pictureBox1.Size = new System.Drawing.Size(865, 733);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // groupBox1
             // 
             this.groupBox1.AutoSize = true;
+            this.groupBox1.Controls.Add(this.listBoxPolyhedronList);
             this.groupBox1.Controls.Add(this.radioButton3);
             this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.resetButton);
@@ -116,7 +119,7 @@
             this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(167, 588);
+            this.groupBox1.Size = new System.Drawing.Size(167, 736);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
@@ -140,7 +143,7 @@
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checkBox1.Location = new System.Drawing.Point(83, 349);
+            this.checkBox1.Location = new System.Drawing.Point(83, 497);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(78, 17);
             this.checkBox1.TabIndex = 20;
@@ -150,7 +153,7 @@
             // 
             // resetButton
             // 
-            this.resetButton.Location = new System.Drawing.Point(6, 413);
+            this.resetButton.Location = new System.Drawing.Point(6, 561);
             this.resetButton.Name = "resetButton";
             this.resetButton.Size = new System.Drawing.Size(150, 43);
             this.resetButton.TabIndex = 19;
@@ -160,7 +163,7 @@
             // 
             // textBoxRotateLine
             // 
-            this.textBoxRotateLine.Location = new System.Drawing.Point(6, 387);
+            this.textBoxRotateLine.Location = new System.Drawing.Point(6, 535);
             this.textBoxRotateLine.Name = "textBoxRotateLine";
             this.textBoxRotateLine.Size = new System.Drawing.Size(150, 20);
             this.textBoxRotateLine.TabIndex = 18;
@@ -171,7 +174,7 @@
             // labelRotateLine
             // 
             this.labelRotateLine.AutoSize = true;
-            this.labelRotateLine.Location = new System.Drawing.Point(6, 371);
+            this.labelRotateLine.Location = new System.Drawing.Point(6, 519);
             this.labelRotateLine.Name = "labelRotateLine";
             this.labelRotateLine.Size = new System.Drawing.Size(128, 13);
             this.labelRotateLine.TabIndex = 17;
@@ -179,7 +182,7 @@
             // 
             // textBoxRotateAxis
             // 
-            this.textBoxRotateAxis.Location = new System.Drawing.Point(6, 346);
+            this.textBoxRotateAxis.Location = new System.Drawing.Point(6, 494);
             this.textBoxRotateAxis.Name = "textBoxRotateAxis";
             this.textBoxRotateAxis.Size = new System.Drawing.Size(71, 20);
             this.textBoxRotateAxis.TabIndex = 16;
@@ -190,7 +193,7 @@
             // labelRotateAxis
             // 
             this.labelRotateAxis.AutoSize = true;
-            this.labelRotateAxis.Location = new System.Drawing.Point(6, 330);
+            this.labelRotateAxis.Location = new System.Drawing.Point(6, 478);
             this.labelRotateAxis.Name = "labelRotateAxis";
             this.labelRotateAxis.Size = new System.Drawing.Size(117, 13);
             this.labelRotateAxis.TabIndex = 15;
@@ -198,7 +201,7 @@
             // 
             // reflectTextBox
             // 
-            this.reflectTextBox.Location = new System.Drawing.Point(6, 307);
+            this.reflectTextBox.Location = new System.Drawing.Point(6, 455);
             this.reflectTextBox.Name = "reflectTextBox";
             this.reflectTextBox.Size = new System.Drawing.Size(150, 20);
             this.reflectTextBox.TabIndex = 14;
@@ -209,7 +212,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(9, 291);
+            this.label6.Location = new System.Drawing.Point(9, 439);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(125, 13);
             this.label6.TabIndex = 13;
@@ -217,7 +220,7 @@
             // 
             // translationTextBox
             // 
-            this.translationTextBox.Location = new System.Drawing.Point(6, 269);
+            this.translationTextBox.Location = new System.Drawing.Point(6, 417);
             this.translationTextBox.Name = "translationTextBox";
             this.translationTextBox.Size = new System.Drawing.Size(150, 20);
             this.translationTextBox.TabIndex = 12;
@@ -228,7 +231,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 253);
+            this.label5.Location = new System.Drawing.Point(6, 401);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(97, 13);
             this.label5.TabIndex = 11;
@@ -236,7 +239,7 @@
             // 
             // applyButton
             // 
-            this.applyButton.Location = new System.Drawing.Point(6, 176);
+            this.applyButton.Location = new System.Drawing.Point(6, 324);
             this.applyButton.Name = "applyButton";
             this.applyButton.Size = new System.Drawing.Size(150, 23);
             this.applyButton.TabIndex = 10;
@@ -256,7 +259,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 133);
+            this.label3.Location = new System.Drawing.Point(6, 281);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(152, 13);
             this.label3.TabIndex = 8;
@@ -272,7 +275,7 @@
             "Масштаб",
             "Отражение",
             "Вращение"});
-            this.comboBoxAthenian.Location = new System.Drawing.Point(6, 149);
+            this.comboBoxAthenian.Location = new System.Drawing.Point(6, 297);
             this.comboBoxAthenian.Name = "comboBoxAthenian";
             this.comboBoxAthenian.Size = new System.Drawing.Size(150, 21);
             this.comboBoxAthenian.TabIndex = 7;
@@ -281,7 +284,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 459);
+            this.label2.Location = new System.Drawing.Point(6, 607);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(40, 13);
             this.label2.TabIndex = 6;
@@ -289,7 +292,7 @@
             // 
             // textBoxOutput
             // 
-            this.textBoxOutput.Location = new System.Drawing.Point(6, 475);
+            this.textBoxOutput.Location = new System.Drawing.Point(6, 623);
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
             this.textBoxOutput.Size = new System.Drawing.Size(150, 94);
@@ -298,7 +301,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 214);
+            this.label1.Location = new System.Drawing.Point(6, 362);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(101, 13);
             this.label1.TabIndex = 4;
@@ -306,7 +309,7 @@
             // 
             // textBoxScale
             // 
-            this.textBoxScale.Location = new System.Drawing.Point(6, 230);
+            this.textBoxScale.Location = new System.Drawing.Point(6, 378);
             this.textBoxScale.Name = "textBoxScale";
             this.textBoxScale.Size = new System.Drawing.Size(150, 20);
             this.textBoxScale.TabIndex = 3;
@@ -360,9 +363,10 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.checkBoxColor);
+            this.groupBox2.Controls.Add(this.checkBoxZBuffer);
             this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.checkBoxNonFrontFaces);
-            this.groupBox2.Controls.Add(this.comboBoxPolyList);
             this.groupBox2.Controls.Add(this.label10);
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.textBox1);
@@ -380,15 +384,15 @@
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.saveButton);
             this.groupBox2.Controls.Add(this.loadButton);
-            this.groupBox2.Location = new System.Drawing.Point(941, 12);
+            this.groupBox2.Location = new System.Drawing.Point(1056, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(190, 581);
+            this.groupBox2.Size = new System.Drawing.Size(190, 746);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(12, 268);
+            this.button2.Location = new System.Drawing.Point(12, 435);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(165, 23);
             this.button2.TabIndex = 23;
@@ -400,22 +404,13 @@
             // 
             this.checkBoxNonFrontFaces.AutoSize = true;
             this.checkBoxNonFrontFaces.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checkBoxNonFrontFaces.Location = new System.Drawing.Point(6, 230);
+            this.checkBoxNonFrontFaces.Location = new System.Drawing.Point(6, 204);
             this.checkBoxNonFrontFaces.Name = "checkBoxNonFrontFaces";
             this.checkBoxNonFrontFaces.Size = new System.Drawing.Size(178, 17);
             this.checkBoxNonFrontFaces.TabIndex = 22;
             this.checkBoxNonFrontFaces.Text = "Отсечение невидимых граней";
             this.checkBoxNonFrontFaces.UseVisualStyleBackColor = true;
             this.checkBoxNonFrontFaces.CheckedChanged += new System.EventHandler(this.checkBoxNonFrontFaces_CheckedChanged);
-            // 
-            // comboBoxPolyList
-            // 
-            this.comboBoxPolyList.FormattingEnabled = true;
-            this.comboBoxPolyList.Location = new System.Drawing.Point(12, 203);
-            this.comboBoxPolyList.Name = "comboBoxPolyList";
-            this.comboBoxPolyList.Size = new System.Drawing.Size(165, 21);
-            this.comboBoxPolyList.TabIndex = 21;
-            this.comboBoxPolyList.SelectedIndexChanged += new System.EventHandler(this.comboBoxPolyList_SelectedIndexChanged);
             // 
             // label10
             // 
@@ -469,7 +464,7 @@
             // 
             // clearRotationFigureButton
             // 
-            this.clearRotationFigureButton.Location = new System.Drawing.Point(91, 381);
+            this.clearRotationFigureButton.Location = new System.Drawing.Point(97, 548);
             this.clearRotationFigureButton.Name = "clearRotationFigureButton";
             this.clearRotationFigureButton.Size = new System.Drawing.Size(80, 23);
             this.clearRotationFigureButton.TabIndex = 10;
@@ -491,7 +486,7 @@
             // 
             // createRotationFigureButton
             // 
-            this.createRotationFigureButton.Location = new System.Drawing.Point(6, 381);
+            this.createRotationFigureButton.Location = new System.Drawing.Point(12, 548);
             this.createRotationFigureButton.Name = "createRotationFigureButton";
             this.createRotationFigureButton.Size = new System.Drawing.Size(79, 23);
             this.createRotationFigureButton.TabIndex = 9;
@@ -502,7 +497,7 @@
             // pictureBoxRotationFigure
             // 
             this.pictureBoxRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBoxRotationFigure.Location = new System.Drawing.Point(6, 413);
+            this.pictureBoxRotationFigure.Location = new System.Drawing.Point(12, 580);
             this.pictureBoxRotationFigure.Name = "pictureBoxRotationFigure";
             this.pictureBoxRotationFigure.Size = new System.Drawing.Size(165, 147);
             this.pictureBoxRotationFigure.TabIndex = 8;
@@ -513,7 +508,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 336);
+            this.label8.Location = new System.Drawing.Point(14, 503);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 13);
             this.label8.TabIndex = 7;
@@ -521,7 +516,7 @@
             // 
             // textBoxRotationFigure
             // 
-            this.textBoxRotationFigure.Location = new System.Drawing.Point(6, 355);
+            this.textBoxRotationFigure.Location = new System.Drawing.Point(12, 522);
             this.textBoxRotationFigure.Name = "textBoxRotationFigure";
             this.textBoxRotationFigure.Size = new System.Drawing.Size(165, 20);
             this.textBoxRotationFigure.TabIndex = 6;
@@ -534,7 +529,7 @@
             this.radioButtonZRotationFigure.AutoSize = true;
             this.radioButtonZRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonZRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(149, 297);
+            this.radioButtonZRotationFigure.Location = new System.Drawing.Point(155, 464);
             this.radioButtonZRotationFigure.Name = "radioButtonZRotationFigure";
             this.radioButtonZRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonZRotationFigure.TabIndex = 5;
@@ -547,7 +542,7 @@
             this.radioButtonYRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonYRotationFigure.Checked = true;
             this.radioButtonYRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(125, 297);
+            this.radioButtonYRotationFigure.Location = new System.Drawing.Point(131, 464);
             this.radioButtonYRotationFigure.Name = "radioButtonYRotationFigure";
             this.radioButtonYRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonYRotationFigure.TabIndex = 4;
@@ -560,7 +555,7 @@
             this.radioButtonXRotationFigure.AutoSize = true;
             this.radioButtonXRotationFigure.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.radioButtonXRotationFigure.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(101, 297);
+            this.radioButtonXRotationFigure.Location = new System.Drawing.Point(107, 464);
             this.radioButtonXRotationFigure.Name = "radioButtonXRotationFigure";
             this.radioButtonXRotationFigure.Size = new System.Drawing.Size(18, 30);
             this.radioButtonXRotationFigure.TabIndex = 3;
@@ -570,7 +565,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 314);
+            this.label7.Location = new System.Drawing.Point(15, 481);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(81, 13);
             this.label7.TabIndex = 2;
@@ -602,12 +597,43 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // listBoxPolyhedronList
+            // 
+            this.listBoxPolyhedronList.FormattingEnabled = true;
+            this.listBoxPolyhedronList.Location = new System.Drawing.Point(6, 136);
+            this.listBoxPolyhedronList.Name = "listBoxPolyhedronList";
+            this.listBoxPolyhedronList.Size = new System.Drawing.Size(150, 134);
+            this.listBoxPolyhedronList.TabIndex = 24;
+            this.listBoxPolyhedronList.SelectedIndexChanged += new System.EventHandler(this.listBoxPolyhedronList_SelectedIndexChanged);
+            // 
+            // checkBoxZBuffer
+            // 
+            this.checkBoxZBuffer.AutoSize = true;
+            this.checkBoxZBuffer.Location = new System.Drawing.Point(6, 228);
+            this.checkBoxZBuffer.Name = "checkBoxZBuffer";
+            this.checkBoxZBuffer.Size = new System.Drawing.Size(67, 17);
+            this.checkBoxZBuffer.TabIndex = 24;
+            this.checkBoxZBuffer.Text = "Z-буфер";
+            this.checkBoxZBuffer.UseVisualStyleBackColor = true;
+            this.checkBoxZBuffer.CheckedChanged += new System.EventHandler(this.checkBoxZBuffer_CheckedChanged);
+            // 
+            // checkBoxColor
+            // 
+            this.checkBoxColor.AutoSize = true;
+            this.checkBoxColor.Location = new System.Drawing.Point(6, 252);
+            this.checkBoxColor.Name = "checkBoxColor";
+            this.checkBoxColor.Size = new System.Drawing.Size(88, 17);
+            this.checkBoxColor.TabIndex = 25;
+            this.checkBoxColor.Text = "Задать цвет";
+            this.checkBoxColor.UseVisualStyleBackColor = true;
+            this.checkBoxColor.CheckedChanged += new System.EventHandler(this.checkBoxColor_CheckedChanged);
+            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1143, 605);
+            this.ClientSize = new System.Drawing.Size(1258, 757);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -672,10 +698,12 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ComboBox comboBoxPolyList;
         private System.Windows.Forms.CheckBox checkBoxNonFrontFaces;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.ListBox listBoxPolyhedronList;
+        private System.Windows.Forms.CheckBox checkBoxZBuffer;
+        private System.Windows.Forms.CheckBox checkBoxColor;
     }
 }
 

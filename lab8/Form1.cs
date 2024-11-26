@@ -32,6 +32,7 @@ namespace lab8
         Graphics _graphics;
         Graphics _graphicsRotationFigure;
         Polyhedron _polyhedron;
+        List<Polyhedron> _polyhedronList;
         Mode _mode;
         ModeView _modeView;
         ModeRotationFigure _modeRotationFigure;
@@ -39,6 +40,8 @@ namespace lab8
         Func<float, float, float> _function;
         private bool saveWithAffin = false;
         Camera _camera;
+        private bool colorPolyhedrons = false;
+        Random _random;
 
         enum Mode
         {
@@ -61,6 +64,7 @@ namespace lab8
         {
             InitializeComponent();
             _polyhedron = new Hexahedron();
+            _polyhedronList = new List<Polyhedron>();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             _bitmapRotationFigure = new Bitmap(pictureBoxRotationFigure.Width, pictureBoxRotationFigure.Height);
@@ -69,7 +73,8 @@ namespace lab8
             //_graphics.ScaleTransform(1, -1);
             _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
             _graphicsRotationFigure.Clear(Color.White);
-            _camera = new Camera(_graphics, _pen);
+            _random = new Random();
+            _camera = new Camera(_graphics, _pen, _random);
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
@@ -82,6 +87,7 @@ namespace lab8
             _points = new List<Point>();
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             checkBoxNonFrontFaces.Checked = true;
+            checkBoxColor.Checked = false;
             DrawPolyhedron();
         }
 
@@ -105,7 +111,8 @@ namespace lab8
 
         public void DrawPolyhedron()
         {
-            _camera.DrawScene(_graphics, new List<Polyhedron>() { _polyhedron }, _modeView, checkBoxNonFrontFaces.Checked);
+            _camera.DrawScene(_graphics, _polyhedronList, _modeView, checkBoxNonFrontFaces.Checked);
+            
             pictureBox1.Refresh();
         }
 
@@ -293,6 +300,8 @@ namespace lab8
                     _polyhedron = new Parallelepiped();
                     break;
             }
+            listBoxPolyhedronList.Items.Add(_polyhedron);
+            _polyhedronList.Add(_polyhedron);
             DrawPolyhedron();
         }
 
@@ -716,8 +725,26 @@ namespace lab8
 
         private void button2_Click(object sender, EventArgs e)
         {
-            _camera = new Camera(_graphics, _pen);
+            _camera = new Camera(_graphics, _pen, _random);
             DrawPolyhedron();
+        }
+
+        private void checkBoxColor_CheckedChanged(object sender, EventArgs e)
+        {
+            colorPolyhedrons = !colorPolyhedrons;
+        }
+
+        private void listBoxPolyhedronList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxPolyhedronList.SelectedIndex >= 0)
+            {
+                _polyhedron = _polyhedronList[listBoxPolyhedronList.SelectedIndex];
+            }
+        }
+
+        private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 
@@ -734,14 +761,16 @@ namespace lab8
 
         private Graphics _graphics;
         private Pen _pen;
+        private Random _random;
 
-        public Camera(Graphics graphics, Pen pen)
+        public Camera(Graphics graphics, Pen pen, Random random)
         {
             Position = new Point3D(0, 0, 1000);
             Target = new Point3D(0, 0, 0);
             ViewMatrix = Matrices.Identity();
             _pen = pen;
             _graphics = graphics;
+            _random = random;
         }
 
         public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, bool checkBoxNonFrontFaces)
@@ -845,9 +874,22 @@ namespace lab8
                             p2.X / p2.W, p2.Y / p2.W
                             );
                 }
+
+                var polygonPoints = new PointF[face.indexes.Count];
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    var point = points[face.indexes[i]];
+                    polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
+                }
+
+                Color randomColor = Color.FromArgb(_random.Next(256), _random.Next(256), _random.Next(256));
+                using (Brush brush = new SolidBrush(randomColor))
+                {
+                    _graphics.FillPolygon(brush, polygonPoints);
+                }
             }
         }
- 
+
         private void UpdateViewMatrix()
         {
             forward = Target - Position;
