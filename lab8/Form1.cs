@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -737,8 +739,6 @@ namespace lab8
         {
             Position = new Point3D(0, 0, 1000);
             Target = new Point3D(0, 0, 0);
-            //forward = Position - Target;
-            //forward.Normalize();
             ViewMatrix = Matrices.Identity();
             _pen = pen;
             _graphics = graphics;
@@ -755,11 +755,11 @@ namespace lab8
             switch (modeView)
             {
                 case ModeView.Perspective:
-                    ProjectionMatrix = Matrices.Perspective(c);
+                    ProjectionMatrix = Matrices.Perspective(c); // Не работает
                     break;
                 case ModeView.Axonometry:
                     //ProjectionMatrix = Matrices.Axonometry(phi, psi);
-                    ProjectionMatrix = Matrices.Perspective(c);
+                    ProjectionMatrix = Matrices.Perspective(c); // А это вообще заглушка
                     break;
                 case ModeView.Parallel:
                     ProjectionMatrix = Matrices.Parallel();
@@ -847,7 +847,7 @@ namespace lab8
                 }
             }
         }
-
+ 
         private void UpdateViewMatrix()
         {
             forward = Target - Position;
@@ -868,7 +868,6 @@ namespace lab8
         public void Move(float dx, float dy, float dz)
         {
             Position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
-            //UpdateViewMatrix();
         }
 
         public void Rotate(float angleX, float angleY)
@@ -876,22 +875,33 @@ namespace lab8
             float radX = (float)(angleX * Math.PI / 180);
             float radY = (float)(angleY * Math.PI / 180);
 
-            if (radY == 0)
+            float sin;
+            float cos;
+            Point3D point;
+
+            if (radX != 0)
             {
-                var rotationX = Matrices.XRotationMatrix(radX);
-                Position.ApplyMatrix(rotationX);
+                point = right;
+                sin = (float)Math.Sin(radX);
+                cos = (float)Math.Cos(radX);
             } 
-            else if (radX == 0)
+            else
             {
-                var rotationY = Matrices.YRotationMatrix(radY);
-                Position.ApplyMatrix(rotationY);
+                point = up;
+                sin = (float)Math.Sin(radY);
+                cos = (float)Math.Cos(radY);
             }
 
-            //UpdateViewMatrix();
+            float length = (float)Math.Sqrt(point.X * point.X + point.Y * point.Y + point.Z * point.Z);
+            float l = point.X / length;
+            float m = point.Y / length;
+            float n = point.Z / length;
+            float[][] rotation = Matrices.RotationLine(l, m, n, sin, cos);
+            Position.ApplyMatrix(rotation);
         }
 
-        public void MoveUp() => Move(0, 30, 0);
-        public void MoveDown() => Move(0, -30, 0);
+        public void MoveUp() => Move(0, -30, 0);
+        public void MoveDown() => Move(0, 30, 0);
         public void MoveRight() => Move(30, 0, 0);
         public void MoveLeft() => Move(-30, 0, 0);
         public void MoveForward() => Move(0, 0, 30);
