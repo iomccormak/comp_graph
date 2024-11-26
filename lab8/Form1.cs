@@ -41,7 +41,6 @@ namespace lab8
         private bool saveWithAffin = false;
         Camera _camera;
         private bool colorPolyhedrons = false;
-        Random _random;
 
         enum Mode
         {
@@ -73,8 +72,7 @@ namespace lab8
             //_graphics.ScaleTransform(1, -1);
             _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
             _graphicsRotationFigure.Clear(Color.White);
-            _random = new Random();
-            _camera = new Camera(_graphics, _pen, _random);
+            _camera = new Camera(_graphics, _pen);
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
@@ -88,6 +86,7 @@ namespace lab8
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             checkBoxNonFrontFaces.Checked = true;
             checkBoxColor.Checked = false;
+            checkBoxZBuffer.Checked = false;
             DrawPolyhedron();
         }
 
@@ -111,8 +110,7 @@ namespace lab8
 
         public void DrawPolyhedron()
         {
-            _camera.DrawScene(_graphics, _polyhedronList, _modeView, checkBoxNonFrontFaces.Checked);
-            
+            _camera.DrawScene(_graphics, _polyhedronList, _modeView, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked, pictureBox1.Width, pictureBox1.Height, colorPolyhedrons);
             pictureBox1.Refresh();
         }
 
@@ -299,6 +297,15 @@ namespace lab8
                 case 5:
                     _polyhedron = new Parallelepiped();
                     break;
+            }
+            Random random = new Random();
+            foreach (var face in _polyhedron.faces)
+            {
+                face.faceColor = Color.FromArgb(
+                    random.Next(256), // Красный компонент
+                    random.Next(256), // Зелёный компонент
+                    random.Next(256)  // Синий компонент
+                );
             }
             listBoxPolyhedronList.Items.Add(_polyhedron);
             _polyhedronList.Add(_polyhedron);
@@ -725,7 +732,7 @@ namespace lab8
 
         private void button2_Click(object sender, EventArgs e)
         {
-            _camera = new Camera(_graphics, _pen, _random);
+            _camera = new Camera(_graphics, _pen);
             DrawPolyhedron();
         }
 
@@ -744,7 +751,7 @@ namespace lab8
 
         private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
         {
-
+            DrawPolyhedron();
         }
     }
 
@@ -761,25 +768,33 @@ namespace lab8
 
         private Graphics _graphics;
         private Pen _pen;
-        private Random _random;
 
-        public Camera(Graphics graphics, Pen pen, Random random)
+        public Camera(Graphics graphics, Pen pen)
         {
             Position = new Point3D(0, 0, 1000);
             Target = new Point3D(0, 0, 0);
             ViewMatrix = Matrices.Identity();
             _pen = pen;
             _graphics = graphics;
-            _random = random;
         }
 
-        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, bool checkBoxNonFrontFaces)
+        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, bool checkBoxNonFrontFaces, bool zBuffer, int width, int height, bool faceColor)
         {
             float c = -Position.Z;
             //double phi = 35.26d;
             //double psi = 45d;
             _graphics = graphics;
             _graphics.Clear(Color.White);
+
+            
+            float[,] zBufferArray = new float[width, height];
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    zBufferArray[i, j] = float.MaxValue; // Инициализируем Z-буфер большим значением (далеко от камеры)
+                }
+            }
 
             switch (modeView)
             {
@@ -797,7 +812,7 @@ namespace lab8
 
             foreach (Polyhedron polyhedron in polyhedrons)
             {
-                DrawPolyhedron(polyhedron, checkBoxNonFrontFaces);
+                DrawPolyhedron(polyhedron, checkBoxNonFrontFaces, zBuffer, zBufferArray, width, height, faceColor);
             }
             DrawAxis();
         }
@@ -827,7 +842,8 @@ namespace lab8
             }
         }
 
-        private void DrawPolyhedron(Polyhedron polyhedron, bool checkBoxNonFrontFaces)
+
+        private void DrawPolyhedron(Polyhedron polyhedron, bool checkBoxNonFrontFaces, bool zBuffer, float[,] zBufferArray, int width, int height, bool faceColor)
         {
             List<Point3D> points = new List<Point3D>();
 
@@ -850,44 +866,50 @@ namespace lab8
                 points.Add(p);
             }
 
-            foreach (var face in visibleFaces)
+            if (zBuffer)
             {
-                var indexes = face.indexes;
-
-                for (int i = 0; i < indexes.Count; i++)
+                
+            }
+            else
+            {
+                foreach (var face in visibleFaces)
                 {
-                    Point3D p1, p2;
-                    if (i == indexes.Count - 1)
+                    var indexes = face.indexes;
+                    var polygonPoints = new PointF[face.indexes.Count];
+                    for (int i = 0; i < face.indexes.Count; i++)
                     {
-                        p1 = points[indexes[0]];
-                        p2 = points[indexes[i]];
-                    }
-                    else
-                    {
-                        p1 = points[indexes[i]];
-                        p2 = points[indexes[i + 1]];
+                        var point = points[face.indexes[i]];
+                        polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
                     }
 
-                    _graphics.DrawLine(
-                            _pen,
-                            p1.X / p1.W, p1.Y / p1.W,
-                            p2.X / p2.W, p2.Y / p2.W
-                            );
-                }
+                    using (Brush brush = new SolidBrush(face.faceColor))
+                    {
+                        _graphics.FillPolygon(brush, polygonPoints);
+                    }
 
-                var polygonPoints = new PointF[face.indexes.Count];
-                for (int i = 0; i < indexes.Count; i++)
-                {
-                    var point = points[face.indexes[i]];
-                    polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
-                }
+                    for (int i = 0; i < indexes.Count; i++)
+                    {
+                        Point3D p1, p2;
+                        if (i == indexes.Count - 1)
+                        {
+                            p1 = points[indexes[0]];
+                            p2 = points[indexes[i]];
+                        }
+                        else
+                        {
+                            p1 = points[indexes[i]];
+                            p2 = points[indexes[i + 1]];
+                        }
 
-                Color randomColor = Color.FromArgb(_random.Next(256), _random.Next(256), _random.Next(256));
-                using (Brush brush = new SolidBrush(randomColor))
-                {
-                    _graphics.FillPolygon(brush, polygonPoints);
+                        _graphics.DrawLine(
+                                _pen,
+                                p1.X / p1.W, p1.Y / p1.W,
+                                p2.X / p2.W, p2.Y / p2.W
+                                );
+                    }
                 }
             }
+            
         }
 
         private void UpdateViewMatrix()
@@ -1031,11 +1053,20 @@ namespace lab8
     {
         public List<int> indexes;
         public Point3D normal;
+        public Color faceColor { get; set; }
 
         public Face(List<int> _indexes)
         {
             indexes = _indexes;
             normal = null;
+            faceColor = Color.Red;
+        }
+
+        public Face(List<int> _indexes, Color color)
+        {
+            indexes = _indexes;
+            normal = null;
+            faceColor = color;
         }
 
         public Point3D CalculateNormal(List<Point3D> points)
