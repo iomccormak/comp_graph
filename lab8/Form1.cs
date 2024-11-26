@@ -494,6 +494,8 @@ namespace lab8
             {
                 _polyhedron = new Polyhedron();
                 _polyhedron.ParseFromOBJ(openFileDialog.FileName);
+                _polyhedronList.Add(_polyhedron);
+                listBoxPolyhedronList.Items.Add(_polyhedron);
                 DrawPolyhedron();
             }
         }
@@ -582,6 +584,8 @@ namespace lab8
             int axis = radioButtonXRotationFigure.Checked ? 0 : radioButtonYRotationFigure.Checked ? 1 : 2;
             _polyhedron = new RotationPolyhedron(points, int.Parse(textBoxRotationFigure.Text, NumberStyles.Integer, CultureInfo.InvariantCulture), axis);
 
+            listBoxPolyhedronList.Items.Add(_polyhedron);
+            _polyhedronList.Add(_polyhedron);
             DrawPolyhedron();
         }
 
@@ -613,6 +617,8 @@ namespace lab8
             float y1 = float.Parse(inputs[3]);
             float step = float.Parse(inputs[4]);
             _polyhedron = new FunctionalPolyhedron(x0, x1, y0, y1, step, _function);
+            listBoxPolyhedronList.Items.Add(_polyhedron);
+            _polyhedronList.Add(_polyhedron);
             DrawPolyhedron();
         }
 
@@ -792,7 +798,7 @@ namespace lab8
             {
                 for (int j = 0; j < height; j++)
                 {
-                    zBufferArray[i, j] = float.MaxValue; // Инициализируем Z-буфер большим значением (далеко от камеры)
+                    zBufferArray[i, j] = float.MaxValue;
                 }
             }
 
@@ -846,7 +852,6 @@ namespace lab8
         private void DrawPolyhedron(Polyhedron polyhedron, bool checkBoxNonFrontFaces, bool zBuffer, float[,] zBufferArray, int width, int height, bool faceColor)
         {
             List<Point3D> points = new List<Point3D>();
-            List<Point3D> projectedPoints = new List<Point3D>();
 
             List<Face> visibleFaces = polyhedron.faces;
             if (checkBoxNonFrontFaces)
@@ -856,29 +861,22 @@ namespace lab8
                 visibleFaces = polyhedron.GetVisibleFaces(viewVector);
             }
 
-            UpdateViewMatrix();
-
             foreach (Point3D point in polyhedron.points)
             {
                 Point3D p = point.Clone();
                 p.ApplyMatrix(polyhedron.modelMatrix);
                 p.ApplyMatrix(ViewMatrix);
-                p.ApplyMatrix(ProjectionMatrix);
                 points.Add(p);
-                projectedPoints.Add(p);
             }
 
             if (zBuffer)
             {
                 foreach (var face in polyhedron.faces)
                 {
-                    var facePoints = face.indexes.Select(i => projectedPoints[i]).ToList();
+                    var facePoints = face.indexes.Select(i => points[i]).ToList();
+
                     var screenPoints = facePoints.Select(p =>
-                        new Point3D(
-                            p.X / p.W + width / 2,
-                            p.Y / p.W + height / 2,
-                            0
-                        )
+                        new Point3D(p.X + width / 2, p.Y + height / 2, p.Z)
                     ).ToList();
 
                     var triangles = Triangulate(screenPoints);
@@ -889,7 +887,15 @@ namespace lab8
                     }
                 }
             }
-            else
+
+            UpdateViewMatrix();
+
+            foreach (Point3D point in points)
+            {
+                point.ApplyMatrix(ProjectionMatrix);
+            }
+
+            if (checkBoxNonFrontFaces)
             {
                 foreach (var face in visibleFaces)
                 {
@@ -928,6 +934,7 @@ namespace lab8
                     }
                 }
             }
+                
             
         }
 
@@ -937,11 +944,11 @@ namespace lab8
             for (int i = 2; i < polygonPoints.Count; i++)
             {
                 triangles.Add(new List<Point3D>
-        {
-            polygonPoints[0],
-            polygonPoints[i - 1],
-            polygonPoints[i]
-        });
+                {
+                    polygonPoints[0],
+                    polygonPoints[i - 1],
+                    polygonPoints[i]
+                });
             }
 
             return triangles;
@@ -950,13 +957,11 @@ namespace lab8
 
         private void RasterizeTriangle(List<Point3D> triangle, List<Point3D> facePoints, float[,] zBufferArray, Color color, int width, int height)
         {
-            // Упорядочиваем вершины треугольника по Y для упрощения
             var sortedPoints = triangle.OrderBy(p => p.Y).ToList();
             var top = sortedPoints[0];
             var mid = sortedPoints[1];
             var bottom = sortedPoints[2];
 
-            // Растеризация верхней части треугольника
             for (float y = top.Y; y <= mid.Y; y += 0.5f)
             {
                 float x1 = FindXbyY(y, top, mid);
@@ -968,7 +973,6 @@ namespace lab8
                 FillScanline((int)y, x1, z1, x2, z2, zBufferArray, color, width, height);
             }
 
-            // Растеризация нижней части треугольника
             for (float y = mid.Y; y <= bottom.Y; y += 0.5f)
             {
                 float x1 = FindXbyY(y, mid, bottom);
@@ -983,14 +987,14 @@ namespace lab8
 
         private float FindXbyY(float y, Point3D p1, Point3D p2)
         {
-            if (p1.Y == p2.Y) return p1.X; // Горизонтальная линия
+            if (p1.Y == p2.Y) return p1.X;
             return p1.X + (p2.X - p1.X) * (y - p1.Y) / (p2.Y - p1.Y);
         }
 
 
         private float FindZbyY(float y, Point3D p1, Point3D p2)
         {
-            if (p1.Y == p2.Y) return p1.Z; // Горизонтальная линия
+            if (p1.Y == p2.Y) return p1.Z;
             return p1.Z + (p2.Z - p1.Z) * (y - p1.Y) / (p2.Y - p1.Y);
         }
 
@@ -1011,7 +1015,7 @@ namespace lab8
                 if (ix >= 0 && ix < width && iy >= 0 && iy < height && z < zBufferArray[ix, iy])
                 {
                     zBufferArray[ix, iy] = z;
-                    _graphics.FillRectangle(new SolidBrush(color), ix, iy, 1, 1);
+                    _graphics.FillRectangle(new SolidBrush(color), ix - width / 2, iy - height / 2, 1, 1);
                 }
             }
         }
