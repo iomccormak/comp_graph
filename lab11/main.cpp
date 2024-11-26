@@ -27,14 +27,6 @@ const char* VertexShaderSource = R"(
  }
 )";
 
-const char* FragShaderSource = R"(
- #version 330 core
- out vec4 color;
- void main() {
-    color = vec4(0, 1, 0, 1);
- }
-)";
-
 const char* GradientVertexShaderSource = R"(
 #version 330 core
 in vec2 coord;
