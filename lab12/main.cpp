@@ -4,29 +4,31 @@
 #include <iostream>
 #include <vector>
 
-// Переменные
 GLuint Program;
 GLint Attrib_vertex, Attrib_color;
 GLuint VBO, VAO, EBO;
 
-// Глобальные переменные для смещения
 float offsetX = 0.0f, offsetY = 0.0f, offsetZ = 0.0f;
-const float step = 0.1f; // Шаг смещения
+float angleX = 0.0f, angleY = 0.0f, angleZ = 0.0f;
+const float offsetStep = 0.1f; 
+const float angleStep = 5.0f; 
+const float M_PI = 2 * acos(0.0);
 
 struct Vertex {
     GLfloat x, y, z;
-    GLfloat r, g, b; // Цвет вершины
+    GLfloat r, g, b;
 };
 
-// Шейдеры
+
 const char* VertexShaderSource = R"(
 #version 330 core
 in vec3 coord;
 in vec3 color;
-out vec3 vertexColor; // Передача цвета
+out vec3 vertexColor;
 uniform mat4 translationMatrix;
+uniform mat4 rotationMatrix;
 void main() {
-    gl_Position = translationMatrix * vec4(coord, 1.0);
+    gl_Position = translationMatrix * rotationMatrix * vec4(coord, 1.0);
     vertexColor = color;
 }
 )";
@@ -40,17 +42,21 @@ void main() {
 }
 )";
 
-// Функции
 void Init();
 void InitShader();
-void InitBuffers();
+void InitTetrahedron();
 void Draw();
 void Release();
 void ShaderLog(GLuint shader);
 void createTranslationMatrix(float offsetX, float offsetY, float offsetZ, float* matrix);
+void rotateY(float angle, float* matrix);
+void rotateX(float angle, float* matrix);
+void rotateZ(float angle, float* matrix);
+void multiplyMatrices(const float* a, const float* b, float* result);
+
 
 int main() {
-    sf::Window window(sf::VideoMode(800, 600), "Tetrahedron Movement", sf::Style::Default, sf::ContextSettings(24));
+    sf::Window window(sf::VideoMode(800, 600), "Lab12", sf::Style::Default, sf::ContextSettings(24));
     window.setVerticalSyncEnabled(true);
     window.setActive(true);
     glewInit();
@@ -65,19 +71,28 @@ int main() {
                 glViewport(0, 0, event.size.width, event.size.height);
             else if (event.type == sf::Event::KeyPressed) {
                 switch (event.key.code) {
-                case sf::Keyboard::W: offsetY += step; break; // Вверх
-                case sf::Keyboard::S: offsetY -= step; break; // Вниз
-                case sf::Keyboard::A: offsetX -= step; break; // Влево
-                case sf::Keyboard::D: offsetX += step; break; // Вправо
-                case sf::Keyboard::Q: offsetZ += step; break; // Вперёд
-                case sf::Keyboard::E: offsetZ -= step; break; // Назад
+                case sf::Keyboard::Num1: 
+                    InitTetrahedron(); 
+                    break;
+                case sf::Keyboard::W: offsetY += offsetStep; break; 
+                case sf::Keyboard::S: offsetY -= offsetStep; break;
+                case sf::Keyboard::A: offsetX -= offsetStep; break;
+                case sf::Keyboard::D: offsetX += offsetStep; break; 
+                case sf::Keyboard::Q: offsetZ += offsetStep; break;
+                case sf::Keyboard::E: offsetZ -= offsetStep; break;
+                case sf::Keyboard::Up: angleY -= angleStep; break;
+                case sf::Keyboard::Down: angleY += angleStep; break;
+                case sf::Keyboard::Left: angleX -= angleStep; break;
+                case sf::Keyboard::Right: angleX += angleStep; break;
+                case sf::Keyboard::Numpad2: angleZ -= angleStep; break;
+                case sf::Keyboard::Numpad8: angleZ += angleStep; break;
                 default: break;
                 }
             }
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Draw(); // Вызов без аргументов
+        Draw(); 
         window.display();
     }
 
@@ -85,10 +100,11 @@ int main() {
     return 0;
 }
 
+
 void Init() {
-    glEnable(GL_DEPTH_TEST); // Включить тест глубины
+    glEnable(GL_DEPTH_TEST);
     InitShader();
-    InitBuffers();
+    InitTetrahedron();
 }
 
 void InitShader() {
@@ -114,42 +130,19 @@ void InitShader() {
     Attrib_color = glGetAttribLocation(Program, "color");
 }
 
-void InitBuffers() {
-    const float PI = 3.14159265359;
-    const float angleX = 0.0f * PI / 180.0f; // угол 30 градусов в радианах
-    const float angleY = 0.0f * PI / 180.0f; // угол 30 градусов в радианах
-
-    // Математика вращения
-
+void InitTetrahedron() {
     std::vector<Vertex> vertices = {
-        {  0.0f,  0.5f,  0.0f,  0.0f,  0.0f,  1.0f }, // Верхняя вершина
-        { -0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f }, // Левая нижняя вершина 
-        {  0.5f, -0.5f,  0.5f,  0.0f,  1.0f,  0.0f }, // Правая нижняя вершина
-        {  0.0f, 0.0f,  -0.5f,  1.0f,  1.0f,  1.0f }  // Задняя нижняя вершина 
+        {  0.0f,   0.5f,  0.0f,  0.0f,  0.0f,  1.0f }, // Верхняя вершина
+        { -0.5f,  -0.5f,  0.0f,  1.0f,  0.0f,  0.0f }, // Левая нижняя вершина 
+        {  0.5f,  -0.5f,  0.0f,  0.0f,  1.0f,  0.0f }, // Правая нижняя вершина
+        {  0.0f,  -0.5f,  -0.5f, 1.0f,  1.0f,  1.0f }  // Задняя нижняя вершина 
     };
 
-    // Применяем вращение по оси X и Y для каждой вершины
-
-    for (auto& vertex : vertices) {
-        // Вращение по оси X
-        float tempY = vertex.y * cos(angleY) - vertex.z * sin(angleY);
-        float tempZ = vertex.y * sin(angleY) + vertex.z * cos(angleY);
-        vertex.y = tempY;
-        vertex.z = tempZ;
-
-        // Вращение по оси Y
-        float tempX = vertex.x * cos(angleX) + vertex.z * sin(angleX);
-        tempZ = -vertex.x * sin(angleX) + vertex.z * cos(angleX);
-        vertex.x = tempX;
-        vertex.z = tempZ;
-    }
-
-
     GLuint indices[] = {
-        0, 1, 2, // Треугольник 1
-        0, 2, 3, // Треугольник 2
-        0, 3, 1, // Треугольник 3
-        1, 2, 3  // Треугольник 4
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 1, 
+        1, 2, 3 
     };
 
     glGenBuffers(1, &VBO);
@@ -174,31 +167,24 @@ void InitBuffers() {
     glBindVertexArray(0);
 }
 
-void createTranslationMatrix(float offsetX, float offsetY, float offsetZ, float* matrix) {
-    float translationMatrix[16] = {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        offsetX, offsetY, offsetZ, 1.0f
-    };
-
-    for (int i = 0; i < 16; ++i)
-        matrix[i] = translationMatrix[i];
-}
-
 void Draw() {
     glUseProgram(Program);
     glBindVertexArray(VAO);
 
-    // Создать матрицу трансляции
     float translationMatrix[16];
     createTranslationMatrix(offsetX, offsetY, offsetZ, translationMatrix);
-
-    // Передать матрицу трансляции в шейдер
     GLint translationMatrixLocation = glGetUniformLocation(Program, "translationMatrix");
     glUniformMatrix4fv(translationMatrixLocation, 1, GL_FALSE, translationMatrix);
 
-    // Отрисовка
+    float rotationX[16], rotationY[16], rotationZ[16], combinedRotation[16], tempMatrix[16];
+    rotateX(angleX * M_PI / 180.0f, rotationX);
+    rotateY(angleY * M_PI / 180.0f, rotationY);
+    rotateZ(angleZ * M_PI / 180.0f, rotationZ);
+    multiplyMatrices(rotationY, rotationX, tempMatrix); // Y * X
+    multiplyMatrices(rotationZ, tempMatrix, combinedRotation); // Z * (Y * X)
+    GLint rotMatrixLoc = glGetUniformLocation(Program, "rotationMatrix");
+    glUniformMatrix4fv(rotMatrixLoc, 1, GL_TRUE, combinedRotation);
+
     glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
@@ -219,5 +205,60 @@ void ShaderLog(GLuint shader) {
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cerr << "Shader compilation error:\n" << infoLog << std::endl;
+    }
+}
+
+// ========= Matrices =========
+
+void createTranslationMatrix(float offsetX, float offsetY, float offsetZ, float* matrix) {
+    float temp[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        offsetX, offsetY, offsetZ, 1.0f
+    };
+    std::copy(temp, temp + 16, matrix);
+}
+
+void rotateX(float angle, float* matrix) {
+    float cosA = cos(angle), sinA = sin(angle);
+    float temp[16] = {
+        cosA, 0, -sinA, 0,
+        0,    1, 0,     0,
+        sinA, 0, cosA,  0,
+        0,    0, 0,     1
+    };
+    std::copy(temp, temp + 16, matrix);
+}
+
+void rotateY(float angle, float* matrix) {
+    float cosA = cos(angle), sinA = sin(angle);
+    float temp[16] = {
+        1, 0,     0,     0,
+        0, cosA,  sinA,  0,
+        0, -sinA, cosA,  0,
+        0, 0,     0,     1
+    };
+    std::copy(temp, temp + 16, matrix);
+}
+
+void rotateZ(float angle, float* matrix) {
+    float cosA = cos(angle), sinA = sin(angle);
+    float temp[16] = {
+        cosA,  sinA,  0, 0,
+        -sinA, cosA,  0, 0,
+        0,     0,     1, 0,
+        0,     0,     0, 1
+    };
+    std::copy(temp, temp + 16, matrix);
+}
+
+void multiplyMatrices(const float* a, const float* b, float* result) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            result[i * 4 + j] = 0;
+            for (int k = 0; k < 4; ++k)
+                result[i * 4 + j] += a[i * 4 + k] * b[k * 4 + j];
+        }
     }
 }
