@@ -84,8 +84,8 @@ int main() {
                 case sf::Keyboard::Down: angleY += angleStep; break;
                 case sf::Keyboard::Left: angleX -= angleStep; break;
                 case sf::Keyboard::Right: angleX += angleStep; break;
-                case sf::Keyboard::Numpad2: angleZ -= angleStep; break;
-                case sf::Keyboard::Numpad8: angleZ += angleStep; break;
+                case sf::Keyboard::Num9: angleZ -= angleStep; break;
+                case sf::Keyboard::Num0: angleZ += angleStep; break;
                 default: break;
                 }
             }
@@ -131,11 +131,15 @@ void InitShader() {
 }
 
 void InitTetrahedron() {
+    const float sqrt2 = std::sqrt(2.0f);
+    const float sqrt6 = std::sqrt(6.0f);
+    const float scale = 0.5f;
+
     std::vector<Vertex> vertices = {
-        {  0.0f,   0.5f,  0.0f,  0.0f,  0.0f,  1.0f }, // Верхняя вершина
-        { -0.5f,  -0.5f,  0.0f,  1.0f,  0.0f,  0.0f }, // Левая нижняя вершина 
-        {  0.5f,  -0.5f,  0.0f,  0.0f,  1.0f,  0.0f }, // Правая нижняя вершина
-        {  0.0f,  -0.5f,  -0.5f, 1.0f,  1.0f,  1.0f }  // Задняя нижняя вершина 
+        { scale * 1.0f,  scale * 0.0f, scale * (-1.0f / sqrt2),  1.0f, 0.0f, 0.0f }, 
+        { scale * -1.0f, scale * 0.0f, scale * (-1.0f / sqrt2),  0.0f, 1.0f, 0.0f }, 
+        { scale * 0.0f,  scale * 1.0f, scale * (1.0f / sqrt2),  0.0f, 0.0f, 1.0f }, 
+        { scale * 0.0f,  scale * -1.0f, scale * (1.0f / sqrt2), 1.0f, 1.0f, 1.0f }
     };
 
     GLuint indices[] = {
