@@ -3,10 +3,13 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 #include <vector>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 GLuint Program;
-GLint Attrib_vertex, Attrib_color;
+GLint Attrib_vertex, Attrib_color, Attrib_texture;
 GLuint VBO, VAO, EBO;
+int drawMode = 0;
 
 float offsetX = 0.0f, offsetY = 0.0f, offsetZ = 0.0f;
 float angleX = 0.0f, angleY = 0.0f, angleZ = 0.0f;
@@ -19,20 +22,30 @@ const float scaleStep = 0.1f;
 struct Vertex {
     GLfloat x, y, z;
     GLfloat r, g, b;
+    GLfloat s, t;
+};
+
+struct Image {
+    int sizeX;
+    int sizeY;
+    unsigned char* data;
 };
 
 
 const char* VertexShaderSource = R"(
 #version 330 core
-in vec3 coord;
-in vec3 color;
+layout(location = 0) in vec3 coord;
+layout(location = 1) in vec3 color;
+layout(location = 2) in vec2 texCoord;
 out vec3 vertexColor;
+out vec2 TexCoord;
 uniform mat4 translationMatrix;
 uniform mat4 rotationMatrix;
 uniform mat4 scaleMatrix;
 void main() {
-    gl_Position = translationMatrix * rotationMatrix * scaleMatrix * vec4(coord, 1.0);
     vertexColor = color;
+    TexCoord = texCoord;
+    gl_Position = translationMatrix * rotationMatrix * scaleMatrix * vec4(coord, 1.0);
 }
 )";
 
@@ -45,9 +58,21 @@ void main() {
 }
 )";
 
+const char* FragShaderTextureColor = R"(
+#version 330 core
+in vec3 vertexColor;
+in vec2 TexCoord;
+out vec4 color;
+uniform sampler2D ourTexture;
+void main() {
+    color = texture(ourTexture, TexCoord) * vec4(vertexColor, 1.0);
+}
+)";
+
 void Init();
 void InitShader();
 void InitTetrahedron();
+void InitHexahedron();
 void InitGradientCircle();
 void Draw();
 void Release();
@@ -59,10 +84,11 @@ void rotateY(float angle, float* matrix);
 void rotateX(float angle, float* matrix);
 void rotateZ(float angle, float* matrix);
 void multiplyMatrices(const float* a, const float* b, float* result);
-
+Image* loadImage(const char* filePath);
+void freeImage(Image* img);
 
 int main() {
-    sf::Window window(sf::VideoMode(800, 600), "Lab12", sf::Style::Default, sf::ContextSettings(24));
+    sf::Window window(sf::VideoMode(800, 800), "Lab12", sf::Style::Default, sf::ContextSettings(24));
     window.setVerticalSyncEnabled(true);
     window.setActive(true);
     glewInit();
@@ -78,9 +104,18 @@ int main() {
             else if (event.type == sf::Event::KeyPressed) {
                 switch (event.key.code) {
                 case sf::Keyboard::Num1:
+                    drawMode = 0;
+                    InitShader();
                     InitTetrahedron();
                     break;
+                case sf::Keyboard::Num2:
+                    drawMode = 1;
+                    InitShader();
+                    InitHexahedron();
+                    break;
                 case sf::Keyboard::Num4:
+                    drawMode = 3;
+                    InitShader();
                     InitGradientCircle();
                     break;
                 case sf::Keyboard::W: offsetY += offsetStep; break;
@@ -99,8 +134,6 @@ int main() {
                 case sf::Keyboard::K: scaleY -= scaleStep; break;
                 case sf::Keyboard::J: scaleX -= scaleStep; break;
                 case sf::Keyboard::L: scaleX += scaleStep; break;
-                case sf::Keyboard::Num9: angleZ -= angleStep; break;
-                case sf::Keyboard::Num0: angleZ += angleStep; break;
                 default: break;
                 }
             }
@@ -129,7 +162,12 @@ void InitShader() {
     ShaderLog(vShader);
 
     GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fShader, 1, &FragShaderSource, NULL);
+
+    if (drawMode == 1)
+        glShaderSource(fShader, 1, &FragShaderTextureColor, NULL);
+    else
+        glShaderSource(fShader, 1, &FragShaderSource, NULL);
+
     glCompileShader(fShader);
     ShaderLog(fShader);
 
@@ -143,18 +181,15 @@ void InitShader() {
 
     Attrib_vertex = glGetAttribLocation(Program, "coord");
     Attrib_color = glGetAttribLocation(Program, "color");
+    Attrib_texture = glGetAttribLocation(Program, "texCoord");
 }
 
 void InitTetrahedron() {
-    const float sqrt2 = std::sqrt(2.0f);
-    const float sqrt6 = std::sqrt(6.0f);
-    const float scale = 0.5f;
-
     std::vector<Vertex> vertices = {
-        { scale * 1.0f,  scale * 0.0f, scale * (-1.0f / sqrt2),  1.0f, 0.0f, 0.0f }, 
-        { scale * -1.0f, scale * 0.0f, scale * (-1.0f / sqrt2),  0.0f, 1.0f, 0.0f }, 
-        { scale * 0.0f,  scale * 1.0f, scale * (1.0f / sqrt2),  0.0f, 0.0f, 1.0f }, 
-        { scale * 0.0f,  scale * -1.0f, scale * (1.0f / sqrt2), 1.0f, 1.0f, 1.0f }
+        {  0.0f,   0.5f,  0.0f,  0.0f,  0.0f,  1.0f }, // Верхняя вершина
+        { -0.5f,  -0.5f,  0.0f,  1.0f,  0.0f,  0.0f }, // Левая нижняя вершина 
+        {  0.5f,  -0.5f,  0.0f,  0.0f,  1.0f,  0.0f }, // Правая нижняя вершина
+        {  0.0f,  -0.5f,  -0.5f, 1.0f,  1.0f,  1.0f }  // Задняя нижняя вершина 
     };
 
     GLuint indices[] = {
@@ -181,6 +216,75 @@ void InitTetrahedron() {
 
     glVertexAttribPointer(Attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, r));
     glEnableVertexAttribArray(Attrib_color);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void InitHexahedron()
+{
+    std::vector<Vertex> vertices = {
+        // Верхняя
+        {  0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f },
+        {  0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f },
+        { -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f },
+        { -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+        // Нижняя 
+        {  0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+        {  0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f },
+        { -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f },
+        { -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f },
+        // Задняя 
+        {  0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+        { -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f },
+        { -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f },
+        {  0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f },
+        // Передняя
+        {  0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f },
+        { -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f },
+        { -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f },
+        {  0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+        // Правая
+        {  0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f },
+        {  0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+        {  0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f },
+        {  0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+        // Левая
+        { -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f },
+        { -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f },
+        { -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f },        
+        { -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f },        
+    };
+
+    GLuint indices[] = {
+        0, 1, 2, 3,
+        4, 5, 6, 7,
+        8, 9, 10, 11,
+        12, 13, 14, 15,
+        16, 17, 18, 19,
+        20, 21, 22, 23
+    };
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(Attrib_vertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+    glEnableVertexAttribArray(Attrib_vertex);
+
+    glVertexAttribPointer(Attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(Attrib_color);
+
+    glVertexAttribPointer(Attrib_texture, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(Attrib_texture);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -285,7 +389,35 @@ void Draw() {
     GLint rotMatrixLoc = glGetUniformLocation(Program, "rotationMatrix");
     glUniformMatrix4fv(rotMatrixLoc, 1, GL_TRUE, combinedRotation);
 
-    glDrawElements(GL_TRIANGLES, 300, GL_UNSIGNED_INT, 0);
+    if (drawMode == 1)
+    {
+        Image* photo_img = loadImage("inrag3.jpg");
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img->sizeX, photo_img->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img->data);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        GLint textureLocation = glGetUniformLocation(Program, "ourTexture");
+        glUniform1i(textureLocation, 0);
+
+        glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
+
+        if (photo_img != nullptr)
+            freeImage(photo_img);
+    }
+    else
+    {
+        glDrawElements(GL_TRIANGLES, 300, GL_UNSIGNED_INT, 0);
+    }
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -305,6 +437,27 @@ void ShaderLog(GLuint shader) {
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cerr << "Shader compilation error:\n" << infoLog << std::endl;
+    }
+}
+
+Image* loadImage(const char* filePath) {
+    Image* img = new Image();
+
+    int channels;
+    img->data = stbi_load(filePath, &img->sizeX, &img->sizeY, &channels, 3);
+    if (!img->data) {
+        std::cerr << "Не удалось загрузить изображение: " << filePath << std::endl;
+        delete img;
+        return nullptr;
+    }
+
+    return img;
+}
+
+void freeImage(Image* img) {
+    if (img) {
+        stbi_image_free(img->data);
+        delete img;
     }
 }
 
