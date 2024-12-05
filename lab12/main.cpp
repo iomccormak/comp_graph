@@ -1,7 +1,7 @@
 ﻿#include <GL/glew.h>
+#include <iostream>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window.hpp>
-#include <iostream>
 #include <vector>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -18,6 +18,7 @@ const float angleStep = 5.0f;
 const float M_PI = 2 * acos(0.0);
 float scaleX = 1.0f, scaleY = 1.0f;
 const float scaleStep = 0.1f;
+float proportion = 0.5f;
 
 struct Vertex {
     GLfloat x, y, z;
@@ -64,8 +65,21 @@ in vec3 vertexColor;
 in vec2 TexCoord;
 out vec4 color;
 uniform sampler2D ourTexture;
+uniform float proportion;
 void main() {
-    color = texture(ourTexture, TexCoord) * vec4(vertexColor, 1.0);
+    color = mix(texture(ourTexture, TexCoord), vec4(vertexColor, 1.0), proportion);
+}
+)";
+
+const char* FragShaderTextureMix = R"(
+#version 330 core
+in vec2 TexCoord;
+out vec4 color;
+uniform sampler2D ourTexture1;
+uniform sampler2D ourTexture2;
+uniform float proportion;
+void main() {
+    color = mix(texture(ourTexture1, TexCoord), texture(ourTexture2, TexCoord), proportion);
 }
 )";
 
@@ -75,6 +89,8 @@ void InitTetrahedron();
 void InitHexahedron();
 void InitGradientCircle();
 void Draw();
+void DrawHexahedronTextureColor();
+void DrawHexahedronTextureTexture();
 void Release();
 void ShaderLog(GLuint shader);
 void createTranslationMatrix(float offsetX, float offsetY, float offsetZ, float* matrix);
@@ -113,6 +129,11 @@ int main() {
                     InitShader();
                     InitHexahedron();
                     break;
+                case sf::Keyboard::Num3:
+                    drawMode = 2;
+                    InitShader();
+                    InitHexahedron();
+                    break;
                 case sf::Keyboard::Num4:
                     drawMode = 3;
                     InitShader();
@@ -134,6 +155,8 @@ int main() {
                 case sf::Keyboard::K: scaleY -= scaleStep; break;
                 case sf::Keyboard::J: scaleX -= scaleStep; break;
                 case sf::Keyboard::L: scaleX += scaleStep; break;
+                case sf::Keyboard::Add: proportion = (proportion + 0.05f < 1.0f) ? proportion + 0.05f : 1.0f; break;
+                case sf::Keyboard::Subtract: proportion = (proportion - 0.05f > 0.0f) ? proportion - 0.05f : 0.0f; break;
                 default: break;
                 }
             }
@@ -165,6 +188,8 @@ void InitShader() {
 
     if (drawMode == 1)
         glShaderSource(fShader, 1, &FragShaderTextureColor, NULL);
+    else if (drawMode == 2)
+        glShaderSource(fShader, 1, &FragShaderTextureMix, NULL);
     else
         glShaderSource(fShader, 1, &FragShaderSource, NULL);
 
@@ -211,10 +236,10 @@ void InitTetrahedron() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(Attrib_vertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, x));
+    glVertexAttribPointer(Attrib_vertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(Attrib_vertex);
 
-    glVertexAttribPointer(Attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, r));
+    glVertexAttribPointer(Attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(Attrib_color);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -332,10 +357,10 @@ void InitGradientCircle() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(Attrib_vertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, x));
+    glVertexAttribPointer(Attrib_vertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(Attrib_vertex);
 
-    glVertexAttribPointer(Attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, r));
+    glVertexAttribPointer(Attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(Attrib_color);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -366,6 +391,7 @@ void HSVtoRGB(float h, float s, float v, float& r, float& g, float& b) {
     }
 }
 
+
 void Draw() {
     glUseProgram(Program);
     glBindVertexArray(VAO);
@@ -390,29 +416,12 @@ void Draw() {
     glUniformMatrix4fv(rotMatrixLoc, 1, GL_TRUE, combinedRotation);
 
     if (drawMode == 1)
+    { 
+        DrawHexahedronTextureColor();
+    }
+    else if (drawMode == 2)
     {
-        Image* photo_img = loadImage("inrag3.jpg");
-        GLuint texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img->sizeX, photo_img->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img->data);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        GLint textureLocation = glGetUniformLocation(Program, "ourTexture");
-        glUniform1i(textureLocation, 0);
-
-        glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
-
-        if (photo_img != nullptr)
-            freeImage(photo_img);
+        DrawHexahedronTextureTexture();
     }
     else
     {
@@ -421,6 +430,82 @@ void Draw() {
 
     glBindVertexArray(0);
     glUseProgram(0);
+}
+
+
+void DrawHexahedronTextureColor()
+{
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    Image* photo_img = loadImage("inrag3.jpg");
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img->sizeX, photo_img->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img->data);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    GLint textureLocation = glGetUniformLocation(Program, "ourTexture");
+    glUniform1i(textureLocation, 0);
+
+    glUniform1f(glGetUniformLocation(Program, "proportion"), proportion);
+
+    glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
+
+    if (photo_img != nullptr)
+        freeImage(photo_img);
+
+    glDeleteTextures(1, &texture);
+}
+
+void DrawHexahedronTextureTexture()
+{
+    GLuint texture1;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    Image* photo_img1 = loadImage("inrag3.jpg");
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img1->sizeX, photo_img1->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img1->data);
+
+    GLuint texture2;
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    Image* photo_img2 = loadImage("imgpreview.jpg");
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img2->sizeX, photo_img2->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img2->data);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glUniform1i(glGetUniformLocation(Program, "ourTexture1"), 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glUniform1i(glGetUniformLocation(Program, "ourTexture2"), 1);
+
+    glUniform1f(glGetUniformLocation(Program, "proportion"), proportion);
+
+    glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
+
+    if (photo_img1 != nullptr)
+        freeImage(photo_img1);
+    if (photo_img2 != nullptr)
+        freeImage(photo_img2);
+
+    glDeleteTextures(1, &texture1);
+    glDeleteTextures(1, &texture2);
 }
 
 void Release() {
