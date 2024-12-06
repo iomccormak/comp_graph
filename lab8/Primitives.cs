@@ -7,11 +7,11 @@ namespace lab8
     public class Point3D    
     {
         public float X, Y, Z, W;
-        public Point3D(float _X, float _Y, float _Z)
+        public Point3D(float x, float y, float z)
         {
-            X = _X;
-            Y = _Y;
-            Z = _Z;
+            X = x;
+            Y = y;
+            Z = z;
             W = 1;
         }
 
@@ -83,16 +83,16 @@ namespace lab8
         public Point3D normal;
         public Color faceColor { get; set; }
 
-        public Face(List<int> _indexes)
+        public Face(List<int> indexes)
         {
-            indexes = _indexes;
+            this.indexes = indexes;
             normal = null;
             faceColor = Color.Red;
         }
 
-        public Face(List<int> _indexes, Color color)
+        public Face(List<int> indexes, Color color)
         {
-            indexes = _indexes;
+            this.indexes = indexes;
             normal = null;
             faceColor = color;
         }

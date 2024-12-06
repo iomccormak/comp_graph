@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 
@@ -7,35 +8,40 @@ namespace lab8
 {
     public class Camera
     {
-        public Point3D Position {  get; set; }
-        public Point3D Target { get; set; }
-        public float[][] ViewMatrix { get; set; }
-        public float[][] ProjectionMatrix { get; set; }
-
-        private Point3D right = new Point3D(1, 0, 0);
-        private Point3D up = new Point3D(0, 1, 0);
-        private Point3D forward = new Point3D(0, 0, 1);
+        public bool IsColored { get; set; }
+        public bool IsNonFrontFaces { get; set; }
+        public bool IsZBuffer { get; set; }
+        
+        private Point3D _position;
+        private Point3D _target;
+        private Point3D _right = new Point3D(1, 0, 0);
+        private Point3D _up = new Point3D(0, 1, 0);
+        private Point3D _forward = new Point3D(0, 0, 1);
+        private float[][] _viewMatrix;
+        private float[][] _projectionMatrix;
 
         private Graphics _graphics;
         private Pen _pen;
 
-        public Camera(Graphics graphics, Pen pen)
+        public Camera(Graphics graphics, Pen pen, bool isColored, bool isNonFrontFaces, bool isZBuffer)
         {
-            Position = new Point3D(0, 0, 1000);
-            Target = new Point3D(0, 0, 0);
-            ViewMatrix = Matrices.Identity();
+            _position = new Point3D(0, 0, 1000);
+            _target = new Point3D(0, 0, 0);
+            _viewMatrix = Matrices.Identity();
+            IsColored = isColored;
+            IsNonFrontFaces = isNonFrontFaces;
+            IsZBuffer = isZBuffer;
             _pen = pen;
             _graphics = graphics;
         }
 
-        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, bool checkBoxNonFrontFaces, bool zBuffer, int width, int height, bool faceColor)
+        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, int width, int height)
         {
-            float c = -Position.Z;
+            float c = -_position.Z;
             //double phi = 35.26d;
             //double psi = 45d;
             _graphics = graphics;
             _graphics.Clear(Color.White);
-
             
             float[,] zBufferArray = new float[width, height];
             for (int i = 0; i < width; i++)
@@ -49,20 +55,20 @@ namespace lab8
             switch (modeView)
             {
                 case ModeView.Perspective:
-                    ProjectionMatrix = Matrices.Perspective(c); // Не работает
+                    _projectionMatrix = Matrices.Perspective(c); // Не работает
                     break;
-                case ModeView.Axonometry:
+                case ModeView.Axonometric:
                     //ProjectionMatrix = Matrices.Axonometry(phi, psi);
-                    ProjectionMatrix = Matrices.Perspective(c); // А это вообще заглушка
+                    _projectionMatrix = Matrices.Perspective(c); // А это вообще заглушка
                     break;
                 case ModeView.Parallel:
-                    ProjectionMatrix = Matrices.Parallel();
+                    _projectionMatrix = Matrices.Parallel();
                     break;
             }
 
             foreach (Polyhedron polyhedron in polyhedrons)
             {
-                DrawPolyhedron(polyhedron, checkBoxNonFrontFaces, zBuffer, zBufferArray, width, height, faceColor);
+                DrawPolyhedron(polyhedron, zBufferArray, width, height);
             }
             DrawAxis();
         }
@@ -80,8 +86,8 @@ namespace lab8
                 var axes = axeses[i];
                 foreach (var point in axes)
                 {
-                    point.ApplyMatrix(ViewMatrix);
-                    point.ApplyMatrix(ProjectionMatrix);
+                    point.ApplyMatrix(_viewMatrix);
+                    point.ApplyMatrix(_projectionMatrix);
                 }
 
                 _graphics.DrawLine(
@@ -92,15 +98,14 @@ namespace lab8
             }
         }
 
-
-        private void DrawPolyhedron(Polyhedron polyhedron, bool checkBoxNonFrontFaces, bool zBuffer, float[,] zBufferArray, int width, int height, bool faceColor)
+        private void DrawPolyhedron(Polyhedron polyhedron, float[,] zBufferArray, int width, int height)
         {
             List<Point3D> points = new List<Point3D>();
 
             List<Face> visibleFaces = polyhedron.faces;
-            if (checkBoxNonFrontFaces)
+            if (IsNonFrontFaces)
             {
-                var viewVector = Target - Position;
+                var viewVector = _target - _position;
                 viewVector.Normalize();
                 visibleFaces = polyhedron.GetVisibleFaces(viewVector);
             }
@@ -109,11 +114,11 @@ namespace lab8
             {
                 Point3D p = point.Clone();
                 p.ApplyMatrix(polyhedron.modelMatrix);
-                p.ApplyMatrix(ViewMatrix);
+                p.ApplyMatrix(_viewMatrix);
                 points.Add(p);
             }
 
-            if (zBuffer)
+            if (IsZBuffer)
             {
                 foreach (var face in polyhedron.faces)
                 {
@@ -127,7 +132,7 @@ namespace lab8
 
                     foreach (var triangle in triangles)
                     {
-                        RasterizeTriangle(triangle, facePoints, zBufferArray, face.faceColor, width, height);
+                        RasterizeTriangle(triangle, zBufferArray, face.faceColor, width, height);
                     }
                 }
             }
@@ -136,10 +141,10 @@ namespace lab8
 
             foreach (Point3D point in points)
             {
-                point.ApplyMatrix(ProjectionMatrix);
+                point.ApplyMatrix(_projectionMatrix);
             }
 
-            if (checkBoxNonFrontFaces)
+            if (IsNonFrontFaces)
             {
                 foreach (var face in visibleFaces)
                 {
@@ -150,10 +155,13 @@ namespace lab8
                         var point = points[face.indexes[i]];
                         polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
                     }
-
-                    using (Brush brush = new SolidBrush(face.faceColor))
+                    
+                    if(IsColored)
                     {
-                        _graphics.FillPolygon(brush, polygonPoints);
+                        using (Brush brush = new SolidBrush(face.faceColor))
+                        {
+                            _graphics.FillPolygon(brush, polygonPoints);
+                        }
                     }
 
                     for (int i = 0; i < indexes.Count; i++)
@@ -177,9 +185,7 @@ namespace lab8
                         );
                     }
                 }
-            }
-                
-            
+            } 
         }
 
         private static List<List<Point3D>> Triangulate(List<Point3D> polygonPoints)
@@ -199,7 +205,7 @@ namespace lab8
         }
 
 
-        private void RasterizeTriangle(List<Point3D> triangle, List<Point3D> facePoints, float[,] zBufferArray, Color color, int width, int height)
+        private void RasterizeTriangle(List<Point3D> triangle, float[,] zBufferArray, Color color, int width, int height)
         {
             var sortedPoints = triangle.OrderBy(p => p.Y).ToList();
             var top = sortedPoints[0];
@@ -235,14 +241,12 @@ namespace lab8
             return p1.X + (p2.X - p1.X) * (y - p1.Y) / (p2.Y - p1.Y);
         }
 
-
         private float FindZbyY(float y, Point3D p1, Point3D p2)
         {
             if (p1.Y == p2.Y) return p1.Z;
             return p1.Z + (p2.Z - p1.Z) * (y - p1.Y) / (p2.Y - p1.Y);
         }
-
-
+        
         private void FillScanline(int y, float x1, float z1, float x2, float z2, float[,] zBufferArray, Color color, int width, int height)
         {
             if (x1 > x2)
@@ -264,31 +268,29 @@ namespace lab8
             }
         }
 
-
-
         private void UpdateViewMatrix()
         {
-            forward = Target - Position;
-            forward.Normalize();
-            right = forward.CrossProduct(up);
-            right.Normalize();
-            up = right.CrossProduct(forward);
-            up.Normalize();
+            _forward = _target - _position;
+            _forward.Normalize();
+            _right = _forward.CrossProduct(_up);
+            _right.Normalize();
+            _up = _right.CrossProduct(_forward);
+            _up.Normalize();
 
-            ViewMatrix = new float[][] {
-                new float[] { right.X, up.X, forward.X, 0 },
-                new float[] { right.Y, up.Y, forward.Y, 0 },
-                new float[] { right.Z, up.Z, forward.Z, 0 },
-                new float[] { -right.DotProduct(Position), -up.DotProduct(Position), -forward.DotProduct(Position), 1 }
+            _viewMatrix = new float[][] {
+                new float[] { _right.X, _up.X, _forward.X, 0 },
+                new float[] { _right.Y, _up.Y, _forward.Y, 0 },
+                new float[] { _right.Z, _up.Z, _forward.Z, 0 },
+                new float[] { -_right.DotProduct(_position), -_up.DotProduct(_position), -_forward.DotProduct(_position), 1 }
             };
         }
 
-        public void Move(float dx, float dy, float dz)
+        private void Move(float dx, float dy, float dz)
         {
-            Position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
+            _position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
         }
 
-        public void Rotate(float angleX, float angleY)
+        private void Rotate(float angleX, float angleY)
         {
             float radX = (float)(angleX * Math.PI / 180);
             float radY = (float)(angleY * Math.PI / 180);
@@ -299,13 +301,13 @@ namespace lab8
 
             if (radX != 0)
             {
-                point = right;
+                point = _right;
                 sin = (float)Math.Sin(radX);
                 cos = (float)Math.Cos(radX);
             } 
             else
             {
-                point = up;
+                point = _up;
                 sin = (float)Math.Sin(radY);
                 cos = (float)Math.Cos(radY);
             }
@@ -315,7 +317,7 @@ namespace lab8
             float m = point.Y / length;
             float n = point.Z / length;
             float[][] rotation = Matrices.RotationLine(l, m, n, sin, cos);
-            Position.ApplyMatrix(rotation);
+            _position.ApplyMatrix(rotation);
         }
 
         public void MoveUp() => Move(0, -30, 0);

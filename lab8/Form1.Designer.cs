@@ -23,14 +23,15 @@
         #region Код, автоматически созданный конструктором форм Windows
 
         /// <summary>
-        /// Требуемый метод для поддержки конструктора — не изменяйте 
-        /// содержимое этого метода с помощью редактора кода.
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.listBoxPolyhedronList = new System.Windows.Forms.ListBox();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.resetButton = new System.Windows.Forms.Button();
@@ -54,7 +55,9 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.checkBoxColor = new System.Windows.Forms.CheckBox();
+            this.checkBoxZBuffer = new System.Windows.Forms.CheckBox();
+            this.resetCameraButton = new System.Windows.Forms.Button();
             this.checkBoxNonFrontFaces = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -74,9 +77,6 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.listBoxPolyhedronList = new System.Windows.Forms.ListBox();
-            this.checkBoxZBuffer = new System.Windows.Forms.CheckBox();
-            this.checkBoxColor = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -122,6 +122,15 @@
             this.groupBox1.Size = new System.Drawing.Size(167, 736);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
+            // 
+            // listBoxPolyhedronList
+            // 
+            this.listBoxPolyhedronList.FormattingEnabled = true;
+            this.listBoxPolyhedronList.Location = new System.Drawing.Point(6, 136);
+            this.listBoxPolyhedronList.Name = "listBoxPolyhedronList";
+            this.listBoxPolyhedronList.Size = new System.Drawing.Size(150, 134);
+            this.listBoxPolyhedronList.TabIndex = 24;
+            this.listBoxPolyhedronList.SelectedIndexChanged += new System.EventHandler(this.listBoxPolyhedronList_SelectedIndexChanged);
             // 
             // radioButton3
             // 
@@ -269,12 +278,7 @@
             // 
             this.comboBoxAthenian.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxAthenian.FormattingEnabled = true;
-            this.comboBoxAthenian.Items.AddRange(new object[] {
-            "Смещение",
-            "Поворот",
-            "Масштаб",
-            "Отражение",
-            "Вращение"});
+            this.comboBoxAthenian.Items.AddRange(new object[] { "Смещение", "Поворот", "Масштаб", "Отражение", "Вращение" });
             this.comboBoxAthenian.Location = new System.Drawing.Point(6, 297);
             this.comboBoxAthenian.Name = "comboBoxAthenian";
             this.comboBoxAthenian.Size = new System.Drawing.Size(150, 21);
@@ -322,13 +326,7 @@
             this.comboBoxPolyhedron.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPolyhedron.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.comboBoxPolyhedron.FormattingEnabled = true;
-            this.comboBoxPolyhedron.Items.AddRange(new object[] {
-            "Тетраэдр",
-            "Гексаэдр",
-            "Октаэдр",
-            "Икосаэдр",
-            "Додекаэдр",
-            "Параллелепипед"});
+            this.comboBoxPolyhedron.Items.AddRange(new object[] { "Тетраэдр", "Гексаэдр", "Октаэдр", "Икосаэдр", "Додекаэдр", "Параллелепипед" });
             this.comboBoxPolyhedron.Location = new System.Drawing.Point(6, 109);
             this.comboBoxPolyhedron.Name = "comboBoxPolyhedron";
             this.comboBoxPolyhedron.Size = new System.Drawing.Size(150, 21);
@@ -365,7 +363,7 @@
             this.groupBox2.AutoSize = true;
             this.groupBox2.Controls.Add(this.checkBoxColor);
             this.groupBox2.Controls.Add(this.checkBoxZBuffer);
-            this.groupBox2.Controls.Add(this.button2);
+            this.groupBox2.Controls.Add(this.resetCameraButton);
             this.groupBox2.Controls.Add(this.checkBoxNonFrontFaces);
             this.groupBox2.Controls.Add(this.label10);
             this.groupBox2.Controls.Add(this.label9);
@@ -390,15 +388,37 @@
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
-            // button2
+            // checkBoxColor
             // 
-            this.button2.Location = new System.Drawing.Point(12, 435);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(165, 23);
-            this.button2.TabIndex = 23;
-            this.button2.Text = "Сбросить положение камеры";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.checkBoxColor.AutoSize = true;
+            this.checkBoxColor.Location = new System.Drawing.Point(6, 252);
+            this.checkBoxColor.Name = "checkBoxColor";
+            this.checkBoxColor.Size = new System.Drawing.Size(88, 17);
+            this.checkBoxColor.TabIndex = 25;
+            this.checkBoxColor.Text = "Задать цвет";
+            this.checkBoxColor.UseVisualStyleBackColor = true;
+            this.checkBoxColor.CheckedChanged += new System.EventHandler(this.checkBoxColor_CheckedChanged);
+            // 
+            // checkBoxZBuffer
+            // 
+            this.checkBoxZBuffer.AutoSize = true;
+            this.checkBoxZBuffer.Location = new System.Drawing.Point(6, 228);
+            this.checkBoxZBuffer.Name = "checkBoxZBuffer";
+            this.checkBoxZBuffer.Size = new System.Drawing.Size(67, 17);
+            this.checkBoxZBuffer.TabIndex = 24;
+            this.checkBoxZBuffer.Text = "Z-буфер";
+            this.checkBoxZBuffer.UseVisualStyleBackColor = true;
+            this.checkBoxZBuffer.CheckedChanged += new System.EventHandler(this.checkBoxZBuffer_CheckedChanged);
+            // 
+            // resetCameraButton
+            // 
+            this.resetCameraButton.Location = new System.Drawing.Point(12, 435);
+            this.resetCameraButton.Name = "resetCameraButton";
+            this.resetCameraButton.Size = new System.Drawing.Size(165, 23);
+            this.resetCameraButton.TabIndex = 23;
+            this.resetCameraButton.Text = "Сбросить положение камеры";
+            this.resetCameraButton.UseVisualStyleBackColor = true;
+            this.resetCameraButton.Click += new System.EventHandler(this.resetCameraButton_Click);
             // 
             // checkBoxNonFrontFaces
             // 
@@ -442,10 +462,7 @@
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "sin(x)+cos(y)",
-            "cos(x+y)",
-            "5*cos(x^2+y^2+1)/(x^2+y^2+1)+0.1)"});
+            this.comboBox1.Items.AddRange(new object[] { "sin(x)+cos(y)", "cos(x+y)", "5*cos(x^2+y^2+1)/(x^2+y^2+1)+0.1)" });
             this.comboBox1.Location = new System.Drawing.Point(12, 148);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(165, 21);
@@ -597,37 +614,6 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // listBoxPolyhedronList
-            // 
-            this.listBoxPolyhedronList.FormattingEnabled = true;
-            this.listBoxPolyhedronList.Location = new System.Drawing.Point(6, 136);
-            this.listBoxPolyhedronList.Name = "listBoxPolyhedronList";
-            this.listBoxPolyhedronList.Size = new System.Drawing.Size(150, 134);
-            this.listBoxPolyhedronList.TabIndex = 24;
-            this.listBoxPolyhedronList.SelectedIndexChanged += new System.EventHandler(this.listBoxPolyhedronList_SelectedIndexChanged);
-            // 
-            // checkBoxZBuffer
-            // 
-            this.checkBoxZBuffer.AutoSize = true;
-            this.checkBoxZBuffer.Location = new System.Drawing.Point(6, 228);
-            this.checkBoxZBuffer.Name = "checkBoxZBuffer";
-            this.checkBoxZBuffer.Size = new System.Drawing.Size(67, 17);
-            this.checkBoxZBuffer.TabIndex = 24;
-            this.checkBoxZBuffer.Text = "Z-буфер";
-            this.checkBoxZBuffer.UseVisualStyleBackColor = true;
-            this.checkBoxZBuffer.CheckedChanged += new System.EventHandler(this.checkBoxZBuffer_CheckedChanged);
-            // 
-            // checkBoxColor
-            // 
-            this.checkBoxColor.AutoSize = true;
-            this.checkBoxColor.Location = new System.Drawing.Point(6, 252);
-            this.checkBoxColor.Name = "checkBoxColor";
-            this.checkBoxColor.Size = new System.Drawing.Size(88, 17);
-            this.checkBoxColor.TabIndex = 25;
-            this.checkBoxColor.Text = "Задать цвет";
-            this.checkBoxColor.UseVisualStyleBackColor = true;
-            this.checkBoxColor.CheckedChanged += new System.EventHandler(this.checkBoxColor_CheckedChanged);
-            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
@@ -651,7 +637,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRotationFigure)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -700,7 +685,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox checkBoxNonFrontFaces;
         private System.Windows.Forms.RadioButton radioButton3;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button resetCameraButton;
         private System.Windows.Forms.ListBox listBoxPolyhedronList;
         private System.Windows.Forms.CheckBox checkBoxZBuffer;
         private System.Windows.Forms.CheckBox checkBoxColor;

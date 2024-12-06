@@ -10,29 +10,28 @@ namespace lab8
     public enum ModeView
     {
         Perspective,
-        Axonometry,
+        Axonometric,
         Parallel
     }
 
     public partial class Form1 : Form
     {
-        Pen _pen;
-        Bitmap _bitmap;
-        Bitmap _bitmapRotationFigure;
-        Graphics _graphics;
-        Graphics _graphicsRotationFigure;
-        Polyhedron _polyhedron;
-        List<Polyhedron> _polyhedronList;
-        Mode _mode;
-        ModeView _modeView;
-        ModeRotationFigure _modeRotationFigure;
-        List<Point> _points;
-        Func<float, float, float> _function;
-        private bool saveWithAffin = false;
-        Camera _camera;
-        private bool colorPolyhedrons = false;
+        private Pen _pen;
+        private Bitmap _bitmap;
+        private Bitmap _bitmapRotationFigure;
+        private Graphics _graphics;
+        private Graphics _graphicsRotationFigure;
+        private Polyhedron _polyhedron;
+        private List<Polyhedron> _polyhedronList;
+        private Mode _mode;
+        private ModeView _modeView;
+        private ModeRotationFigure _modeRotationFigure;
+        private List<Point> _points;
+        private Func<float, float, float> _function;
+        private bool _saveWithAffin = false;
+        private Camera _camera;
 
-        enum Mode
+        private enum Mode
         {
             None,
             Translation,
@@ -42,7 +41,7 @@ namespace lab8
             RotateLine,
         }
 
-        enum ModeRotationFigure
+        private enum ModeRotationFigure
         {
             None,
             DrawPoints,
@@ -62,12 +61,12 @@ namespace lab8
             //_graphics.ScaleTransform(1, -1);
             _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
             _graphicsRotationFigure.Clear(Color.White);
-            _camera = new Camera(_graphics, _pen);
+            _camera = new Camera(_graphics, _pen,checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked);
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
             checkBox1.Checked = false;
-            comboBoxPolyhedron.SelectedIndex = 4;
+            comboBoxPolyhedron.SelectedIndex = 1;
             _mode = Mode.None;
             _modeView = ModeView.Parallel;
             _modeRotationFigure = ModeRotationFigure.DrawPoints;
@@ -75,32 +74,14 @@ namespace lab8
             _points = new List<Point>();
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             checkBoxNonFrontFaces.Checked = true;
-            checkBoxColor.Checked = false;
+            checkBoxColor.Checked = true;
             checkBoxZBuffer.Checked = false;
             DrawPolyhedron();
         }
 
-        // public void DrawPolyhedron()
-        // {
-        //     _graphics.Clear(Color.White);
-
-        //     if (radioButton1.Checked)
-        //     {
-        //         DrawPerspective();
-        //     }
-        //     else if (radioButton2.Checked)
-        //     {
-        //         DrawAxonometry();
-        //     }
-        //     else if (radioButton3.Checked)
-        //     {
-        //         DrawParallel();
-        //     }
-        // }
-
         public void DrawPolyhedron()
         {
-            _camera.DrawScene(_graphics, _polyhedronList, _modeView, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked, pictureBox1.Width, pictureBox1.Height, colorPolyhedrons);
+            _camera.DrawScene(_graphics, _polyhedronList, _modeView, pictureBox1.Width, pictureBox1.Height);
             pictureBox1.Refresh();
         }
 
@@ -255,7 +236,7 @@ namespace lab8
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
-            _modeView = ModeView.Axonometry;
+            _modeView = ModeView.Axonometric;
             DrawPolyhedron();
         }
 
@@ -653,7 +634,7 @@ namespace lab8
         {
             try
             {
-                _polyhedron.SaveToFileInProjectFolder(saveWithAffin ? _polyhedron.modelMatrix : null);
+                _polyhedron.SaveToFileInProjectFolder(_saveWithAffin ? _polyhedron.modelMatrix : null);
                 MessageBox.Show("Модель сохранена в папке проекта (Models/modifiedModel.obj)");
             }
             catch (Exception ex)
@@ -665,16 +646,12 @@ namespace lab8
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            saveWithAffin = !saveWithAffin;
-        }
-
-        private void comboBoxPolyList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
+            _saveWithAffin = !_saveWithAffin;
         }
 
         private void checkBoxNonFrontFaces_CheckedChanged(object sender, EventArgs e)
         {
+            _camera.IsNonFrontFaces = checkBoxNonFrontFaces.Checked;
             DrawPolyhedron();
         }
         
@@ -720,21 +697,20 @@ namespace lab8
                 case Keys.NumPad6:
                     _camera.RotateRight();
                     break;
-                default:
-                    break;
             }
             DrawPolyhedron();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void resetCameraButton_Click(object sender, EventArgs e)
         {
-            _camera = new Camera(_graphics, _pen);
+            _camera = new Camera(_graphics, _pen, checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked);
             DrawPolyhedron();
         }
 
         private void checkBoxColor_CheckedChanged(object sender, EventArgs e)
         {
-            colorPolyhedrons = !colorPolyhedrons;
+            _camera.IsColored = checkBoxColor.Checked;
+            DrawPolyhedron();
         }
 
         private void listBoxPolyhedronList_SelectedIndexChanged(object sender, EventArgs e)
@@ -747,6 +723,7 @@ namespace lab8
 
         private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
         {
+            _camera.IsZBuffer = checkBoxZBuffer.Checked;
             DrawPolyhedron();
         }
     }
