@@ -11,9 +11,11 @@ namespace lab9
         public bool IsColored { get; set; }
         public bool IsNonFrontFaces { get; set; }
         public bool IsZBuffer { get; set; }
+        public bool IsLighting { get; set; }
         
         private Point3D _position;
         private Point3D _target;
+        private Point3D _lightDirection = new Point3D(200, 200, -200);
         private Point3D _right = new Point3D(1, 0, 0);
         private Point3D _up = new Point3D(0, 1, 0);
         private Point3D _forward = new Point3D(0, 0, 1);
@@ -21,9 +23,8 @@ namespace lab9
         private float[][] _projectionMatrix;
 
         private Graphics _graphics;
-        private Pen _pen;
-
-        public Camera(Graphics graphics, Pen pen, bool isColored, bool isNonFrontFaces, bool isZBuffer)
+        
+        public Camera(Graphics graphics, bool isColored, bool isNonFrontFaces, bool isZBuffer, bool isLighting)
         {
             _position = new Point3D(0, 0, 1000);
             _target = new Point3D(0, 0, 0);
@@ -31,7 +32,7 @@ namespace lab9
             IsColored = isColored;
             IsNonFrontFaces = isNonFrontFaces;
             IsZBuffer = isZBuffer;
-            _pen = pen;
+            IsLighting = isLighting;
             _graphics = graphics;
         }
 
@@ -132,7 +133,7 @@ namespace lab9
 
                     foreach (var triangle in triangles)
                     {
-                        RasterizeTriangle(triangle, zBufferArray, face.faceColor, width, height);
+                        RasterizeTriangle(triangle, zBufferArray, face.color, width, height);
                     }
                 }
             }
@@ -148,41 +149,40 @@ namespace lab9
             {
                 foreach (var face in visibleFaces)
                 {
-                    var indexes = face.indexes;
-                    var polygonPoints = new PointF[face.indexes.Count];
-                    for (int i = 0; i < face.indexes.Count; i++)
+                    if (IsColored)
                     {
-                        var point = points[face.indexes[i]];
-                        polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
+                        PhongLighting.ShadePhongLighting(_graphics, face, points, _lightDirection, _target - _position);
                     }
-                    
-                    if(IsColored)
+                    else
                     {
-                        using (Brush brush = new SolidBrush(face.faceColor))
+                        var indexes = face.indexes;
+                        var polygonPoints = new PointF[face.indexes.Count];
+                        for (int i = 0; i < face.indexes.Count; i++)
                         {
-                            _graphics.FillPolygon(brush, polygonPoints);
-                        }
-                    }
-
-                    for (int i = 0; i < indexes.Count; i++)
-                    {
-                        Point3D p1, p2;
-                        if (i == indexes.Count - 1)
-                        {
-                            p1 = points[indexes[0]];
-                            p2 = points[indexes[i]];
-                        }
-                        else
-                        {
-                            p1 = points[indexes[i]];
-                            p2 = points[indexes[i + 1]];
+                            var point = points[face.indexes[i]];
+                            polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
                         }
 
-                        _graphics.DrawLine(
-                            _pen,
-                            p1.X / p1.W, p1.Y / p1.W,
-                            p2.X / p2.W, p2.Y / p2.W
-                        );
+                        for (int i = 0; i < indexes.Count; i++)
+                        {
+                            Point3D p1, p2;
+                            if (i == indexes.Count - 1)
+                            {
+                                p1 = points[indexes[0]];
+                                p2 = points[indexes[i]];
+                            }
+                            else
+                            {
+                                p1 = points[indexes[i]];
+                                p2 = points[indexes[i + 1]];
+                            }
+
+                            _graphics.DrawLine(
+                                new Pen(Color.Black, 1),
+                                p1.X / p1.W, p1.Y / p1.W,
+                                p2.X / p2.W, p2.Y / p2.W
+                            );
+                        }
                     }
                 }
             } 
@@ -286,7 +286,10 @@ namespace lab9
 
         private void Move(float dx, float dy, float dz)
         {
-            _position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
+            if (IsLighting)
+                _lightDirection.ApplyMatrix(Matrices.Translation(dx, dy, dz));
+            else
+                _position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
         }
 
         private void Rotate(float angleX, float angleY)
@@ -316,17 +319,21 @@ namespace lab9
             float m = point.Y / length;
             float n = point.Z / length;
             float[][] rotation = Matrices.RotationLine(l, m, n, sin, cos);
-            _position.ApplyMatrix(rotation);
+            
+            if (IsLighting)
+                _lightDirection.ApplyMatrix(rotation);
+            else
+                _position.ApplyMatrix(rotation);
         }
 
-        public void MoveUp() => Move(0, -30, 0);
-        public void MoveDown() => Move(0, 30, 0);
+        public void MoveUp() => Move(0, 30, 0);
+        public void MoveDown() => Move(0, -30, 0);
         public void MoveRight() => Move(30, 0, 0);
         public void MoveLeft() => Move(-30, 0, 0);
         public void MoveForward() => Move(0, 0, 30);
         public void MoveBackward() => Move(0, 0, -30);
-        public void RotateUp() => Rotate(10, 0);
-        public void RotateDown() => Rotate(-10, 0);
+        public void RotateUp() => Rotate(-10, 0);
+        public void RotateDown() => Rotate(10, 0);
         public void RotateRight() => Rotate(0, 10);
         public void RotateLeft() => Rotate(0, -10);
     }

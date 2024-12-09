@@ -55,6 +55,7 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxLighting = new System.Windows.Forms.CheckBox();
             this.checkBoxColor = new System.Windows.Forms.CheckBox();
             this.checkBoxZBuffer = new System.Windows.Forms.CheckBox();
             this.resetCameraButton = new System.Windows.Forms.Button();
@@ -361,6 +362,7 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.checkBoxLighting);
             this.groupBox2.Controls.Add(this.checkBoxColor);
             this.groupBox2.Controls.Add(this.checkBoxZBuffer);
             this.groupBox2.Controls.Add(this.resetCameraButton);
@@ -387,6 +389,16 @@
             this.groupBox2.Size = new System.Drawing.Size(190, 746);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
+            // 
+            // checkBoxLighting
+            // 
+            this.checkBoxLighting.Location = new System.Drawing.Point(6, 275);
+            this.checkBoxLighting.Name = "checkBoxLighting";
+            this.checkBoxLighting.Size = new System.Drawing.Size(167, 24);
+            this.checkBoxLighting.TabIndex = 26;
+            this.checkBoxLighting.Text = "Вращать источник света";
+            this.checkBoxLighting.UseVisualStyleBackColor = true;
+            this.checkBoxLighting.CheckedChanged += new System.EventHandler(this.checkBoxLighting_CheckedChanged);
             // 
             // checkBoxColor
             // 
@@ -638,6 +650,8 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox checkBoxLighting;
 
         #endregion
 

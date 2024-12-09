@@ -51,21 +51,22 @@ namespace lab9
         public Form1()
         {
             InitializeComponent();
-            _polyhedron = new Hexahedron();
+            _polyhedron = new Tetrahedron();
             _polyhedronList = new List<Polyhedron>();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             _bitmapRotationFigure = new Bitmap(pictureBoxRotationFigure.Width, pictureBoxRotationFigure.Height);
             _graphics = Graphics.FromImage(_bitmap);
             _graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            _graphics.ScaleTransform(1, -1);
             _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
             _graphicsRotationFigure.Clear(Color.White);
-            _camera = new Camera(_graphics, _pen,checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked);
+            _camera = new Camera(_graphics,checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked, checkBoxLighting.Checked);
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
             checkBox1.Checked = false;
-            comboBoxPolyhedron.SelectedIndex = 1;
+            comboBoxPolyhedron.SelectedIndex = 0;
             _mode = Mode.None;
             _modeView = ModeView.Parallel;
             _modeRotationFigure = ModeRotationFigure.DrawPoints;
@@ -270,7 +271,7 @@ namespace lab9
             Random random = new Random();
             foreach (var face in _polyhedron.faces)
             {
-                face.faceColor = Color.FromArgb(
+                face.color = Color.FromArgb(
                     random.Next(256), // Красный компонент
                     random.Next(256), // Зелёный компонент
                     random.Next(256)  // Синий компонент
@@ -448,6 +449,7 @@ namespace lab9
                 _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
                 _graphics = Graphics.FromImage(_bitmap);
                 _graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
+                _graphics.ScaleTransform(1, -1);
                 pictureBox1.Image = _bitmap;
                 DrawPolyhedron();
             }
@@ -699,7 +701,7 @@ namespace lab9
 
         private void resetCameraButton_Click(object sender, EventArgs e)
         {
-            _camera = new Camera(_graphics, _pen, checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked);
+            _camera = new Camera(_graphics, checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked, checkBoxLighting.Checked);
             DrawPolyhedron();
         }
 
@@ -720,6 +722,12 @@ namespace lab9
         private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
         {
             _camera.IsZBuffer = checkBoxZBuffer.Checked;
+            DrawPolyhedron();
+        }
+
+        private void checkBoxLighting_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsLighting = checkBoxLighting.Checked;
             DrawPolyhedron();
         }
     }
