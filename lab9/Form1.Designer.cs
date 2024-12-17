@@ -55,6 +55,7 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxLighting = new System.Windows.Forms.CheckBox();
             this.checkBoxColor = new System.Windows.Forms.CheckBox();
             this.checkBoxZBuffer = new System.Windows.Forms.CheckBox();
             this.resetCameraButton = new System.Windows.Forms.Button();
@@ -77,6 +78,7 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.checkBoxTexture = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -131,6 +133,7 @@
             this.listBoxPolyhedronList.Size = new System.Drawing.Size(150, 134);
             this.listBoxPolyhedronList.TabIndex = 24;
             this.listBoxPolyhedronList.SelectedIndexChanged += new System.EventHandler(this.listBoxPolyhedronList_SelectedIndexChanged);
+            this.listBoxPolyhedronList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBoxPolyhedronList_KeyDown);
             // 
             // radioButton3
             // 
@@ -361,6 +364,8 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.checkBoxTexture);
+            this.groupBox2.Controls.Add(this.checkBoxLighting);
             this.groupBox2.Controls.Add(this.checkBoxColor);
             this.groupBox2.Controls.Add(this.checkBoxZBuffer);
             this.groupBox2.Controls.Add(this.resetCameraButton);
@@ -388,10 +393,20 @@
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
+            // checkBoxLighting
+            // 
+            this.checkBoxLighting.Location = new System.Drawing.Point(6, 296);
+            this.checkBoxLighting.Name = "checkBoxLighting";
+            this.checkBoxLighting.Size = new System.Drawing.Size(167, 17);
+            this.checkBoxLighting.TabIndex = 26;
+            this.checkBoxLighting.Text = "Вращать источник света";
+            this.checkBoxLighting.UseVisualStyleBackColor = true;
+            this.checkBoxLighting.CheckedChanged += new System.EventHandler(this.checkBoxLighting_CheckedChanged);
+            // 
             // checkBoxColor
             // 
             this.checkBoxColor.AutoSize = true;
-            this.checkBoxColor.Location = new System.Drawing.Point(6, 252);
+            this.checkBoxColor.Location = new System.Drawing.Point(6, 250);
             this.checkBoxColor.Name = "checkBoxColor";
             this.checkBoxColor.Size = new System.Drawing.Size(88, 17);
             this.checkBoxColor.TabIndex = 25;
@@ -402,7 +417,7 @@
             // checkBoxZBuffer
             // 
             this.checkBoxZBuffer.AutoSize = true;
-            this.checkBoxZBuffer.Location = new System.Drawing.Point(6, 228);
+            this.checkBoxZBuffer.Location = new System.Drawing.Point(6, 227);
             this.checkBoxZBuffer.Name = "checkBoxZBuffer";
             this.checkBoxZBuffer.Size = new System.Drawing.Size(67, 17);
             this.checkBoxZBuffer.TabIndex = 24;
@@ -614,6 +629,16 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // checkBoxTexture
+            // 
+            this.checkBoxTexture.Location = new System.Drawing.Point(6, 273);
+            this.checkBoxTexture.Name = "checkBoxTexture";
+            this.checkBoxTexture.Size = new System.Drawing.Size(167, 17);
+            this.checkBoxTexture.TabIndex = 27;
+            this.checkBoxTexture.Text = "Текстурировать";
+            this.checkBoxTexture.UseVisualStyleBackColor = true;
+            this.checkBoxTexture.CheckedChanged += new System.EventHandler(this.checkBoxTexture_CheckedChanged);
+            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
@@ -638,6 +663,10 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox checkBoxTexture;
+
+        private System.Windows.Forms.CheckBox checkBoxLighting;
 
         #endregion
 

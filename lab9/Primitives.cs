@@ -36,6 +36,14 @@ namespace lab9
             Z = 0;
             W = 1;
         }
+        
+        public Point3D(PointF point)
+        {
+            X = point.X;
+            Y = point.Y;
+            Z = 0;
+            W = 1;
+        }
 
         public void ApplyMatrix(float[][] matrix)
         {
@@ -59,6 +67,16 @@ namespace lab9
         {
             return new Point3D(this.X, this.Y, this.Z) { W = this.W };
         }
+        public static Point3D operator /(Point3D p1, float scalar)
+        {
+            if (scalar == 0.0f)
+                throw new DivideByZeroException();
+            return new Point3D(p1.X / scalar, p1.Y / scalar, p1.Z / scalar);
+        }
+        public static Point3D operator *(Point3D p1, float scalar)
+        {
+            return new Point3D(p1.X * scalar, p1.Y * scalar, p1.Z * scalar);
+        }
         public static Point3D operator -(Point3D p1, Point3D p2)
         {
             return new Point3D(p1.X - p2.X, p1.Y - p2.Y, p1.Z - p2.Z);
@@ -79,15 +97,20 @@ namespace lab9
         {
             return this.X * other.X + this.Y * other.Y + this.Z * other.Z;
         }
-        public void Normalize()
+        public float Length()
         {
-            float length = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            return (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+        }
+        public Point3D Normalize()
+        {
+            float length = Length();
             if (length > 0)
             {
                 X /= length;
                 Y /= length;
                 Z /= length;
             }
+            return this;
         }
     }
 
@@ -96,20 +119,20 @@ namespace lab9
         public List<int> indexes;
         public List<int> textureIndexes;
         public Point3D normal;
-        public Color faceColor { get; set; }
+        public Color color { get; set; }
 
         public Face(List<int> indexes)
         {
             this.indexes = indexes;
             normal = null;
-            faceColor = Color.Red;
+            color = Color.CornflowerBlue;
         }
 
         public Face(List<int> indexes, Color color)
         {
             this.indexes = indexes;
             normal = null;
-            faceColor = color;
+            this.color = color;
         }
 
         public Face(List<int> indexes, List<int> textureIndexes)
@@ -120,8 +143,7 @@ namespace lab9
             faceColor = Color.Red;
         }
 
-
-        public Point3D CalculateNormal(List<Point3D> points)
+        public void CalculateNormal(List<Point3D> points)
         {
             Point3D A = points[indexes[0]];
             Point3D B = points[indexes[1]];
@@ -148,8 +170,6 @@ namespace lab9
             {
                 normal = new Point3D(-normal.X, -normal.Y, -normal.Z);
             }
-
-            return normal;
         }
     }
 }

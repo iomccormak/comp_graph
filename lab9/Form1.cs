@@ -52,21 +52,22 @@ namespace lab9
         public Form1()
         {
             InitializeComponent();
-            _polyhedron = new Octahedron();
+            _polyhedron = new Icosahedron();
             _polyhedronList = new List<Polyhedron>();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             _bitmapRotationFigure = new Bitmap(pictureBoxRotationFigure.Width, pictureBoxRotationFigure.Height);
             _graphics = Graphics.FromImage(_bitmap);
             _graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            _graphics.ScaleTransform(1, -1);
             _graphicsRotationFigure = Graphics.FromImage(_bitmapRotationFigure);
             _graphicsRotationFigure.Clear(Color.White);
-            _camera = new Camera(_graphics, _pen,checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked);
+            _camera = new Camera(_graphics);
             pictureBox1.Image = _bitmap;
             pictureBoxRotationFigure.Image = _bitmapRotationFigure;
             applyButton.Enabled = false;
             checkBox1.Checked = false;
-            comboBoxPolyhedron.SelectedIndex = 1;
+            comboBoxPolyhedron.SelectedIndex = 3;
             _mode = Mode.None;
             _modeView = ModeView.Parallel;
             _modeRotationFigure = ModeRotationFigure.DrawPoints;
@@ -85,9 +86,10 @@ namespace lab9
             }*/
             _texture = new Bitmap("texture.jpg");
             DrawPolyhedron();
+            DrawScene();
         }
 
-        public void DrawPolyhedron()
+        public void DrawScene()
         {
             _camera.DrawScene(_graphics, _polyhedronList, _modeView, pictureBox1.Width, pictureBox1.Height, _texture);
             pictureBox1.Refresh();
@@ -99,7 +101,7 @@ namespace lab9
 
             _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, MatrixScale);
 
-            DrawPolyhedron();
+            DrawScene();
         }
 
         public void RotateLine(string input)
@@ -132,7 +134,7 @@ namespace lab9
 
             _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, rotationMatrix);
 
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void RotateAxis(string input)
@@ -154,7 +156,7 @@ namespace lab9
                 XYZRotate(angle, CreateZRotationMatrix);
             }
 
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void XYZRotate(float angle, Func<float, float[][]> createRotationMatrix)
@@ -207,7 +209,7 @@ namespace lab9
             _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, TranslationMatrix);
 
             if (draw)
-                DrawPolyhedron();
+                DrawScene();
         }
 
         private void Reflect(string plane)
@@ -232,25 +234,25 @@ namespace lab9
 
             _polyhedron.modelMatrix = Matrices.MultiplyMatrix(_polyhedron.modelMatrix, reflectionMatrix);
 
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             _modeView = ModeView.Perspective;
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
             _modeView = ModeView.Axonometric;
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
             _modeView = ModeView.Parallel;
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void comboBoxPolyhedron_SelectedIndexChanged(object sender, EventArgs e)
@@ -279,7 +281,7 @@ namespace lab9
             Random random = new Random();
             foreach (var face in _polyhedron.faces)
             {
-                face.faceColor = Color.FromArgb(
+                face.color = Color.FromArgb(
                     random.Next(256), // Красный компонент
                     random.Next(256), // Зелёный компонент
                     random.Next(256)  // Синий компонент
@@ -287,7 +289,7 @@ namespace lab9
             }
             listBoxPolyhedronList.Items.Add(_polyhedron);
             _polyhedronList.Add(_polyhedron);
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void applyButton_Click(object sender, EventArgs e)
@@ -444,7 +446,7 @@ namespace lab9
         private void resetButton_Click(object sender, EventArgs e)
         {
             _polyhedron.modelMatrix = Matrices.Identity();
-            DrawPolyhedron();
+            DrawScene();
             applyButton.Focus();
         }
 
@@ -457,8 +459,9 @@ namespace lab9
                 _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
                 _graphics = Graphics.FromImage(_bitmap);
                 _graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
+                _graphics.ScaleTransform(1, -1);
                 pictureBox1.Image = _bitmap;
-                DrawPolyhedron();
+                DrawScene();
             }
         }
 
@@ -473,7 +476,7 @@ namespace lab9
                 _polyhedron.ParseFromOBJ(openFileDialog.FileName);
                 _polyhedronList.Add(_polyhedron);
                 listBoxPolyhedronList.Items.Add(_polyhedron);
-                DrawPolyhedron();
+                DrawScene();
             }
         }
 
@@ -563,7 +566,7 @@ namespace lab9
 
             listBoxPolyhedronList.Items.Add(_polyhedron);
             _polyhedronList.Add(_polyhedron);
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void pictureBoxRotationFigure_Paint(object sender, PaintEventArgs e)
@@ -596,7 +599,7 @@ namespace lab9
             _polyhedron = new FunctionalPolyhedron(x0, x1, y0, y1, step, _function);
             listBoxPolyhedronList.Items.Add(_polyhedron);
             _polyhedronList.Add(_polyhedron);
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -657,7 +660,7 @@ namespace lab9
         private void checkBoxNonFrontFaces_CheckedChanged(object sender, EventArgs e)
         {
             _camera.IsNonFrontFaces = checkBoxNonFrontFaces.Checked;
-            DrawPolyhedron();
+            DrawScene();
         }
         
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -703,19 +706,24 @@ namespace lab9
                     _camera.RotateRight();
                     break;
             }
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void resetCameraButton_Click(object sender, EventArgs e)
         {
-            _camera = new Camera(_graphics, _pen, checkBoxColor.Checked, checkBoxNonFrontFaces.Checked, checkBoxZBuffer.Checked);
-            DrawPolyhedron();
+            _camera = new Camera(_graphics);
+            _camera.IsLighting = checkBoxLighting.Checked;
+            _camera.IsColored = checkBoxColor.Checked;
+            _camera.IsZBuffer = checkBoxZBuffer.Checked;
+            _camera.IsNonFrontFaces = checkBoxNonFrontFaces.Checked;
+            _camera.IsTextured = checkBoxTexture.Checked;
+            DrawScene();
         }
 
         private void checkBoxColor_CheckedChanged(object sender, EventArgs e)
         {
             _camera.IsColored = checkBoxColor.Checked;
-            DrawPolyhedron();
+            DrawScene();
         }
 
         private void listBoxPolyhedronList_SelectedIndexChanged(object sender, EventArgs e)
@@ -729,7 +737,32 @@ namespace lab9
         private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
         {
             _camera.IsZBuffer = checkBoxZBuffer.Checked;
-            DrawPolyhedron();
+            DrawScene();
+        }
+
+        private void checkBoxLighting_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsLighting = checkBoxLighting.Checked;
+            DrawScene();
+        }
+
+        private void listBoxPolyhedronList_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                if (listBoxPolyhedronList.SelectedIndex != -1)
+                {
+                    _polyhedronList.RemoveAt(listBoxPolyhedronList.SelectedIndex);
+                    listBoxPolyhedronList.Items.RemoveAt(listBoxPolyhedronList.SelectedIndex);
+                }
+            }
+            DrawScene();
+        }
+
+        private void checkBoxTexture_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsTextured = checkBoxTexture.Checked;
+            DrawScene();
         }
     }
 }

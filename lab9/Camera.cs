@@ -11,9 +11,12 @@ namespace lab9
         public bool IsColored { get; set; }
         public bool IsNonFrontFaces { get; set; }
         public bool IsZBuffer { get; set; }
-        
+        public bool IsLighting { get; set; }
+        public bool IsTextured { get; set; }
+
         private Point3D _position;
         private Point3D _target;
+        private Point3D _lightDirection = new Point3D(200, 200, -200);
         private Point3D _right = new Point3D(1, 0, 0);
         private Point3D _up = new Point3D(0, 1, 0);
         private Point3D _forward = new Point3D(0, 0, 1);
@@ -21,17 +24,16 @@ namespace lab9
         private float[][] _projectionMatrix;
 
         private Graphics _graphics;
-        private Pen _pen;
-
-        public Camera(Graphics graphics, Pen pen, bool isColored, bool isNonFrontFaces, bool isZBuffer)
+        
+        public Camera(Graphics graphics)
         {
             _position = new Point3D(0, 0, 1000);
             _target = new Point3D(0, 0, 0);
             _viewMatrix = Matrices.Identity();
-            IsColored = isColored;
-            IsNonFrontFaces = isNonFrontFaces;
-            IsZBuffer = isZBuffer;
-            _pen = pen;
+            IsColored = false;
+            IsNonFrontFaces = false;
+            IsZBuffer = false;
+            IsLighting = false;
             _graphics = graphics;
         }
 
@@ -101,7 +103,10 @@ namespace lab9
         private void DrawPolyhedron(Polyhedron polyhedron, float[,] zBufferArray, int width, int height, Bitmap texture)
         {
             List<Point3D> points = new List<Point3D>();
-
+            
+            UpdateViewMatrix();
+            RecalculateNormals(polyhedron.faces, polyhedron.points);
+            
             List<Face> visibleFaces = polyhedron.faces;
             if (IsNonFrontFaces)
             {
@@ -118,79 +123,81 @@ namespace lab9
                 points.Add(p);
             }
 
-            if (polyhedron.coordinates.Count != 0)
+            if (IsZBuffer)
             {
-                if (IsZBuffer)
+                foreach (var face in polyhedron.faces)
                 {
-                    foreach (var face in polyhedron.faces)
-                    {
-                        var facePoints = face.indexes.Select(i => points[i]).ToList();
-                        var faceTexCoords = face.textureIndexes.Select(i => polyhedron.coordinates[i]).ToList();
-                        var screenPoints = facePoints.Select(p =>
-                            new Point3D(p.X + width / 2, p.Y + height / 2, p.Z)
-                        ).ToList();
-                        var triangles = Triangulate(screenPoints);
-                        for (int i = 0; i < triangles.Count; i++)
-                        {
-                            var triangle = triangles[i];
-                            var triangleTexCoords = new List<Coordinates> {faceTexCoords[0], faceTexCoords[1], faceTexCoords[2]};
-                            RasterizeTexturedTriangle(triangle, zBufferArray, width, height, texture, triangleTexCoords);
-                        }
-                    }
+                    var facePoints = face.indexes.Select(i => points[i]).ToList();
 
+                    var screenPoints = facePoints.Select(p =>
+                        new Point3D(p.X + width / 2, p.Y + height / 2, p.Z)
+                    ).ToList();
+
+                    var triangles = Triangulate(screenPoints);
+
+                    foreach (var triangle in triangles)
+                    {
+                        RasterizeTriangle(triangle, zBufferArray, face.color, width, height);
+                    }
                 }
             }
-         
-
-            UpdateViewMatrix();
 
             foreach (Point3D point in points)
             {
                 point.ApplyMatrix(_projectionMatrix);
             }
+            
+            RecalculateNormals(visibleFaces, points);
 
             if (IsNonFrontFaces)
             {
                 foreach (var face in visibleFaces)
                 {
-                    var indexes = face.indexes;
-                    var polygonPoints = new PointF[face.indexes.Count];
-                    for (int i = 0; i < face.indexes.Count; i++)
+                    if (IsColored)
                     {
-                        var point = points[face.indexes[i]];
-                        polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
+                        PhongLighting.ShadePhongLighting(_graphics, face, points, _lightDirection, _target - _position);
                     }
-                    
-                    if(IsColored)
+                    else
                     {
-                        using (Brush brush = new SolidBrush(face.faceColor))
+                        var indexes = face.indexes;
+                        var polygonPoints = new PointF[face.indexes.Count];
+                        for (int i = 0; i < face.indexes.Count; i++)
                         {
-                            _graphics.FillPolygon(brush, polygonPoints);
-                        }
-                    }
-
-                    for (int i = 0; i < indexes.Count; i++)
-                    {
-                        Point3D p1, p2;
-                        if (i == indexes.Count - 1)
-                        {
-                            p1 = points[indexes[0]];
-                            p2 = points[indexes[i]];
-                        }
-                        else
-                        {
-                            p1 = points[indexes[i]];
-                            p2 = points[indexes[i + 1]];
+                            var point = points[face.indexes[i]];
+                            polygonPoints[i] = new PointF(point.X / point.W, point.Y / point.W);
                         }
 
-                        _graphics.DrawLine(
-                            _pen,
-                            p1.X / p1.W, p1.Y / p1.W,
-                            p2.X / p2.W, p2.Y / p2.W
-                        );
+                        for (int i = 0; i < indexes.Count; i++)
+                        {
+                            Point3D p1, p2;
+                            if (i == indexes.Count - 1)
+                            {
+                                p1 = points[indexes[0]];
+                                p2 = points[indexes[i]];
+                            }
+                            else
+                            {
+                                p1 = points[indexes[i]];
+                                p2 = points[indexes[i + 1]];
+                            }
+
+                            _graphics.DrawLine(
+                                new Pen(Color.Black, 1),
+                                p1.X / p1.W, p1.Y / p1.W,
+                                p2.X / p2.W, p2.Y / p2.W
+                            );
+                        }
                     }
                 }
             } 
+        }
+        
+        public void RecalculateNormals(List<Face> faces, List<Point3D> points)
+        {
+            foreach (var face in faces)
+            {
+                face.CalculateNormal(points);
+            }
         }
 
         private void RasterizeTexturedTriangle(List<Point3D> triangle, float[,] zBufferArray, int width, int height, Bitmap texture, List<Coordinates> coordinates)
@@ -387,7 +394,10 @@ namespace lab9
 
         private void Move(float dx, float dy, float dz)
         {
-            _position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
+            if (IsLighting)
+                _lightDirection += new Point3D(dx, dy, dz);
+            else
+                _position += new Point3D(dx, dy, dz);
         }
 
         private void Rotate(float angleX, float angleY)
@@ -395,39 +405,42 @@ namespace lab9
             float radX = (float)(angleX * Math.PI / 180);
             float radY = (float)(angleY * Math.PI / 180);
 
-            float sin;
-            float cos;
-            Point3D point;
-
             if (radX != 0)
             {
-                point = _right;
-                sin = (float)Math.Sin(radX);
-                cos = (float)Math.Cos(radX);
-            } 
-            else
-            {
-                point = _up;
-                sin = (float)Math.Sin(radY);
-                cos = (float)Math.Cos(radY);
+                ApplyRotation(_right, radX);
             }
-
-            float length = (float)Math.Sqrt(point.X * point.X + point.Y * point.Y + point.Z * point.Z);
-            float l = point.X / length;
-            float m = point.Y / length;
-            float n = point.Z / length;
-            float[][] rotation = Matrices.RotationLine(l, m, n, sin, cos);
-            _position.ApplyMatrix(rotation);
+            if (radY != 0)
+            {
+                ApplyRotation(_up, radY);
+            }
         }
 
-        public void MoveUp() => Move(0, -30, 0);
-        public void MoveDown() => Move(0, 30, 0);
+        private void ApplyRotation(Point3D axis, float radians)
+        {
+            float sin = (float)Math.Sin(radians);
+            float cos = (float)Math.Cos(radians);
+    
+            float length = axis.Length();
+            float l = axis.X / length;
+            float m = axis.Y / length;
+            float n = axis.Z / length;
+
+            float[][] rotation = Matrices.RotationLine(l, m, n, sin, cos);
+
+            if (IsLighting)
+                _lightDirection.ApplyMatrix(rotation);
+            else
+                _position.ApplyMatrix(rotation);
+        }
+
+        public void MoveUp() => Move(0, 30, 0);
+        public void MoveDown() => Move(0, -30, 0);
         public void MoveRight() => Move(30, 0, 0);
         public void MoveLeft() => Move(-30, 0, 0);
         public void MoveForward() => Move(0, 0, 30);
         public void MoveBackward() => Move(0, 0, -30);
-        public void RotateUp() => Rotate(10, 0);
-        public void RotateDown() => Rotate(-10, 0);
+        public void RotateUp() => Rotate(-10, 0);
+        public void RotateDown() => Rotate(10, 0);
         public void RotateRight() => Rotate(0, 10);
         public void RotateLeft() => Rotate(0, -10);
     }
