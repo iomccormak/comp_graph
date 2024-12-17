@@ -4,9 +4,23 @@ using System.Drawing;
 
 namespace lab9
 {
+    public class Coordinates
+    {
+        public float U { get; set; }
+        public float V { get; set; }
+        public float W { get; set; }
+
+        public Coordinates(float u, float v = 0, float w = 0)
+        {
+            U = u;
+            V = v; W = w;
+        }
+    }
+
     public class Point3D    
     {
         public float X, Y, Z, W;
+
         public Point3D(float x, float y, float z)
         {
             X = x;
@@ -80,6 +94,7 @@ namespace lab9
     public class Face
     {
         public List<int> indexes;
+        public List<int> textureIndexes;
         public Point3D normal;
         public Color faceColor { get; set; }
 
@@ -96,6 +111,15 @@ namespace lab9
             normal = null;
             faceColor = color;
         }
+
+        public Face(List<int> indexes, List<int> textureIndexes)
+        {
+            this.indexes = indexes;
+            this.textureIndexes = textureIndexes;
+            normal = null;
+            faceColor = Color.Red;
+        }
+
 
         public Point3D CalculateNormal(List<Point3D> points)
         {

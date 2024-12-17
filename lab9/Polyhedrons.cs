@@ -10,12 +10,15 @@ namespace lab9
         public const int EDGE_LENGTH = 200;
         public List<Point3D> points;
         public List<Face> faces;
+        public List<Coordinates> coordinates;  
+        
         public float[][] modelMatrix;
 
         public Polyhedron()
         {
             points = new List<Point3D>();
             faces = new List<Face>();
+            coordinates = new List<Coordinates>();
             modelMatrix = Matrices.Identity();
         }
 
@@ -78,6 +81,7 @@ namespace lab9
         {
             points = new List<Point3D>();
             faces = new List<Face>();
+            coordinates = new List<Coordinates>();
             List<Point3D> normals = new List<Point3D>();
 
             using (StreamReader reader = new StreamReader(filePath))
@@ -108,11 +112,22 @@ namespace lab9
                             normals.Add(new Point3D(x, y, z));
                         }
                     }
+                    else if (line.StartsWith("vt "))
+                    {
+                        var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 3 &&
+                            float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float u) &&
+                            float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float v))
+                        {
+                            coordinates.Add(new Coordinates(u, v));
+                        }
+                    }
                     else if (line.StartsWith("f "))
                     {
                         var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         var indexes = new List<int>();
                         var normalIndexes = new List<int>();
+                        var textureIndexes = new List<int>();
 
                         for (int i = 1; i < parts.Length; i++)
                         {
@@ -126,6 +141,15 @@ namespace lab9
                                 }
                             }
 
+                            if (faceData.Length > 1 && int.TryParse(faceData[1], out int textureIndex))
+                            {
+                                int adjustedTextureIndex = textureIndex - 1;
+                                if (adjustedTextureIndex >= 0 && adjustedTextureIndex < coordinates.Count)
+                                {
+                                    textureIndexes.Add(adjustedTextureIndex);
+                                }
+                            }
+
                             if (faceData.Length > 2 && int.TryParse(faceData[2], out int normalIndex))
                             {
                                 int adjustedNormalIndex = normalIndex - 1;
@@ -134,11 +158,13 @@ namespace lab9
                                     normalIndexes.Add(adjustedNormalIndex);
                                 }
                             }
+
+                            
                         }
 
                         if (indexes.Count >= 3)
                         {
-                            Face face = new Face(indexes);
+                            Face face = new Face(indexes, textureIndexes);
                             if (normalIndexes.Count > 0)
                             {
                                 face.normal = normals[normalIndexes[0]];

@@ -30,6 +30,7 @@ namespace lab9
         private Func<float, float, float> _function;
         private bool _saveWithAffin = false;
         private Camera _camera;
+        private Bitmap _texture;
 
         private enum Mode
         {
@@ -51,7 +52,7 @@ namespace lab9
         public Form1()
         {
             InitializeComponent();
-            _polyhedron = new Hexahedron();
+            _polyhedron = new Octahedron();
             _polyhedronList = new List<Polyhedron>();
             _pen = new Pen(Color.Black, 1);
             _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -75,12 +76,20 @@ namespace lab9
             checkBoxNonFrontFaces.Checked = true;
             checkBoxColor.Checked = true;
             checkBoxZBuffer.Checked = false;
+            /*openFileDialog.Title = "Выберите текстуру";
+            openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                _texture = new Bitmap(openFileDialog.FileName);
+            }*/
+            _texture = new Bitmap("texture.jpg");
             DrawPolyhedron();
         }
 
         public void DrawPolyhedron()
         {
-            _camera.DrawScene(_graphics, _polyhedronList, _modeView, pictureBox1.Width, pictureBox1.Height);
+            _camera.DrawScene(_graphics, _polyhedronList, _modeView, pictureBox1.Width, pictureBox1.Height, _texture);
             pictureBox1.Refresh();
         }
 

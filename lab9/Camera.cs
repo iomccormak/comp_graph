@@ -35,7 +35,7 @@ namespace lab9
             _graphics = graphics;
         }
 
-        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, int width, int height)
+        public void DrawScene(Graphics graphics, List<Polyhedron> polyhedrons, ModeView modeView, int width, int height, Bitmap texture)
         {
             float c = -_position.Z;
             //double phi = 35.26d;
@@ -68,7 +68,7 @@ namespace lab9
 
             foreach (Polyhedron polyhedron in polyhedrons)
             {
-                DrawPolyhedron(polyhedron, zBufferArray, width, height);
+                DrawPolyhedron(polyhedron, zBufferArray, width, height, texture);
             }
             DrawAxis();
         }
@@ -98,7 +98,7 @@ namespace lab9
             }
         }
 
-        private void DrawPolyhedron(Polyhedron polyhedron, float[,] zBufferArray, int width, int height)
+        private void DrawPolyhedron(Polyhedron polyhedron, float[,] zBufferArray, int width, int height, Bitmap texture)
         {
             List<Point3D> points = new List<Point3D>();
 
@@ -118,24 +118,29 @@ namespace lab9
                 points.Add(p);
             }
 
-            if (IsZBuffer)
+            if (polyhedron.coordinates.Count != 0)
             {
-                foreach (var face in polyhedron.faces)
+                if (IsZBuffer)
                 {
-                    var facePoints = face.indexes.Select(i => points[i]).ToList();
-
-                    var screenPoints = facePoints.Select(p =>
-                        new Point3D(p.X + width / 2, p.Y + height / 2, p.Z)
-                    ).ToList();
-
-                    var triangles = Triangulate(screenPoints);
-
-                    foreach (var triangle in triangles)
+                    foreach (var face in polyhedron.faces)
                     {
-                        RasterizeTriangle(triangle, zBufferArray, face.faceColor, width, height);
+                        var facePoints = face.indexes.Select(i => points[i]).ToList();
+                        var faceTexCoords = face.textureIndexes.Select(i => polyhedron.coordinates[i]).ToList();
+                        var screenPoints = facePoints.Select(p =>
+                            new Point3D(p.X + width / 2, p.Y + height / 2, p.Z)
+                        ).ToList();
+                        var triangles = Triangulate(screenPoints);
+                        for (int i = 0; i < triangles.Count; i++)
+                        {
+                            var triangle = triangles[i];
+                            var triangleTexCoords = new List<Coordinates> {faceTexCoords[0], faceTexCoords[1], faceTexCoords[2]};
+                            RasterizeTexturedTriangle(triangle, zBufferArray, width, height, texture, triangleTexCoords);
+                        }
                     }
+
                 }
             }
+         
 
             UpdateViewMatrix();
 
@@ -186,6 +191,102 @@ namespace lab9
                     }
                 }
             } 
+        }
+
+        private void RasterizeTexturedTriangle(List<Point3D> triangle, float[,] zBufferArray, int width, int height, Bitmap texture, List<Coordinates> coordinates)
+        {
+            // Получение вершин треугольника
+            var p0 = triangle[0];
+            var p1 = triangle[1];
+            var p2 = triangle[2];
+
+            // Получение UV-координат для треугольника из списка coordinates
+            var uv0 = coordinates[triangle.IndexOf(p0)];
+            var uv1 = coordinates[triangle.IndexOf(p1)];
+            var uv2 = coordinates[triangle.IndexOf(p2)];
+
+            // Вычисление границ треугольника
+            int minX = (int)Math.Max(0, Math.Min(p0.X, Math.Min(p1.X, p2.X)));
+            int maxX = (int)Math.Min(width - 1, Math.Max(p0.X, Math.Max(p1.X, p2.X)));
+            int minY = (int)Math.Max(0, Math.Min(p0.Y, Math.Min(p1.Y, p2.Y)));
+            int maxY = (int)Math.Min(height - 1, Math.Max(p0.Y, Math.Max(p1.Y, p2.Y)));
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    // Вычисление барицентрических координат для текущего пикселя
+                    float u, v, w;
+                    if (CalculateBarycentricCoordinates(p0, p1, p2, x, y, out u, out v, out w))
+                    {
+                        // Вычисление z-координаты пикселя
+                        float z = u * p0.Z + v * p1.Z + w * p2.Z;
+
+                        // Проверка глубины
+                        if (z < zBufferArray[x, y])
+                        {
+                            zBufferArray[x, y] = z;
+
+                            // Интерполяция UV-координат для текущего пикселя
+                            float interpolatedU = u * uv0.U + v * uv1.U + w * uv2.U;
+                            float interpolatedV = u * uv0.V + v * uv1.V + w * uv2.V;
+
+                            // Выборка цвета из текстуры с учетом интерполированных UV-координат
+                            int texX = Math.Max(0, Math.Min(texture.Width - 1, (int)(interpolatedU * texture.Width)));
+                            int texY = Math.Max(0, Math.Min(texture.Height - 1, (int)(interpolatedV * texture.Height)));
+
+                            // Отрисовка пикселя с цветом из текстуры
+                            using (Brush brush = new SolidBrush(texture.GetPixel(texX, texY)))
+                            {
+                                _graphics.FillRectangle(brush, x - width / 2, y - height / 2, 1, 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        // Функция для вычисления UV-координат вершин
+        private List<(float u, float v)> CalculateUVForFace(List<Point3D> vertices)
+        {
+            // Определяем границы проекции на плоскость XY
+            float minX = vertices.Min(v => v.X);
+            float maxX = vertices.Max(v => v.X);
+            float minY = vertices.Min(v => v.Y);
+            float maxY = vertices.Max(v => v.Y);
+
+            var uvCoordinates = new List<(float u, float v)>();
+
+            foreach (var vertex in vertices)
+            {
+                // Нормализуем координаты
+                float u = (vertex.X - minX) / (maxX - minX);
+                float v = (vertex.Y - minY) / (maxY - minY);
+
+                uvCoordinates.Add((u, v));
+            }
+
+            return uvCoordinates;
+        }
+
+
+        // Пример функции для вычисления барицентрических координат
+        private bool CalculateBarycentricCoordinates(Point3D p0, Point3D p1, Point3D p2, int x, int y, out float u, out float v, out float w)
+        {
+            float det = (p1.Y - p2.Y) * (p0.X - p2.X) + (p2.X - p1.X) * (p0.Y - p2.Y);
+            if (Math.Abs(det) < 1e-5)
+            {
+                u = v = w = 0;
+                return false;
+            }
+
+            u = ((p1.Y - p2.Y) * (x - p2.X) + (p2.X - p1.X) * (y - p2.Y)) / det;
+            v = ((p2.Y - p0.Y) * (x - p2.X) + (p0.X - p2.X) * (y - p2.Y)) / det;
+            w = 1 - u - v;
+
+            return u >= 0 && v >= 0 && w >= 0;
         }
 
         private static List<List<Point3D>> Triangulate(List<Point3D> polygonPoints)
