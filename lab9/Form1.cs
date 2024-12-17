@@ -75,7 +75,7 @@ namespace lab9
             _points = new List<Point>();
             this.MouseWheel += new MouseEventHandler(pictureBox1_OnMouseWheel);
             checkBoxNonFrontFaces.Checked = true;
-            checkBoxColor.Checked = true;
+            checkBoxPhong.Checked = true;
             checkBoxZBuffer.Checked = false;
             /*openFileDialog.Title = "Выберите текстуру";
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
@@ -84,8 +84,7 @@ namespace lab9
             {
                 _texture = new Bitmap(openFileDialog.FileName);
             }*/
-            _texture = new Bitmap("texture.jpg");
-            DrawPolyhedron();
+            _texture = new Bitmap(@"..\..\texture.jpg");
             DrawScene();
         }
 
@@ -656,12 +655,6 @@ namespace lab9
         {
             _saveWithAffin = !_saveWithAffin;
         }
-
-        private void checkBoxNonFrontFaces_CheckedChanged(object sender, EventArgs e)
-        {
-            _camera.IsNonFrontFaces = checkBoxNonFrontFaces.Checked;
-            DrawScene();
-        }
         
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
@@ -712,17 +705,48 @@ namespace lab9
         private void resetCameraButton_Click(object sender, EventArgs e)
         {
             _camera = new Camera(_graphics);
-            _camera.IsLighting = checkBoxLighting.Checked;
-            _camera.IsColored = checkBoxColor.Checked;
+            _camera.IsRotateLighting = checkBoxLighting.Checked;
+            _camera.IsPhongLighting = checkBoxPhong.Checked;
+            _camera.IsLambertLighting = checkBoxLambert.Checked;
             _camera.IsZBuffer = checkBoxZBuffer.Checked;
             _camera.IsNonFrontFaces = checkBoxNonFrontFaces.Checked;
             _camera.IsTextured = checkBoxTexture.Checked;
             DrawScene();
         }
 
-        private void checkBoxColor_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxPhong_CheckedChanged(object sender, EventArgs e)
         {
-            _camera.IsColored = checkBoxColor.Checked;
+            _camera.IsPhongLighting = checkBoxPhong.Checked;
+            DrawScene();
+        }
+        
+        private void checkBoxLambert_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsLambertLighting = checkBoxLambert.Checked;
+            DrawScene();
+        }
+        
+        private void checkBoxNonFrontFaces_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsNonFrontFaces = checkBoxNonFrontFaces.Checked;
+            DrawScene();
+        }
+        
+        private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsZBuffer = checkBoxZBuffer.Checked;
+            DrawScene();
+        }
+
+        private void checkBoxLighting_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsRotateLighting = checkBoxLighting.Checked;
+            DrawScene();
+        }
+        
+        private void checkBoxTexture_CheckedChanged(object sender, EventArgs e)
+        {
+            _camera.IsTextured = checkBoxTexture.Checked;
             DrawScene();
         }
 
@@ -732,18 +756,6 @@ namespace lab9
             {
                 _polyhedron = _polyhedronList[listBoxPolyhedronList.SelectedIndex];
             }
-        }
-
-        private void checkBoxZBuffer_CheckedChanged(object sender, EventArgs e)
-        {
-            _camera.IsZBuffer = checkBoxZBuffer.Checked;
-            DrawScene();
-        }
-
-        private void checkBoxLighting_CheckedChanged(object sender, EventArgs e)
-        {
-            _camera.IsLighting = checkBoxLighting.Checked;
-            DrawScene();
         }
 
         private void listBoxPolyhedronList_KeyDown(object sender, KeyEventArgs e)
@@ -756,12 +768,6 @@ namespace lab9
                     listBoxPolyhedronList.Items.RemoveAt(listBoxPolyhedronList.SelectedIndex);
                 }
             }
-            DrawScene();
-        }
-
-        private void checkBoxTexture_CheckedChanged(object sender, EventArgs e)
-        {
-            _camera.IsTextured = checkBoxTexture.Checked;
             DrawScene();
         }
     }

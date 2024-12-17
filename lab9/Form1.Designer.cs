@@ -55,8 +55,10 @@
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxLambert = new System.Windows.Forms.CheckBox();
+            this.checkBoxTexture = new System.Windows.Forms.CheckBox();
             this.checkBoxLighting = new System.Windows.Forms.CheckBox();
-            this.checkBoxColor = new System.Windows.Forms.CheckBox();
+            this.checkBoxPhong = new System.Windows.Forms.CheckBox();
             this.checkBoxZBuffer = new System.Windows.Forms.CheckBox();
             this.resetCameraButton = new System.Windows.Forms.Button();
             this.checkBoxNonFrontFaces = new System.Windows.Forms.CheckBox();
@@ -78,7 +80,6 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.checkBoxTexture = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -364,9 +365,10 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSize = true;
+            this.groupBox2.Controls.Add(this.checkBoxLambert);
             this.groupBox2.Controls.Add(this.checkBoxTexture);
             this.groupBox2.Controls.Add(this.checkBoxLighting);
-            this.groupBox2.Controls.Add(this.checkBoxColor);
+            this.groupBox2.Controls.Add(this.checkBoxPhong);
             this.groupBox2.Controls.Add(this.checkBoxZBuffer);
             this.groupBox2.Controls.Add(this.resetCameraButton);
             this.groupBox2.Controls.Add(this.checkBoxNonFrontFaces);
@@ -393,9 +395,30 @@
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
+            // checkBoxLambert
+            // 
+            this.checkBoxLambert.AutoSize = true;
+            this.checkBoxLambert.Location = new System.Drawing.Point(6, 273);
+            this.checkBoxLambert.Name = "checkBoxLambert";
+            this.checkBoxLambert.Size = new System.Drawing.Size(139, 17);
+            this.checkBoxLambert.TabIndex = 28;
+            this.checkBoxLambert.Text = "Освещение Ламберта";
+            this.checkBoxLambert.UseVisualStyleBackColor = true;
+            this.checkBoxLambert.CheckedChanged += new System.EventHandler(this.checkBoxLambert_CheckedChanged);
+            // 
+            // checkBoxTexture
+            // 
+            this.checkBoxTexture.Location = new System.Drawing.Point(6, 296);
+            this.checkBoxTexture.Name = "checkBoxTexture";
+            this.checkBoxTexture.Size = new System.Drawing.Size(167, 17);
+            this.checkBoxTexture.TabIndex = 27;
+            this.checkBoxTexture.Text = "Текстурировать";
+            this.checkBoxTexture.UseVisualStyleBackColor = true;
+            this.checkBoxTexture.CheckedChanged += new System.EventHandler(this.checkBoxTexture_CheckedChanged);
+            // 
             // checkBoxLighting
             // 
-            this.checkBoxLighting.Location = new System.Drawing.Point(6, 296);
+            this.checkBoxLighting.Location = new System.Drawing.Point(6, 319);
             this.checkBoxLighting.Name = "checkBoxLighting";
             this.checkBoxLighting.Size = new System.Drawing.Size(167, 17);
             this.checkBoxLighting.TabIndex = 26;
@@ -403,16 +426,16 @@
             this.checkBoxLighting.UseVisualStyleBackColor = true;
             this.checkBoxLighting.CheckedChanged += new System.EventHandler(this.checkBoxLighting_CheckedChanged);
             // 
-            // checkBoxColor
+            // checkBoxPhong
             // 
-            this.checkBoxColor.AutoSize = true;
-            this.checkBoxColor.Location = new System.Drawing.Point(6, 250);
-            this.checkBoxColor.Name = "checkBoxColor";
-            this.checkBoxColor.Size = new System.Drawing.Size(88, 17);
-            this.checkBoxColor.TabIndex = 25;
-            this.checkBoxColor.Text = "Задать цвет";
-            this.checkBoxColor.UseVisualStyleBackColor = true;
-            this.checkBoxColor.CheckedChanged += new System.EventHandler(this.checkBoxColor_CheckedChanged);
+            this.checkBoxPhong.AutoSize = true;
+            this.checkBoxPhong.Location = new System.Drawing.Point(6, 250);
+            this.checkBoxPhong.Name = "checkBoxPhong";
+            this.checkBoxPhong.Size = new System.Drawing.Size(122, 17);
+            this.checkBoxPhong.TabIndex = 25;
+            this.checkBoxPhong.Text = "Освещение Фонга";
+            this.checkBoxPhong.UseVisualStyleBackColor = true;
+            this.checkBoxPhong.CheckedChanged += new System.EventHandler(this.checkBoxPhong_CheckedChanged);
             // 
             // checkBoxZBuffer
             // 
@@ -629,16 +652,6 @@
             this.timer1.Interval = 25;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // checkBoxTexture
-            // 
-            this.checkBoxTexture.Location = new System.Drawing.Point(6, 273);
-            this.checkBoxTexture.Name = "checkBoxTexture";
-            this.checkBoxTexture.Size = new System.Drawing.Size(167, 17);
-            this.checkBoxTexture.TabIndex = 27;
-            this.checkBoxTexture.Text = "Текстурировать";
-            this.checkBoxTexture.UseVisualStyleBackColor = true;
-            this.checkBoxTexture.CheckedChanged += new System.EventHandler(this.checkBoxTexture_CheckedChanged);
-            // 
             // Form1
             // 
             this.AcceptButton = this.applyButton;
@@ -663,6 +676,8 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox checkBoxLambert;
 
         private System.Windows.Forms.CheckBox checkBoxTexture;
 
@@ -717,7 +732,7 @@
         private System.Windows.Forms.Button resetCameraButton;
         private System.Windows.Forms.ListBox listBoxPolyhedronList;
         private System.Windows.Forms.CheckBox checkBoxZBuffer;
-        private System.Windows.Forms.CheckBox checkBoxColor;
+        private System.Windows.Forms.CheckBox checkBoxPhong;
     }
 }
 
