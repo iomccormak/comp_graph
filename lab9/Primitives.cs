@@ -53,6 +53,12 @@ namespace lab9
         {
             return new Point3D(this.X, this.Y, this.Z) { W = this.W };
         }
+        public static Point3D operator /(Point3D p1, float scalar)
+        {
+            if (scalar == 0.0f)
+                throw new DivideByZeroException();
+            return new Point3D(p1.X / scalar, p1.Y / scalar, p1.Z / scalar);
+        }
         public static Point3D operator *(Point3D p1, float scalar)
         {
             return new Point3D(p1.X * scalar, p1.Y * scalar, p1.Z * scalar);
@@ -77,16 +83,20 @@ namespace lab9
         {
             return this.X * other.X + this.Y * other.Y + this.Z * other.Z;
         }
+        public float Length()
+        {
+            return (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+        }
         public Point3D Normalize()
         {
-            float length = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            float length = Length();
             if (length > 0)
             {
                 X /= length;
                 Y /= length;
                 Z /= length;
             }
-            return Clone();
+            return this;
         }
     }
 
@@ -100,7 +110,7 @@ namespace lab9
         {
             this.indexes = indexes;
             normal = null;
-            color = Color.Red;
+            color = Color.CornflowerBlue;
         }
 
         public Face(List<int> indexes, Color color)

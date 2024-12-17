@@ -62,6 +62,7 @@ namespace lab9
         private static List<Point3D> ComputeVertexNormals(Face face, List<Point3D> points)
         {
             List<Point3D> vertexNormals = new List<Point3D>(new Point3D[points.Count]);
+            List<int> counts = new List<int>(new int[points.Count]);
 
             for (int i = 0; i < vertexNormals.Count; i++)
             {
@@ -78,14 +79,20 @@ namespace lab9
                 Point3D edge2 = C - A;
                 Point3D faceNormal = edge1.CrossProduct(edge2).Normalize();
 
-                vertexNormals[triangle[0]] += faceNormal;
-                vertexNormals[triangle[1]] += faceNormal;
-                vertexNormals[triangle[2]] += faceNormal;
+                for (int i = 0; i < 3; i++)
+                {
+                    vertexNormals[triangle[i]] += faceNormal;
+                    counts[triangle[i]]++;
+                }
             }
 
             for (int i = 0; i < vertexNormals.Count; i++)
             {
-                vertexNormals[i] = vertexNormals[i].Normalize();
+                if (counts[i] > 0)
+                {
+                    vertexNormals[i] /= counts[i]; 
+                    vertexNormals[i] = vertexNormals[i].Normalize(); 
+                }
             }
 
             return vertexNormals;
@@ -105,7 +112,7 @@ namespace lab9
             float kA = 0.2f; 
             float kD = 0.7f; 
             float kS = 0.5f; 
-            float kE = 64.0f; 
+            float kE = 12.0f; 
 
             float ambient = kA * 0.2f; 
             float diffuse = kD * Math.Max(l2.DotProduct(n2), 0.0f);
@@ -133,6 +140,11 @@ namespace lab9
                 g = Clamp((int)(faceColor.G * 1.3f), 0, 255);
                 b = Clamp((int)(faceColor.B * 1.3f), 0, 255);
             }
+            
+            // Раскоментируй, если захотелось посмотреть на обычного Фонга
+            /*r = Clamp((int)(faceColor.R * light), 0, 255);
+            g = Clamp((int)(faceColor.G * light), 0, 255);
+            b = Clamp((int)(faceColor.B * light), 0, 255);*/
             
             return Color.FromArgb(r, g, b);
         }

@@ -12,7 +12,8 @@ namespace lab9
         public bool IsNonFrontFaces { get; set; }
         public bool IsZBuffer { get; set; }
         public bool IsLighting { get; set; }
-        
+        public bool IsTextured { get; set; }
+
         private Point3D _position;
         private Point3D _target;
         private Point3D _lightDirection = new Point3D(200, 200, -200);
@@ -24,15 +25,15 @@ namespace lab9
 
         private Graphics _graphics;
         
-        public Camera(Graphics graphics, bool isColored, bool isNonFrontFaces, bool isZBuffer, bool isLighting)
+        public Camera(Graphics graphics)
         {
             _position = new Point3D(0, 0, 1000);
             _target = new Point3D(0, 0, 0);
             _viewMatrix = Matrices.Identity();
-            IsColored = isColored;
-            IsNonFrontFaces = isNonFrontFaces;
-            IsZBuffer = isZBuffer;
-            IsLighting = isLighting;
+            IsColored = false;
+            IsNonFrontFaces = false;
+            IsZBuffer = false;
+            IsLighting = false;
             _graphics = graphics;
         }
 
@@ -102,7 +103,10 @@ namespace lab9
         private void DrawPolyhedron(Polyhedron polyhedron, float[,] zBufferArray, int width, int height)
         {
             List<Point3D> points = new List<Point3D>();
-
+            
+            UpdateViewMatrix();
+            RecalculateNormals(polyhedron.faces, polyhedron.points);
+            
             List<Face> visibleFaces = polyhedron.faces;
             if (IsNonFrontFaces)
             {
@@ -138,12 +142,12 @@ namespace lab9
                 }
             }
 
-            UpdateViewMatrix();
-
             foreach (Point3D point in points)
             {
                 point.ApplyMatrix(_projectionMatrix);
             }
+            
+            RecalculateNormals(visibleFaces, points);
 
             if (IsNonFrontFaces)
             {
@@ -186,6 +190,14 @@ namespace lab9
                     }
                 }
             } 
+        }
+        
+        public void RecalculateNormals(List<Face> faces, List<Point3D> points)
+        {
+            foreach (var face in faces)
+            {
+                face.CalculateNormal(points);
+            }
         }
 
         private static List<List<Point3D>> Triangulate(List<Point3D> polygonPoints)
@@ -287,9 +299,9 @@ namespace lab9
         private void Move(float dx, float dy, float dz)
         {
             if (IsLighting)
-                _lightDirection.ApplyMatrix(Matrices.Translation(dx, dy, dz));
+                _lightDirection += new Point3D(dx, dy, dz);
             else
-                _position.ApplyMatrix(Matrices.Translation(dx, dy, dz));
+                _position += new Point3D(dx, dy, dz);
         }
 
         private void Rotate(float angleX, float angleY)
@@ -297,29 +309,28 @@ namespace lab9
             float radX = (float)(angleX * Math.PI / 180);
             float radY = (float)(angleY * Math.PI / 180);
 
-            float sin;
-            float cos;
-            Point3D point;
-
             if (radX != 0)
             {
-                point = _right;
-                sin = (float)Math.Sin(radX);
-                cos = (float)Math.Cos(radX);
-            } 
-            else
-            {
-                point = _up;
-                sin = (float)Math.Sin(radY);
-                cos = (float)Math.Cos(radY);
+                ApplyRotation(_right, radX);
             }
+            if (radY != 0)
+            {
+                ApplyRotation(_up, radY);
+            }
+        }
 
-            float length = (float)Math.Sqrt(point.X * point.X + point.Y * point.Y + point.Z * point.Z);
-            float l = point.X / length;
-            float m = point.Y / length;
-            float n = point.Z / length;
+        private void ApplyRotation(Point3D axis, float radians)
+        {
+            float sin = (float)Math.Sin(radians);
+            float cos = (float)Math.Cos(radians);
+    
+            float length = axis.Length();
+            float l = axis.X / length;
+            float m = axis.Y / length;
+            float n = axis.Z / length;
+
             float[][] rotation = Matrices.RotationLine(l, m, n, sin, cos);
-            
+
             if (IsLighting)
                 _lightDirection.ApplyMatrix(rotation);
             else
