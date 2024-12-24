@@ -77,15 +77,6 @@ namespace lab9
             checkBoxNonFrontFaces.Checked = true;
             checkBoxColor.Checked = true;
             checkBoxZBuffer.Checked = false;
-            /*openFileDialog.Title = "Выберите текстуру";
-            openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                _texture = new Bitmap(openFileDialog.FileName);
-            }*/
-            _texture = new Bitmap("texture.jpg");
-            DrawPolyhedron();
             DrawScene();
         }
 
@@ -762,6 +753,15 @@ namespace lab9
         private void checkBoxTexture_CheckedChanged(object sender, EventArgs e)
         {
             _camera.IsTextured = checkBoxTexture.Checked;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Выберите текстуру";
+            openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Загружаем выбранный файл в _texture
+                _texture = new Bitmap(openFileDialog.FileName);
+            }
             DrawScene();
         }
     }

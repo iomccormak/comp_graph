@@ -123,6 +123,35 @@ namespace lab9
                 points.Add(p);
             }
 
+            if (IsTextured)
+            {
+                 foreach (var face in polyhedron.faces)
+                 {
+                     var facePoints = face.indexes.Select(i => points[i]).ToList();
+                     var faceTexCoords = face.textureIndexes.Select(i => polyhedron.coordinates[i]).ToList();
+                     var screenPoints = facePoints.Select(p =>
+                         new Point3D(p.X + width / 2, p.Y + height / 2, p.Z)
+                     ).ToList();
+                     var triangles = Triangulate(screenPoints);
+                     for (int i = 0; i < triangles.Count; i++)
+                     {
+                         var triangle = triangles[i]; 
+                        List<Coordinates> triangleTexCoords;
+                        if (i == 0)
+                        {
+                             triangleTexCoords = new List<Coordinates> { faceTexCoords[0], faceTexCoords[1], faceTexCoords[2] };
+                        } 
+                        else
+                        {
+                             triangleTexCoords = new List<Coordinates> { faceTexCoords[0], faceTexCoords[2], faceTexCoords[3] };
+                        }
+                        
+                         RasterizeTexturedTriangle(triangle, zBufferArray, width, height, texture, triangleTexCoords);
+                     }
+                 }
+
+             }
+
             if (IsZBuffer)
             {
                 foreach (var face in polyhedron.faces)

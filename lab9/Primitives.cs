@@ -140,7 +140,7 @@ namespace lab9
             this.indexes = indexes;
             this.textureIndexes = textureIndexes;
             normal = null;
-            faceColor = Color.Red;
+            color = Color.Red;
         }
 
         public void CalculateNormal(List<Point3D> points)
