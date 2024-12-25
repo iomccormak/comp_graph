@@ -7,7 +7,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
     BACKWARD,
@@ -19,7 +18,6 @@ enum Camera_Movement {
     ROTATE_RIGHT
 };
 
-// Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
@@ -41,7 +39,8 @@ public:
     float MouseSensitivity;
     float Zoom;
 
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : 
+        Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = position;
         WorldUp = up;
@@ -50,7 +49,8 @@ public:
         updateCameraVectors();
     }
 
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : 
+        Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
@@ -61,6 +61,7 @@ public:
 
     glm::mat4 GetViewMatrix()
     {
+        // для преобразования мировых координат в координаты камеры
         return glm::lookAt(Position, Position + Front, Up);
     }
 
@@ -85,6 +86,7 @@ public:
             Yaw -= rotationSpeed * deltaTime;
         if (direction == ROTATE_RIGHT)
             Yaw += rotationSpeed * deltaTime;
+
         updateCameraVectors();
     }
 
@@ -95,26 +97,10 @@ public:
 
         Yaw += xoffset;
         Pitch += yoffset;
-
-        if (constrainPitch)
-        {
-            if (Pitch > 89.0f)
-                Pitch = 89.0f;
-            if (Pitch < -89.0f)
-                Pitch = -89.0f;
-        }
-
+            
         updateCameraVectors();
     }
 
-    void ProcessMouseScroll(float yoffset)
-    {
-        Zoom -= (float)yoffset;
-        if (Zoom < 1.0f)
-            Zoom = 1.0f;
-        if (Zoom > 45.0f)
-            Zoom = 45.0f;
-    }
 
 private:
     void updateCameraVectors()

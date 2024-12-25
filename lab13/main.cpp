@@ -46,7 +46,6 @@ void processInput(sf::Window& window)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
         camera.ProcessKeyboard(ROTATE_RIGHT, deltaTime);
 
-
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
     float xpos = static_cast<float>(mousePosition.x);
     float ypos = static_cast<float>(mousePosition.y);
@@ -70,13 +69,11 @@ int main()
 {
     setlocale(LC_ALL, "ru");
 
-    sf::Window window(sf::VideoMode(800, 800), "3D figures", sf::Style::Default, sf::ContextSettings(24));
+    sf::Window window(sf::VideoMode(800, 800), "lab13", sf::Style::Default, sf::ContextSettings(24));
     window.setVerticalSyncEnabled(true);
-
     window.setMouseCursorVisible(false);
 
     glewInit();
-
     Init();
 
     Shader asteroidShader("10.3.asteroids.vs", "10.3.asteroids.fs");
@@ -153,7 +150,7 @@ int main()
             static_cast<float>(rand() % 100) / 100.0f
         ));
 
-        rotationSpeeds[i] = static_cast<float>(rand() % 100) / 10.0f; // от 0 до 10
+        rotationSpeeds[i] = static_cast<float>(rand() % 100) / 10.0f; 
     }
     std::vector<float> orbitAngles(amount, 0.0f);
     std::vector<float> selfRotationAngles(amount, 0.0f);
@@ -187,8 +184,6 @@ int main()
                 selfRotationAngles[i] -= 360.0f; 
             }
             float selfRotationAngleRad = glm::radians(selfRotationAngles[i]);
-
-
             model = glm::rotate(model, selfRotationAngleRad, rotationAxes[i]);
             model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
 
@@ -200,8 +195,6 @@ int main()
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 0.1f, 1000.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -219,9 +212,10 @@ int main()
         krosh.Draw(planetShader);
 
         asteroidShader.use();
-        asteroidShader.setInt("texture_diffuse1", 0);
+        //asteroidShader.setInt("texture_diffuse1", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cat.textures_loaded[0].id);
+
         for (unsigned int i = 0; i < cat.meshes.size(); i++) {
             glBindVertexArray(cat.meshes[i].VAO);
             glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(cat.meshes[i].indices.size()), GL_UNSIGNED_INT, 0, amount);
